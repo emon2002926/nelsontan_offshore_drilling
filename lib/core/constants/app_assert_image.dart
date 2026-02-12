@@ -18,4 +18,8 @@
     final String shareIcon = "assets/images/share_icon.png";
 
 
+    final String topHeaderIcon = "assets/icons/top_header_icon.png";
+    final String topHeaderNotificationIcon = "assets/icons/notification_icon.png";
+
+
   }
