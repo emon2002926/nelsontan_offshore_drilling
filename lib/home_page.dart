@@ -6,6 +6,7 @@ import 'package:nelsontan_offshore_drilling/features/profile/views/profile_page.
 import 'package:nelsontan_offshore_drilling/features/videos/views/videos_page.dart';
 
 import 'core/widgets/bottom_navigation/bottom_navigation.dart';
+import 'features/safety_card/views/safety_card_screen.dart';
 
   class HomePage extends StatefulWidget {
     const HomePage({super.key});
@@ -60,7 +61,7 @@ import 'core/widgets/bottom_navigation/bottom_navigation.dart';
     Widget build(BuildContext context) {
       final screens = [
         HomeScreen(),
-        CardsPage(),
+        SafetyCardScreen(),
         GamePage(),
         VideosPage(),
         ProfilePage()

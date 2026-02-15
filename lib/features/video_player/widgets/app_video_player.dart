@@ -116,7 +116,10 @@ class AppVideoPlayer extends StatelessWidget {
       left: 0,
       right: 0,
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 8,
+        ),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -160,6 +163,8 @@ class AppVideoPlayer extends StatelessWidget {
               );
             }),
 
+            const SizedBox(height: 4),
+
             // Time and controls
             Obx(() {
               return Row(
@@ -174,13 +179,16 @@ class AppVideoPlayer extends StatelessWidget {
                     ),
                   ),
 
-                  // Play/Pause button
+                  // Play/Pause button (reduced padding)
                   IconButton(
+                    padding: EdgeInsets.zero,
+                    constraints: const BoxConstraints(),
                     icon: Icon(
                       controller.isPlaying.value
                           ? Icons.pause
                           : Icons.play_arrow,
                       color: Colors.white,
+                      size: 24,
                     ),
                     onPressed: controller.togglePlayPause,
                   ),
@@ -193,7 +201,6 @@ class AppVideoPlayer extends StatelessWidget {
     );
   }
 }
-
 /*
 
 

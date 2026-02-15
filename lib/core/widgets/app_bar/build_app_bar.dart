@@ -75,7 +75,7 @@ class BuildAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Center(
               child: Icon(
                 backButtonIcon,
-                color: iconColor ?? Colors.white,
+                color: iconColor ?? Colors.black,
                 size: context.responsiveSize(24),
               ),
             ),
@@ -87,7 +87,7 @@ class BuildAppBar extends StatelessWidget implements PreferredSizeWidget {
     // Standard back button widget
     Widget buildStandardBackButton() {
       return IconButton(
-        icon: Icon(backButtonIcon, color: iconColor ?? Colors.white),
+        icon: Icon(backButtonIcon, color: iconColor ?? Colors.black),
         onPressed: onBackButtonPressed ?? () {Navigator.pop(context);},
       );
     }

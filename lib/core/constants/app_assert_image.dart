@@ -16,10 +16,17 @@
     final String onboardingImage3 = "assets/images/onboardingImage3.png";
 
     final String shareIcon = "assets/images/share_icon.png";
+    final String alertImage = "assets/icons/alart_icon.png";
+    final String rigAnimationImage = "assets/images/rig_demo.png";
 
 
     final String topHeaderIcon = "assets/icons/top_header_icon.png";
     final String topHeaderNotificationIcon = "assets/icons/notification_icon.png";
+
+
+    final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";
+    final String trainingGameBg = "assets/images/training_game_bg.png";
+
 
 
   }

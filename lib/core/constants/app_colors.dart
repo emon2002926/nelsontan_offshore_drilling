@@ -13,7 +13,10 @@ class AppColors {
   final Color appBarBackground = const Color(0xffd5ecc5);
   final Color profileBackground = const Color(0xC7CFCFCF);
 
-  final Color primaryTextColor = const Color(0xff333333);
+  final Color headLineTextColor = const Color(0xff00193F);
+  final Color titleTextColor = const Color(0xff2C2B2B);
+  final Color strokeColor = const Color(0xff939393);
+
   final Color subTextColor = const Color(0xff757575);
   final Color startBtnColor = const Color(0xff757575);
   final Color btnColor = const Color(0xFFBDF0D5);
@@ -89,7 +92,7 @@ class AppColors {
   final Color white900 = const Color(0xff646464);
 
 ////////////////title color
-  final Color titleTextColor = const Color(0xFFF6CB81);
+//   final Color titleTextColor = const Color(0xFFF6CB81);
 
 
   ////////////////Auth Screen Color
