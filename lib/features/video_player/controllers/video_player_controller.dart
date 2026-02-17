@@ -12,6 +12,7 @@ class AppVideoPlayerController extends GetxController {
   final RxBool isPlaying = false.obs;
   final RxBool isLoading = true.obs;
   final RxBool showControls = false.obs;
+  final RxBool hasStartedPlaying = false.obs; // Track if video has started playing
   final Rx<Duration> currentPosition = Duration.zero.obs;
   final Rx<Duration> totalDuration = Duration.zero.obs;
 
@@ -41,12 +42,7 @@ class AppVideoPlayerController extends GetxController {
       isLoading.value = false;
     } catch (e) {
       isLoading.value = false;
-      CustomSnackBar.error('Failed to load videos: ${e.toString()}');
-      // Get.snackbar(
-      //   'Error',
-      //   'Failed to load videos: ${e.toString()}',
-      //   snackPosition: SnackPosition.BOTTOM,
-      // );
+      CustomSnackBar.error('Failed to load video: ${e.toString()}');
     }
   }
 
@@ -62,6 +58,7 @@ class AppVideoPlayerController extends GetxController {
       if (videoController!.value.isPlaying) {
         videoController!.pause();
       } else {
+        hasStartedPlaying.value = true; // Mark as started when playing
         videoController!.play();
       }
     }

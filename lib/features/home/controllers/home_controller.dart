@@ -96,7 +96,7 @@ class HomeController extends GetxController {
 
   // Submit safety card
   Future<void> submitSafetyCard(BuildContext context) async {
-    AppNavigation.push(context, const SafetyCardScreen());
+    AppNavigation.push(context,  SafetyCardScreen());
   }
 
 

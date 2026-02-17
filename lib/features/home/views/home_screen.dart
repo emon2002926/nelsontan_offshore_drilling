@@ -35,6 +35,8 @@ class HomeScreen extends StatelessWidget {
                 AppVideoPlayer(
                   videoSource: VideoSource.asset('assets/videos/demo.mp4'),
                   // videoSource: VideoSource.network('https://api.example.com/video.mp4'),
+                  showThumbnail: true,
+
                   width: context.widthPercentage(100),
                   height: context.heightPercentage(28),
                   borderRadius: 16,
@@ -85,28 +87,37 @@ class HomeScreen extends StatelessWidget {
        width: MediaQuery.of(context).size.width,
        height: context.heightPercentage(5),
        child: Row(
-         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Changed from spaceEvenly
          children: [
+           // Left icon
            Padding(
-             padding: const EdgeInsets.symmetric(vertical: 8),
-             child: Image.asset(headerSaveIcon),
+             padding: const EdgeInsets.all(8),
+             child: Image.asset(
+               headerSaveIcon,
+               height: context.responsiveSize(24),
+             ),
            ),
+           // Title
            AppText(
              data: "Homepage",
-             fontSize: 20,
-             fontWeight: FontWeight.w600,
+             fontSize: 18,
+             fontWeight: FontWeight.w900,
            ),
+           const Spacer(), // Pushes notification icon to the right
+           // Right notification icon
            GestureDetector(
-             onTap: (){
+             onTap: () {
                AppNavigation.push(context, const NotificationsScreen());
-
              },
              child: Padding(
                padding: const EdgeInsets.all(8),
-               child: Image.asset(headerNotificationIcon),
+               child: Image.asset(
+                 headerNotificationIcon,
+                 height: context.responsiveSize(24),
+               ),
              ),
            ),
          ],
        ),
      );
-   }}
+   }
+}

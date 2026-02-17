@@ -12,6 +12,7 @@ class AppVideoPlayer extends StatelessWidget {
   final double? height;
   final double borderRadius;
   final bool autoPlay;
+  final bool showThumbnail; // Show thumbnail before video plays
   final String? tag; // Unique tag for multiple videos players
 
   const AppVideoPlayer({
@@ -21,6 +22,7 @@ class AppVideoPlayer extends StatelessWidget {
     this.height,
     this.borderRadius = 16,
     this.autoPlay = false,
+    this.showThumbnail = true, // Default to showing thumbnail
     this.tag,
   });
 
@@ -32,7 +34,7 @@ class AppVideoPlayer extends StatelessWidget {
       tag: tag ?? videoSource.path,
     );
 
-    // Initialize videos when widget is built
+    // Initialize video when widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.isInitialized.value) {
         controller.initializeVideo(videoSource).then((_) {
@@ -50,6 +52,13 @@ class AppVideoPlayer extends StatelessWidget {
         height: height,
         color: Colors.black,
         child: Obx(() {
+          // Show thumbnail if video hasn't started playing and thumbnail is available
+          if (showThumbnail &&
+              !controller.hasStartedPlaying.value &&
+              videoSource.thumbnailPath != null) {
+            return _buildThumbnail(controller);
+          }
+
           // Loading state
           if (controller.isLoading.value) {
             return const Center(
@@ -107,6 +116,67 @@ class AppVideoPlayer extends StatelessWidget {
           return const SizedBox();
         }),
       ),
+    );
+  }
+
+  Widget _buildThumbnail(AppVideoPlayerController controller) {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        // Thumbnail image
+        videoSource.thumbnailType == VideoSourceType.asset
+            ? Image.asset(
+          videoSource.thumbnailPath!,
+          fit: BoxFit.cover,
+        )
+            : Image.network(
+          videoSource.thumbnailPath!,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.white,
+                size: 50,
+              ),
+            );
+          },
+        ),
+
+        // Play button overlay on thumbnail
+        Center(
+          child: GestureDetector(
+            onTap: () {
+              controller.hasStartedPlaying.value = true;
+              controller.togglePlayPause();
+            },
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.9),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.play_arrow,
+                size: 50,
+                color: Colors.black,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -200,8 +270,7 @@ class AppVideoPlayer extends StatelessWidget {
       ),
     );
   }
-}
-/*
+}/*
 
 
 // Example 1: Single videos player

@@ -130,18 +130,18 @@ class WeeklySafetyFocusCard extends StatelessWidget {
               decoration: BoxDecoration(
                 color: appColors.profileBackground,
                 borderRadius: BorderRadius.circular(
-                  context.responsiveSize(8),
+                  context.responsiveSize(6),
                 ),
                 border: Border.all(
-                  color: const Color(0xFF2C2B2B),
+                  color: const Color(0x4D2C2B2B),
                   width: 1,
                 ),
               ),
               child: AppText(
                 data: 'Read more',
                 fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: const Color(0xFF3A3A3A),
+                fontWeight: FontWeight.bold,
+                color: const Color(0xFF2C2B2B),
                 useResponsiveFontSize: true,
               ),
             ),

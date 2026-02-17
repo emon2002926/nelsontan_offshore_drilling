@@ -23,19 +23,20 @@ class TrainingGameCard extends StatelessWidget {
   });
 
    final appColor = AppColors.instance;
+   final appAssets = AppAssertImage.instance;
   @override
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(context.responsiveSize(16)),
+        borderRadius: BorderRadius.circular(context.responsiveSize(12)),
         border: Border.all(
           color: appColor.strokeColor,
           width: 1.5,
         )
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(context.responsiveSize(16)),
+        borderRadius: BorderRadius.circular(context.responsiveSize(12)),
         child: Stack(
           children: [
             // Background Image
@@ -47,7 +48,7 @@ class TrainingGameCard extends StatelessWidget {
             ),
 
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(20)),
+              padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
               child: isLoading
                   ? _buildLoadingState(context)
                   : _buildContent(context),
@@ -81,109 +82,116 @@ class TrainingGameCard extends StatelessWidget {
   }
 
   Widget _buildContent(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // Header
-        Row(
-          children: [
-            Container(
-
-              child: Icon(
-                Icons.sports_esports,
-                size: context.responsiveSize(28),
-                color: const Color(0xFF0047AB),
-              ),
-            ),
-            SizedBox(width: context.responsiveSize(12)),
-            AppText(
-              data: 'Training & Game',
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: appColor.headLineTextColor,
-              useResponsiveFontSize: true,
-            ),
-          ],
-        ),
-
-
-        // Title
-        AppText(
-          data: data?.title ?? 'Spot the hazard',
-          fontSize: 16,
-          fontWeight: FontWeight.w700,
-          color:appColor.headLineTextColor,
-          useResponsiveFontSize: true,
-        ),
-
-        SizedBox(height: context.responsiveSize(6)),
-
-        // Description
-        AppText(
-          data: data?.description ?? 'Sharpen your safety eyes! Find 5 \n hazards in 30 seconds.',
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: appColor.titleTextColor,
-          useResponsiveFontSize: true,
-          maxLines: 2,
-        ),
-
-        SizedBox(height: context.responsiveSize(8)),
-
-
-        // Last Score
+    return Padding(
+      padding:  EdgeInsets.only(top: context.responsiveSize(8)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Header
           Row(
             children: [
-              Icon(
-                Icons.emoji_events,
-                size: context.responsiveSize(24),
-                color: const Color(0xFFFFA726),
+              Container(
+                child: Image.asset(
+                 appAssets.gameCardIcon,
+                  width: context.responsiveSize(28),
+                  height: context.responsiveSize(28),
+                  // color: const Color(0xFF0047AB), // only works if PNG is monochrome/masked
+                  colorBlendMode: BlendMode.srcIn,
+                ),
               ),
-              SizedBox(width: context.responsiveSize(8)),
+              SizedBox(width: context.responsiveSize(12)),
               AppText(
-                data: 'Last Score: ',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF6B6B6B),
-                useResponsiveFontSize: true,
-              ),
-              AppText(
-                data: '10 pts',
-                fontSize: 14,
-                fontWeight: FontWeight.w700,
-                color: const Color(0xFF1A1A1A),
+                data: 'Training & Game',
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: appColor.headLineTextColor,
                 useResponsiveFontSize: true,
               ),
             ],
           ),
 
-        SizedBox(height: context.responsiveSize(10)),
 
-        // Play Button
-          Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: GestureDetector(
-              onTap: onPlay,
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: context.responsiveSize(32),
-                  vertical: context.responsiveSize(8),
+          SizedBox(height: context.responsiveSize(4)),
+          // Title
+          AppText(
+            data: data?.title ?? 'Spot the hazard',
+            fontSize: 16,
+            fontWeight: FontWeight.w700,
+            color:appColor.headLineTextColor,
+            useResponsiveFontSize: true,
+          ),
+
+
+          // Description
+          AppText(
+            data: data?.description ?? 'Sharpen your safety eyes! Find 5 \n hazards in 30 seconds.',
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: appColor.titleTextColor,
+            useResponsiveFontSize: true,
+            maxLines: 2,
+          ),
+
+          SizedBox(height: context.responsiveSize(8)),
+
+
+          // Last Score
+            Row(
+              children: [
+                Container(
+                  child: Image.asset(
+                   appAssets.winnerIcon,
+                    width: context.responsiveSize(20),
+                    height: context.responsiveSize(20),
+                    colorBlendMode: BlendMode.srcIn,
+                  ),
                 ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0047AB),
-                  borderRadius: BorderRadius.circular(context.responsiveSize(8)),
-                ),
-                child: AppText(
-                  data: 'Play',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                SizedBox(width: context.responsiveSize(8)),
+                AppText(
+                  data: 'Last Score: ',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: const Color(0xFF6B6B6B),
                   useResponsiveFontSize: true,
+                ),
+                AppText(
+                  data: '10 pts',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                  color: const Color(0xFF1A1A1A),
+                  useResponsiveFontSize: true,
+                ),
+              ],
+            ),
+
+          SizedBox(height: context.responsiveSize(10)),
+
+          // Play Button
+            Padding(
+              padding: const EdgeInsets.only(bottom: 14),
+              child: GestureDetector(
+                onTap: onPlay,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.responsiveSize(24 ),
+                    vertical: context.responsiveSize(4),
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF0047AB),
+                    borderRadius: BorderRadius.circular(context.responsiveSize(8)),
+                  ),
+                  child: AppText(
+                    data: 'Play',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                    useResponsiveFontSize: true,
+                  ),
                 ),
               ),
             ),
-          ),
-      ],
+        ],
+      ),
     );
   }
 

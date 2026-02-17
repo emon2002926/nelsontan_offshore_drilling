@@ -11,10 +11,12 @@ class AppColors {
   final Color boxBg2 = const Color(0xffBDD3EC);
   final Color appBackground = const Color(0xff2D2D2D);
   final Color appBarBackground = const Color(0xffd5ecc5);
-  final Color profileBackground = const Color(0xC7CFCFCF);
+  final Color profileBackground = const Color(0x1A2C2B2B);
 
   final Color headLineTextColor = const Color(0xff00193F);
   final Color titleTextColor = const Color(0xff2C2B2B);
+  final Color normalTextColor = const Color(0xff0F172A);
+  final Color hintTextColor = const Color(0xff64748B);
   final Color strokeColor = const Color(0xff939393);
 
   final Color subTextColor = const Color(0xff757575);
@@ -97,7 +99,6 @@ class AppColors {
 
   ////////////////Auth Screen Color
   final Color welcomeTextColor = const Color(0xFF333333);
-  final Color hintTextColor = const Color(0xFF000000);
   final Color labelTextColor = const Color(0xFF000000);
 
   final Color primary = const Color(0xFFBDF0D5);

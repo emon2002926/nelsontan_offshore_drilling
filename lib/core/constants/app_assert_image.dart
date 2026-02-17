@@ -22,6 +22,8 @@
 
     final String topHeaderIcon = "assets/icons/top_header_icon.png";
     final String topHeaderNotificationIcon = "assets/icons/notification_icon.png";
+    final String gameCardIcon = "assets/icons/game_card_icon.png";
+    final String winnerIcon = "assets/icons/winner_icon.png";
 
 
     final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";
