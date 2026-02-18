@@ -1,5 +1,7 @@
 // lib/features/video_player/controllers/video_player_controller.dart
 
+import 'dart:io';
+
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/widgets/snakbar/custom_snackbar.dart';
 import 'package:video_player/video_player.dart';
@@ -12,7 +14,7 @@ class AppVideoPlayerController extends GetxController {
   final RxBool isPlaying = false.obs;
   final RxBool isLoading = true.obs;
   final RxBool showControls = false.obs;
-  final RxBool hasStartedPlaying = false.obs; // Track if video has started playing
+  final RxBool hasStartedPlaying = false.obs;
   final Rx<Duration> currentPosition = Duration.zero.obs;
   final Rx<Duration> totalDuration = Duration.zero.obs;
 
@@ -24,12 +26,18 @@ class AppVideoPlayerController extends GetxController {
       await videoController?.dispose();
 
       // Create controller based on source type
-      if (source.type == VideoSourceType.asset) {
-        videoController = VideoPlayerController.asset(source.path);
-      } else {
-        videoController = VideoPlayerController.networkUrl(
-          Uri.parse(source.path),
-        );
+      switch (source.type) {
+        case VideoSourceType.asset:
+          videoController = VideoPlayerController.asset(source.path);
+          break;
+        case VideoSourceType.network:
+          videoController = VideoPlayerController.networkUrl(
+            Uri.parse(source.path),
+          );
+          break;
+        case VideoSourceType.file:
+          videoController = VideoPlayerController.file(File(source.path));
+          break;
       }
 
       await videoController!.initialize();
@@ -58,7 +66,7 @@ class AppVideoPlayerController extends GetxController {
       if (videoController!.value.isPlaying) {
         videoController!.pause();
       } else {
-        hasStartedPlaying.value = true; // Mark as started when playing
+        hasStartedPlaying.value = true;
         videoController!.play();
       }
     }

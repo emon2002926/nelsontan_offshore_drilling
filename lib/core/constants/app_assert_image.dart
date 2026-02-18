@@ -24,10 +24,28 @@
     final String topHeaderNotificationIcon = "assets/icons/notification_icon.png";
     final String gameCardIcon = "assets/icons/game_card_icon.png";
     final String winnerIcon = "assets/icons/winner_icon.png";
+    final String safetyVideoIcon = "assets/icons/safty_video_icon.png";
 
 
     final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";
     final String trainingGameBg = "assets/images/training_game_bg.png";
+
+
+    final String thumbnailImage = "assets/thumbnails/thumbnail.png";
+
+
+
+    final String home= "assets/icons/navigation/home.png";
+    final String card= "assets/icons/navigation/card.png";
+    final String game= "assets/icons/navigation/game_icon.png";
+    final String video= "assets/icons/navigation/video_icon.png";
+    final String profileIcon= "assets/icons/navigation/profile_icon.png";
+
+
+    final String demoVideo= "assets/videos/demo.png";
+
+
+
 
 
 

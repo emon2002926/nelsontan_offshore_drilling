@@ -16,7 +16,7 @@ import '../../weekly_safety_focus/widget/weekly_safety_focus_card.dart';
 
 class HomeScreen extends StatelessWidget {
    HomeScreen({super.key});
-  final assetsIcon = AppAssertImage.instance;
+  final appAssets = AppAssertImage.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -29,14 +29,12 @@ class HomeScreen extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                topHeader(context,assetsIcon.topHeaderIcon,assetsIcon.topHeaderNotificationIcon),
+                topHeader(context,appAssets.topHeaderIcon,appAssets.topHeaderNotificationIcon),
                 SizedBox(height: context.responsiveSize(12)),
 
                 AppVideoPlayer(
-                  videoSource: VideoSource.asset('assets/videos/demo.mp4'),
-                  // videoSource: VideoSource.network('https://api.example.com/video.mp4'),
-                  showThumbnail: true,
-
+                  videoSource: VideoSource.asset('assets/videos/demo.mp4'
+                  ,thumbnailAssetPath:appAssets.thumbnailImage ),
                   width: context.widthPercentage(100),
                   height: context.heightPercentage(28),
                   borderRadius: 16,

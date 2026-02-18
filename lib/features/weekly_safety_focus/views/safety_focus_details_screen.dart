@@ -1,6 +1,7 @@
 // features/home/presentation/safety_focus_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
 
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
@@ -120,15 +121,10 @@ class SafetyFocusDetailsScreen extends StatelessWidget {
       height: context.responsiveSize(250),
       decoration: BoxDecoration(
         color: const Color(0xFFE8F4FC),
-        borderRadius: BorderRadius.circular(context.responsiveSize(16)),
       ),
       child: Center(
-        child: Icon(
-          Icons.image_outlined,
-          size: context.responsiveSize(80),
-          color: const Color(0xFF0047AB).withOpacity(0.3),
-        ),
-      ),
-    );
+        child: Image.asset(AppAssertImage.instance.thumbnailImage),
+
+    ));
   }
 }

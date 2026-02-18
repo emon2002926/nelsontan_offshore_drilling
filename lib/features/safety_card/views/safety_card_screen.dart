@@ -232,6 +232,7 @@ class SafetyCardScreen extends StatelessWidget {
         horizontal: context.responsiveSize(16),
         vertical: context.responsiveSize(0),
       ),
+
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(context.responsiveSize(6)),
@@ -239,6 +240,13 @@ class SafetyCardScreen extends StatelessWidget {
           color: const Color(0xFFE0E0E0),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -540,7 +548,7 @@ class SafetyCardScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(context.responsiveSize(16)),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F5F5),
+        color: const Color(0xFFE6ECF5),
         borderRadius: BorderRadius.circular(context.responsiveSize(12)),
       ),
       child: Column(
@@ -550,7 +558,8 @@ class SafetyCardScreen extends StatelessWidget {
             title: 'Action Taken',
             subtitle: 'Was corrective action taken on the spot?',
             value: controller.actionTaken,
-            activeColor: Colors.red,
+            activeColor:  const Color(0xFF0047AB),
+            inactiveColor: Colors.red
           ),
           Divider(height: context.responsiveSize(24), color: const Color(0xFFE0E0E0)),
           _buildToggleRow(
@@ -559,6 +568,7 @@ class SafetyCardScreen extends StatelessWidget {
             subtitle: 'Does this require urgent attention from HSE?',
             value: controller.immediateActionRequired,
             activeColor: const Color(0xFF0047AB),
+            inactiveColor: Colors.red
           ),
           Divider(height: context.responsiveSize(24), color: const Color(0xFFE0E0E0)),
           _buildToggleRow(
@@ -573,76 +583,101 @@ class SafetyCardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildToggleRow(
-      BuildContext context, {
-        required String title,
-        required String subtitle,
-        required RxBool value,
-        required Color activeColor,
-      }) {
-    return Obx(
-          () => Row(
-        children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                AppText(
-                  data: title,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A1A1A),
-                  useResponsiveFontSize: true,
-                ),
-                SizedBox(height: context.responsiveSize(4)),
-                AppText(
-                  data: subtitle,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF6B6B6B),
-                  useResponsiveFontSize: true,
-                ),
-              ],
-            ),
-          ),
-          SizedBox(width: context.responsiveSize(12)),
-          GestureDetector(
-            onTap: () {
-              value.value = !value.value;
-            },
-            child: Container(
-              width: context.responsiveSize(48),
-              height: context.responsiveSize(28),
-              decoration: BoxDecoration(
-                color: value.value ? activeColor : const Color(0xFFE0E0E0),
-                borderRadius: BorderRadius.circular(context.responsiveSize(14)),
-              ),
-              child: AnimatedAlign(
-                duration: const Duration(milliseconds: 200),
-                alignment: value.value ? Alignment.centerRight : Alignment.centerLeft,
-                child: Container(
-                  width: context.responsiveSize(24),
-                  height: context.responsiveSize(24),
-                  margin: EdgeInsets.symmetric(horizontal: context.responsiveSize(2)),
-                  decoration: const BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: AppText(
-                      data: value.value ? 'YES' : 'No',
-                      fontSize: 8,
-                      fontWeight: FontWeight.bold,
-                      color: value.value ? activeColor : const Color(0xFF9E9E9E),
-                      useResponsiveFontSize: false,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
+   Widget _buildToggleRow(
+       BuildContext context, {
+         required String title,
+         required String subtitle,
+         required RxBool value,
+         required Color activeColor,
+         Color inactiveColor = const Color(0xFFB0C4DE), // Light blue-gray like screenshot
+       }) {
+     return Obx(
+           () => Row(
+         children: [
+           Expanded(
+             child: Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 AppText(
+                   data: title,
+                   fontSize: 15,
+                   fontWeight: FontWeight.w600,
+                   color: const Color(0xFF1A1A1A),
+                   useResponsiveFontSize: true,
+                 ),
+                 SizedBox(height: context.responsiveSize(4)),
+                 AppText(
+                   data: subtitle,
+                   fontSize: 13,
+                   fontWeight: FontWeight.w400,
+                   color: const Color(0xFF6B6B6B),
+                   useResponsiveFontSize: true,
+                 ),
+               ],
+             ),
+           ),
+           SizedBox(width: context.responsiveSize(12)),
+           GestureDetector(
+             onTap: () {
+               value.value = !value.value;
+             },
+             child: Container(
+               width: context.responsiveSize(56), // Slightly wider
+               height: context.responsiveSize(32), // Slightly taller
+               decoration: BoxDecoration(
+                 color: value.value ? activeColor : inactiveColor,
+                 borderRadius: BorderRadius.circular(context.responsiveSize(16)), // More rounded
+               ),
+               child: Stack(
+                 children: [
+                   // Text label inside toggle
+                   AnimatedPositioned(
+                     duration: const Duration(milliseconds: 200),
+                     left: value.value ? null : context.responsiveSize(32),
+                     right: value.value ? context.responsiveSize(32) : null,
+                     top: 0,
+                     bottom: 0,
+                     child: Center(
+                       child: AppText(
+                         data: value.value ? 'Yes' : 'No',
+                         fontSize: 10, // Larger text
+                         fontWeight: FontWeight.w600,
+                         color: Colors.white,
+                         useResponsiveFontSize: false,
+                       ),
+                     ),
+                   ),
+                   // Animated thumb (white circle)
+                   AnimatedAlign(
+                     duration: const Duration(milliseconds: 200),
+                     curve: Curves.easeInOut,
+                     alignment: value.value ? Alignment.centerRight : Alignment.centerLeft,
+                     child: Container(
+                       width: context.responsiveSize(28),
+                       height: context.responsiveSize(28),
+                       margin: EdgeInsets.symmetric(horizontal: context.responsiveSize(2)),
+                       decoration: BoxDecoration(
+                         color: Colors.white,
+                         shape: BoxShape.circle,
+                         boxShadow: [
+                           BoxShadow(
+                             color: Colors.black.withOpacity(0.1),
+                             blurRadius: 4,
+                             offset: const Offset(0, 2),
+                           ),
+                         ],
+                       ),
+                     ),
+                   ),
+                 ],
+               ),
+             ),
+           ),
+         ],
+       ),
+     );
+   }
+
+
 }

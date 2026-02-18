@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../constants/app_assert_image.dart';
 import '../../util/screen_size.dart';
 import '../text/app_text.dart';
 
@@ -16,12 +17,29 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final appAssets = AppAssertImage.instance;
+
     final items = [
-      {'icon': Icons.home_outlined, 'activeIcon': Icons.home, 'label': 'Home'},
-      {'icon': Icons.add_circle_outline, 'activeIcon': Icons.add_circle, 'label': 'Cards'},
-      {'icon': Icons.sports_esports_outlined, 'activeIcon': Icons.sports_esports, 'label': 'Game'},
-      {'icon': Icons.play_circle_outline, 'activeIcon': Icons.play_circle, 'label': 'Videos'},
-      {'icon': Icons.person_outline, 'activeIcon': Icons.person, 'label': 'Profile'},
+      {
+        'assetIcon': appAssets.home,
+        'label': 'Home'
+      },
+      {
+        'assetIcon': appAssets.card,
+        'label': 'Cards'
+      },
+      {
+        'assetIcon': appAssets.game,
+        'label': 'Game'
+      },
+      {
+        'assetIcon': appAssets.video,
+        'label': 'Videos'
+      },
+      {
+        'assetIcon': appAssets.profileIcon,
+        'label': 'Profile'
+      },
     ];
 
     return Padding(
@@ -62,14 +80,22 @@ class CustomBottomNavigationBar extends StatelessWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(
-                          isSelected
-                              ? item['activeIcon'] as IconData
-                              : item['icon'] as IconData,
-                          size: context.responsiveSize(28),
+                        // Asset Icon with color change
+                        Image.asset(
+                          item['assetIcon'] as String,
+                          width: context.responsiveSize(28),
+                          height: context.responsiveSize(28),
                           color: isSelected
-                              ? const Color(0xFF0047AB) // SafeRig360 blue
-                              : const Color(0xFF4A4A4A), // Dark gray for unselected
+                              ? const Color(0xFF0047AB) // SafeRig360 blue when selected
+                              : const Color(0xFF4A4A4A), // Dark gray when unselected
+                          errorBuilder: (context, error, stackTrace) {
+                            // Fallback to material icon if asset not found
+                            return Icon(
+                              Icons.error_outline,
+                              size: context.responsiveSize(28),
+                              color: Colors.red,
+                            );
+                          },
                         ),
                         SizedBox(height: context.responsiveSize(4)),
                         AppText(

@@ -1,5 +1,4 @@
-// lib/features/video_player/widgets/app_video_player.dart
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:video_player/video_player.dart';
@@ -12,8 +11,8 @@ class AppVideoPlayer extends StatelessWidget {
   final double? height;
   final double borderRadius;
   final bool autoPlay;
-  final bool showThumbnail; // Show thumbnail before video plays
-  final String? tag; // Unique tag for multiple videos players
+  final bool showThumbnail;
+  final String? tag;
 
   const AppVideoPlayer({
     super.key,
@@ -22,19 +21,17 @@ class AppVideoPlayer extends StatelessWidget {
     this.height,
     this.borderRadius = 16,
     this.autoPlay = false,
-    this.showThumbnail = true, // Default to showing thumbnail
+    this.showThumbnail = true,
     this.tag,
   });
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller with unique tag
     final controller = Get.put(
       AppVideoPlayerController(),
       tag: tag ?? videoSource.path,
     );
 
-    // Initialize video when widget is built
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.isInitialized.value) {
         controller.initializeVideo(videoSource).then((_) {
@@ -123,37 +120,8 @@ class AppVideoPlayer extends StatelessWidget {
     return Stack(
       fit: StackFit.expand,
       children: [
-        // Thumbnail image
-        videoSource.thumbnailType == VideoSourceType.asset
-            ? Image.asset(
-          videoSource.thumbnailPath!,
-          fit: BoxFit.cover,
-        )
-            : Image.network(
-          videoSource.thumbnailPath!,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Center(
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                value: loadingProgress.expectedTotalBytes != null
-                    ? loadingProgress.cumulativeBytesLoaded /
-                    loadingProgress.expectedTotalBytes!
-                    : null,
-              ),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return const Center(
-              child: Icon(
-                Icons.broken_image,
-                color: Colors.white,
-                size: 50,
-              ),
-            );
-          },
-        ),
+        // Thumbnail image based on type
+        _buildThumbnailImage(),
 
         // Play button overlay on thumbnail
         Center(
@@ -178,6 +146,86 @@ class AppVideoPlayer extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  Widget _buildThumbnailImage() {
+    if (videoSource.thumbnailPath == null) {
+      return const Center(
+        child: Icon(
+          Icons.video_library,
+          color: Colors.white,
+          size: 50,
+        ),
+      );
+    }
+
+    switch (videoSource.thumbnailType) {
+      case VideoSourceType.asset:
+        return Image.asset(
+          videoSource.thumbnailPath!,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.white,
+                size: 50,
+              ),
+            );
+          },
+        );
+
+      case VideoSourceType.network:
+        return Image.network(
+          videoSource.thumbnailPath!,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return Center(
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                value: loadingProgress.expectedTotalBytes != null
+                    ? loadingProgress.cumulativeBytesLoaded /
+                    loadingProgress.expectedTotalBytes!
+                    : null,
+              ),
+            );
+          },
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.white,
+                size: 50,
+              ),
+            );
+          },
+        );
+
+      case VideoSourceType.file:
+        return Image.file(
+          File(videoSource.thumbnailPath!),
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return const Center(
+              child: Icon(
+                Icons.broken_image,
+                color: Colors.white,
+                size: 50,
+              ),
+            );
+          },
+        );
+
+      default:
+        return const Center(
+          child: Icon(
+            Icons.video_library,
+            color: Colors.white,
+            size: 50,
+          ),
+        );
+    }
   }
 
   Widget _buildControls(AppVideoPlayerController controller) {
@@ -249,7 +297,7 @@ class AppVideoPlayer extends StatelessWidget {
                     ),
                   ),
 
-                  // Play/Pause button (reduced padding)
+                  // Play/Pause button
                   IconButton(
                     padding: EdgeInsets.zero,
                     constraints: const BoxConstraints(),
@@ -270,7 +318,14 @@ class AppVideoPlayer extends StatelessWidget {
       ),
     );
   }
-}/*
+}
+
+
+
+
+
+
+/*
 
 
 // Example 1: Single videos player

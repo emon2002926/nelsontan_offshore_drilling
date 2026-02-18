@@ -25,7 +25,7 @@ class SubmitSafetyCardButton extends StatelessWidget {
           child: Container(
             width: double.infinity,
             padding: EdgeInsets.symmetric(
-              vertical: context.responsiveSize(16),
+              vertical: context.responsiveSize(14),
             ),
             decoration: BoxDecoration(
               color: const Color(0xFF0047AB),
@@ -69,8 +69,8 @@ class SubmitSafetyCardButton extends StatelessWidget {
                 ),
                 SizedBox(width: context.responsiveSize(12)),
                 AppText(
-                  data: 'Submit Safety Card',
-                  fontSize: 18,
+                  data: ' Submit Safety Card',
+                  fontSize: 16  ,
                   fontWeight: FontWeight.w600,
                   color: Colors.white,
                   useResponsiveFontSize: true,
