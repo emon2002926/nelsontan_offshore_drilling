@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
 import 'package:nelsontan_offshore_drilling/core/widgets/app_bar/build_app_bar.dart';
+import 'package:nelsontan_offshore_drilling/features/notification/views/notifications_screen.dart';
 import 'dart:io';
 
 import '../../../core/constants/app_colors.dart';
@@ -75,12 +76,17 @@ class SafetyCardScreen extends StatelessWidget {
                           ),
                         ),
 
-                          Icon(
-                            Icons.notifications_none,
-                            color: Colors.black,
-                            size: context.responsiveSize(30),
+                          GestureDetector(
+                            onTap: (){
+                              AppNavigation.push(context, NotificationsScreen());
+                            },
+                            child: Icon(
+                              Icons.notifications_none,
+                              color: Colors.black,
+                              size: context.responsiveSize(30),
 
-                        )
+                                                    ),
+                          )
                       ],
                     ),
 
@@ -161,7 +167,7 @@ class SafetyCardScreen extends StatelessWidget {
                             borderWidth: 1.5,
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            buttonHeight: context.heightPercentage(5),
+                            buttonHeight: context.heightPercentage(6),
                             borderRadius: 25,
                           ),
                         ),
@@ -176,7 +182,7 @@ class SafetyCardScreen extends StatelessWidget {
                               textColor: Colors.white,
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
-                              buttonHeight: context.heightPercentage(5),
+                              buttonHeight: context.heightPercentage(6),
                               isLoading: controller.isSubmitting.value,
                               loadingText: 'Submitting...',
                                   borderRadius: 25,
@@ -242,7 +248,7 @@ class SafetyCardScreen extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withOpacity(0.15),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -272,21 +278,39 @@ class SafetyCardScreen extends StatelessWidget {
           items: items.map((String item) {
             return DropdownMenuItem<String>(
               value: item,
-              child: Row(
-                children: [
-                  Text(
-                    icon,
-                    style: TextStyle(fontSize: context.responsiveFontSize(20)),
-                  ),
-                  SizedBox(width: context.responsiveSize(12)),
-                  AppText(
-                    data: item,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w400,
-                    color: const Color(0xFF1A1A1A),
-                    useResponsiveFontSize: true,
-                  ),
-                ],
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  vertical: context.responsiveSize(8),
+                  horizontal: context.responsiveSize(4),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: context.responsiveSize(32),
+                      height: context.responsiveSize(32),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF0F4FF),
+                        borderRadius: BorderRadius.circular(context.responsiveSize(8)),
+                      ),
+                      child: Center(
+                        child: Text(
+                          icon,
+                          style: TextStyle(fontSize: context.responsiveFontSize(18)),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: context.responsiveSize(12)),
+                    Expanded(
+                      child: AppText(
+                        data: item,
+                        fontSize: 15,
+                        fontWeight: FontWeight.w400,
+                        color: const Color(0xFF1A1A1A),
+                        useResponsiveFontSize: true,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           }).toList(),
@@ -296,54 +320,57 @@ class SafetyCardScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHazardCategories(BuildContext context, SafetyCardController controller) {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Row(
-        children: controller.hazardCategories.map((category) {
-          final isSelected = controller.selectedHazardCategory.value == category['label'];
-          return Padding(
-            padding: EdgeInsets.only(right: context.responsiveSize(12)),
-            child: GestureDetector(
-              onTap: () {
-                controller.selectedHazardCategory.value = category['label'];
-              },
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                    horizontal: context.responsiveSize(16),
-                    vertical: context.responsiveSize(4)),
-                decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0047AB) : Colors.white,
-                  borderRadius:  BorderRadius.circular(context.responsiveSize(25)),
-                  border: Border.all(
-                    color: isSelected ? const Color(0xFF0047AB) : const Color(0xFFE0E0E0),
-                    width: 1.5,
-                  ),
-                ),
-                child: Row(
-                  children: [
-                    Text(
-                      category['icon'],
-                      style: TextStyle(fontSize: context.responsiveFontSize(18)),
-                    ),
-                    SizedBox(width: context.responsiveSize(8)),
-                    AppText(
-                      data: category['label'],
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: isSelected ? Colors.white : const Color(0xFF1A1A1A),
-                      useResponsiveFontSize: true,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          );
-        }).toList(),
-      ),
-    );
-  }
-
+   Widget _buildHazardCategories(BuildContext context, SafetyCardController controller) {
+     return SingleChildScrollView(
+       scrollDirection: Axis.horizontal,
+       child: Row(
+         children: controller.hazardCategories.map((category) {
+           final isSelected = controller.selectedHazardCategories.contains(category['label']);
+           return Padding(
+             padding: EdgeInsets.only(right: context.responsiveSize(12)),
+             child: GestureDetector(
+               onTap: () {
+                 if (isSelected) {
+                   controller.selectedHazardCategories.remove(category['label']);
+                 } else {
+                   controller.selectedHazardCategories.add(category['label']);
+                 }
+               },
+               child: Container(
+                 padding: EdgeInsets.symmetric(
+                     horizontal: context.responsiveSize(16),
+                     vertical: context.responsiveSize(4)),
+                 decoration: BoxDecoration(
+                   color: isSelected ? const Color(0xFF0047AB) : Colors.white,
+                   borderRadius: BorderRadius.circular(context.responsiveSize(25)),
+                   border: Border.all(
+                     color: isSelected ? const Color(0xFF0047AB) : const Color(0xFFE0E0E0),
+                     width: 1.5,
+                   ),
+                 ),
+                 child: Row(
+                   children: [
+                     Text(
+                       category['icon'],
+                       style: TextStyle(fontSize: context.responsiveFontSize(18)),
+                     ),
+                     SizedBox(width: context.responsiveSize(8)),
+                     AppText(
+                       data: category['label'],
+                       fontSize: 14,
+                       fontWeight: FontWeight.w500,
+                       color: isSelected ? Colors.white : const Color(0xFF1A1A1A),
+                       useResponsiveFontSize: true,
+                     ),
+                   ],
+                 ),
+               ),
+             ),
+           );
+         }).toList(),
+       ),
+     );
+   }
    Widget _buildDescriptionField(BuildContext context, SafetyCardController controller) {
      return Container(
        height: context.responsiveSize(120 ), // Fixed height
@@ -404,6 +431,8 @@ class SafetyCardScreen extends StatelessWidget {
        ),
      );
    }
+
+
   Widget _buildRiskSeverity(BuildContext context, SafetyCardController controller) {
     return Row(
       children: controller.riskSeverities.map((severity) {
@@ -568,7 +597,6 @@ class SafetyCardScreen extends StatelessWidget {
             subtitle: 'Does this require urgent attention from HSE?',
             value: controller.immediateActionRequired,
             activeColor: const Color(0xFF0047AB),
-            inactiveColor: Colors.red
           ),
           Divider(height: context.responsiveSize(24), color: const Color(0xFFE0E0E0)),
           _buildToggleRow(

@@ -21,7 +21,7 @@ class SafetyCardController extends GetxController {
   // Observable values
   final Rx<String?> selectedCardType = Rx<String?>(null);
   final Rx<String?> selectedArea = Rx<String?>(null);
-  final Rx<String?> selectedHazardCategory = Rx<String?>(null);
+  final RxList<String> selectedHazardCategories = <String>[].obs; // Changed to list for multiple selection
   final Rx<String?> selectedRiskSeverity = Rx<String?>('Medium');
   final Rx<String?> uploadedPhotoPath = Rx<String?>(null);
 
@@ -146,8 +146,8 @@ class SafetyCardController extends GetxController {
       return;
     }
 
-    if (selectedHazardCategory.value == null) {
-      CustomSnackBar.warning('Please select a hazard category');
+    if (selectedHazardCategories.isEmpty) {
+      CustomSnackBar.warning('Please select at least one hazard category');
       return;
     }
 
@@ -157,7 +157,7 @@ class SafetyCardController extends GetxController {
       final card = SafetyCardModel(
         cardType: selectedCardType.value,
         areaOfObservation: selectedArea.value,
-        hazardCategory: selectedHazardCategory.value,
+        hazardCategories: selectedHazardCategories.toList(), // Changed to list
         description: descriptionController.text.trim(),
         riskSeverity: selectedRiskSeverity.value,
         photoPath: uploadedPhotoPath.value,
@@ -192,7 +192,7 @@ class SafetyCardController extends GetxController {
     descriptionController.clear();
     selectedCardType.value = cardTypes[0];
     selectedArea.value = null;
-    selectedHazardCategory.value = null;
+    selectedHazardCategories.clear(); // Clear the list
     selectedRiskSeverity.value = 'Medium';
     uploadedPhotoPath.value = null;
     actionTaken.value = false;

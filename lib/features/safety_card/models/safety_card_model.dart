@@ -2,7 +2,7 @@
 class SafetyCardModel {
   final String? cardType;
   final String? areaOfObservation;
-  final String? hazardCategory;
+  final List<String> hazardCategories; // Changed from String to List<String>
   final String? description;
   final String? riskSeverity;
   final String? photoPath;
@@ -13,7 +13,7 @@ class SafetyCardModel {
   SafetyCardModel({
     this.cardType,
     this.areaOfObservation,
-    this.hazardCategory,
+    required this.hazardCategories, // Changed to required list
     this.description,
     this.riskSeverity,
     this.photoPath,
@@ -24,15 +24,29 @@ class SafetyCardModel {
 
   Map<String, dynamic> toJson() {
     return {
-      'card_type': cardType,
-      'area_of_observation': areaOfObservation,
-      'hazard_category': hazardCategory,
+      'cardType': cardType,
+      'areaOfObservation': areaOfObservation,
+      'hazardCategories': hazardCategories, // Now returns list
       'description': description,
-      'risk_severity': riskSeverity,
-      'photo_path': photoPath,
-      'action_taken': actionTaken,
-      'immediate_action_required': immediateActionRequired,
-      'submit_anonymously': submitAnonymously,
+      'riskSeverity': riskSeverity,
+      'photoPath': photoPath,
+      'actionTaken': actionTaken,
+      'immediateActionRequired': immediateActionRequired,
+      'submitAnonymously': submitAnonymously,
     };
+  }
+
+  factory SafetyCardModel.fromJson(Map<String, dynamic> json) {
+    return SafetyCardModel(
+      cardType: json['cardType'],
+      areaOfObservation: json['areaOfObservation'],
+      hazardCategories: List<String>.from(json['hazardCategories'] ?? []), // Parse list
+      description: json['description'],
+      riskSeverity: json['riskSeverity'],
+      photoPath: json['photoPath'],
+      actionTaken: json['actionTaken'] ?? false,
+      immediateActionRequired: json['immediateActionRequired'] ?? false,
+      submitAnonymously: json['submitAnonymously'] ?? false,
+    );
   }
 }

@@ -11,10 +11,10 @@ import 'features/safety_card/views/safety_card_screen.dart';
   class HomePage extends StatefulWidget {
     const HomePage({super.key});
     @override
-    State<HomePage> createState() => _HomePageState();
+    State<HomePage> createState() => HomePageState();
   }
 
-  class _HomePageState extends State<HomePage> {
+  class HomePageState extends State<HomePage> {
     int currentIndex = 0;
     int lastTapTime = 0;
 
@@ -84,8 +84,8 @@ import 'features/safety_card/views/safety_card_screen.dart';
             } else if (currentIndex == 3 && videosNavKey.currentState!.canPop()) {
               videosNavKey.currentState?.pop();
               return Future.value(false);
-            }else if (currentIndex == 3 && profileNavKey.currentState!.canPop()) {
-              videosNavKey.currentState?.pop();
+            }else if (currentIndex == 4 && profileNavKey.currentState!.canPop()) {
+              profileNavKey.currentState?.pop();
               return Future.value(false);
             }
 

@@ -6,7 +6,9 @@ import 'package:nelsontan_offshore_drilling/core/widgets/text/app_text.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
+import '../../../home_page.dart';
 import '../../notification/views/notifications_screen.dart';
+import '../../safety_card/views/safety_card_screen.dart';
 import '../../video_player/models/video_source.dart';
 import '../../video_player/widgets/app_video_player.dart';
 import '../controllers/home_controller.dart';
@@ -63,7 +65,9 @@ class HomeScreen extends StatelessWidget {
 
                    Obx(
                       () => SubmitSafetyCardButton(
-                    onPressed: () => controller.submitSafetyCard(context),
+                    onPressed: () {
+                      context.findAncestorStateOfType<HomePageState>()?.onTabSelected(1);
+                    },
                     isLoading: controller.isSubmittingSafetyCard.value,
                   ),
                   ),
@@ -104,7 +108,7 @@ class HomeScreen extends StatelessWidget {
            // Right notification icon
            GestureDetector(
              onTap: () {
-               AppNavigation.push(context, const NotificationsScreen());
+               AppNavigation.push(context, NotificationsScreen());
              },
              child: Padding(
                padding: const EdgeInsets.all(8),
