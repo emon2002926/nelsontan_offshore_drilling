@@ -97,8 +97,8 @@ class HomeScreen extends StatelessWidget {
            // Title
            AppText(
              data: "Homepage",
-             fontSize: 18,
-             fontWeight: FontWeight.w900,
+             fontSize: 20,
+             fontWeight: FontWeight.w800,
            ),
            const Spacer(), // Pushes notification icon to the right
            // Right notification icon

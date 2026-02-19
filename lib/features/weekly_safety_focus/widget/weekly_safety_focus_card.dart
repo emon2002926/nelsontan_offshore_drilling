@@ -47,7 +47,7 @@ class WeeklySafetyFocusCard extends StatelessWidget {
 
             // Content
             Padding(
-              padding: EdgeInsets.all(context.responsiveSize(20)),
+              padding: EdgeInsets.symmetric(vertical: context.responsiveSize(20),horizontal: 16),
               child: isLoading
                   ? _buildLoadingState(context)
                   : _buildContent(context),
@@ -66,19 +66,12 @@ class WeeklySafetyFocusCard extends StatelessWidget {
         // Header with Icon
         Row(
           children: [
-            Container(
-              padding: EdgeInsets.all(context.responsiveSize(8)),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                borderRadius: BorderRadius.circular(
-                  context.responsiveSize(8),
-                ),
-              ),
-              child: Icon(
-                Icons.calendar_today_outlined,
-                size: context.responsiveSize(20),
-                color: const Color(0xFF0047AB),
-              ),
+            Image.asset(
+              AppAssertImage.instance.calendarIcon,
+              width: context.responsiveSize(24),
+              height: context.responsiveSize(24),
+              // color: const Color(0xFF0047AB), // only works if PNG is monochrome/masked
+              colorBlendMode: BlendMode.srcIn,
             ),
             SizedBox(width: context.responsiveSize(12)),
             Expanded(
@@ -93,7 +86,7 @@ class WeeklySafetyFocusCard extends StatelessWidget {
           ],
         ),
 
-        SizedBox(height: context.responsiveSize(10)),
+        SizedBox(height: context.responsiveSize(8)),
 
         // Title
         AppText(
@@ -104,7 +97,7 @@ class WeeklySafetyFocusCard extends StatelessWidget {
           useResponsiveFontSize: true,
         ),
 
-        SizedBox(height: context.responsiveSize(6)),
+        SizedBox(height: context.responsiveSize(4)),
 
         // Description
         AppText(
@@ -146,6 +139,7 @@ class WeeklySafetyFocusCard extends StatelessWidget {
               ),
             ),
           ),
+        SizedBox(height: context.responsiveSize(4))
       ],
     );
   }

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nelsontan_offshore_drilling/core/widgets/buttons/app_button.dart';
 import 'package:nelsontan_offshore_drilling/features/onboarding/views/onboarding_screen.dart';
-
 import '../../../core/util/screen_size.dart';
-import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../core/widgets/text/app_text.dart';
+import '../controllers/profile_controller.dart';
+
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
 
@@ -21,12 +22,12 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                SizedBox(height: context.responsiveSize(40)),
+                SizedBox(height: context.responsiveSize(35)),
 
                 // Profile Avatar
                 Center(child: _buildProfileAvatar(context, controller)),
 
-                SizedBox(height: context.responsiveSize(16)),
+                SizedBox(height: context.responsiveSize(12)),
 
                 // Name
                 Center(
@@ -52,7 +53,7 @@ class ProfilePage extends StatelessWidget {
                   ),
                 ),
 
-                SizedBox(height: context.responsiveSize(25)),
+                SizedBox(height: context.responsiveSize(20)),
 
                 // Name Field
                 AppText(
@@ -68,11 +69,11 @@ class ProfilePage extends StatelessWidget {
                   controller: controller.nameController,
                 ),
 
-                SizedBox(height: context.responsiveSize(16)),
+                SizedBox(height: context.responsiveSize(12)),
 
                 // Email Field
                 AppText(
-                  data: 'Your Emaill',
+                  data: 'Email',
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
                   color: const Color(0xFF1A1A1A),
@@ -85,7 +86,7 @@ class ProfilePage extends StatelessWidget {
                   keyboardType: TextInputType.emailAddress,
                 ),
 
-                SizedBox(height: context.responsiveSize(16)),
+                SizedBox(height: context.responsiveSize(12)),
 
                 // Company Name Field
                 AppText(
@@ -101,7 +102,7 @@ class ProfilePage extends StatelessWidget {
                   controller: controller.companyController,
                 ),
 
-                SizedBox(height: context.responsiveSize(16)),
+                SizedBox(height: context.responsiveSize(12)),
 
                 // Position Field
                 AppText(
@@ -117,35 +118,29 @@ class ProfilePage extends StatelessWidget {
                   controller: controller.positionController,
                 ),
 
-                SizedBox(height: context.responsiveSize(40)),
+                SizedBox(height: context.responsiveSize(35)),
 
                 // Save Button
-                SizedBox(
-                  width: double.infinity,
-                  height: context.responsiveSize(46),
-                  child: ElevatedButton(
-                    // onPressed: () => controller.saveProfile(),
-                    onPressed: () {
+
+                AppButton(
+                    buttonText: "Save",
+                    onPressed: (){
                       Get.offAll(OnboardingScreen());
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF0047AB),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(context.responsiveSize(28)),
-                      ),
-                      elevation: 0,
-                    ),
-                    child: AppText(
-                      data: 'Save',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      useResponsiveFontSize: true,
-                    ),
-                  ),
+                    fillColor: const Color(0xFF0047AB),
+                    textColor: Colors.white,
                 ),
-
+                SizedBox(height: context.responsiveSize(20)),
+                AppButton(
+                  buttonText: "Log out",
+                  onPressed: (){
+                    Get.offAll(OnboardingScreen());
+                  },
+                  fillColor:  Colors.red,
+                  textColor: Colors.white,
+                ),
                 SizedBox(height: context.responsiveSize(40)),
+
               ],
             ),
           ),
@@ -158,7 +153,7 @@ class ProfilePage extends StatelessWidget {
     return Stack(
       children: [
         CircleAvatar(
-          radius: context.responsiveSize(44),
+          radius: context.responsiveSize(40),
           backgroundColor: const Color(0xFFE0E0E0),
           backgroundImage: const AssetImage('assets/icons/profile_icon.png'),
         ),
@@ -224,44 +219,5 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-// Controller
-class ProfileController extends GetxController {
-  final nameController = TextEditingController(text: 'Eiden Jonson');
-  final emailController = TextEditingController(text: 'ltunuoluwa@gmail.com');
-  final companyController = TextEditingController(text: 'ONGC');
-  final positionController = TextEditingController(text: 'Contractor');
-
-  void changeProfilePhoto() {
-    // Implement photo picker logic
-    CustomSnackBar.info('Change profile photo');
-  }
-
-  void saveProfile() {
-    // Implement save logic
-    final name = nameController.text;
-    final email = emailController.text;
-    final company = companyController.text;
-    final position = positionController.text;
-
-    // Validate
-    if (name.isEmpty || email.isEmpty || company.isEmpty || position.isEmpty) {
-      CustomSnackBar.error('Please fill all fields');
-      return;
-    }
-
-    // Save to backend/local storage
-    CustomSnackBar.success('Profile saved successfully');
-  }
-
-  @override
-  void onClose() {
-    nameController.dispose();
-    emailController.dispose();
-    companyController.dispose();
-    positionController.dispose();
-    super.onClose();
   }
 }

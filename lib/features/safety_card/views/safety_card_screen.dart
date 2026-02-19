@@ -47,8 +47,8 @@ class SafetyCardScreen extends StatelessWidget {
                         Container(
                           child: Image.asset(
                             appAssets.topHeaderIcon,
-                            width: context.responsiveSize(32),
-                            height: context.responsiveSize(32),
+                            width: context.responsiveSize(36),
+                            height: context.responsiveSize(36),
                             colorBlendMode: BlendMode.srcIn,
                           ),
                         ),

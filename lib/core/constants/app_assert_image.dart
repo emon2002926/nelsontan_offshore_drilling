@@ -23,12 +23,18 @@
     final String topHeaderIcon = "assets/icons/top_header_icon.png";
     final String topHeaderNotificationIcon = "assets/icons/notification_icon.png";
     final String gameCardIcon = "assets/icons/game_card_icon.png";
+    final String calendarIcon = "assets/icons/calendar_icon.png";
     final String winnerIcon = "assets/icons/winner_icon.png";
     final String safetyVideoIcon = "assets/icons/safty_video_icon.png";
+    final String arrowForwardIcon = "assets/icons/arrow_back.png";
+    final String arrowBackIcon = "assets/icons/arrow_forward.png";
+    final String trophyIcon = "assets/icons/trophy_icon.png";
 
 
     final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";
     final String trainingGameBg = "assets/images/training_game_bg.png";
+    final String playButton = "assets/images/play_button.png";
+
 
 
     final String thumbnailImage = "assets/thumbnails/thumbnail.png";

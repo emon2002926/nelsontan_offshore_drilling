@@ -105,7 +105,7 @@ class OnboardingScreen extends StatelessWidget {
   Widget _buildPage(BuildContext context, OnboardingPage page) {
     return Padding(
       padding: EdgeInsets.symmetric(
-        horizontal: context.responsiveSize(24),
+        horizontal: context.responsiveSize(20),
       ),
       child: Column(
         children: [
@@ -115,7 +115,7 @@ class OnboardingScreen extends StatelessWidget {
           AppText(
             data: page.title,
             fontSize: 28,
-            fontWeight: FontWeight.bold,
+            fontWeight: FontWeight.w700,
             color: Colors.white,
             useResponsiveFontSize: true,
             textAlign: TextAlign.center,
@@ -138,7 +138,7 @@ class OnboardingScreen extends StatelessWidget {
           // Image Container
           Container(
             width: double.infinity,
-            height: context.responsiveSize(280),
+            height: context.responsiveSize(240),
             decoration: BoxDecoration(
               color: const Color(0xFF2B4A6F),
               borderRadius: BorderRadius.circular(context.responsiveSize(20)),
@@ -147,7 +147,7 @@ class OnboardingScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(context.responsiveSize(20)),
               child: Image.asset(
                 page.image,
-                fit: BoxFit.cover,
+                fit: BoxFit.fill,
                 errorBuilder: (context, error, stackTrace) {
                   // Placeholder when image is not found
                   return Center(
