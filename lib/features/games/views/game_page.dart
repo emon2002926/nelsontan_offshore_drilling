@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
-
 import '../../../core/constants/app_assert_image.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
-import '../controllers/game_controller.dart';
-import 'leader_board_page.dart';
+import '../../game_screen/controllers/game_controller.dart';
+import '../../game_screen/views/leader_board_page.dart';
+
+
+
 class GamePage extends StatelessWidget {
-   GamePage({super.key});
+  GamePage({super.key});
 
   final appAssets = AppAssertImage.instance;
 
@@ -30,7 +32,6 @@ class GamePage extends StatelessWidget {
     );
   }
 
-  // Game Start Screen (Left side of screenshot)
   Widget _buildGameStartScreen(BuildContext context, GamePageController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
@@ -38,17 +39,15 @@ class GamePage extends StatelessWidget {
         children: [
           SizedBox(height: context.responsiveSize(20)),
 
-          // Leaderboard button
           leaderboardButton(context),
 
           const Spacer(),
 
-          // Play icon
           Container(
             width: context.responsiveSize(85),
             height: context.responsiveSize(85),
-            decoration: BoxDecoration(
-              color: const Color(0xFFDBEAFE),
+            decoration: const BoxDecoration(
+              color: Color(0xFFDBEAFE),
               shape: BoxShape.circle,
             ),
             child: Icon(
@@ -60,7 +59,6 @@ class GamePage extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(20)),
 
-          // Title
           AppText(
             data: 'Spot the Hazards',
             fontSize: 20,
@@ -72,9 +70,8 @@ class GamePage extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(16)),
 
-          // Description
           AppText(
-            data: 'You have 30 seconds to identify as many unsafe conditions as possible in the rig scene. Tap on hazards to mark them.',
+            data: 'Find hazards in the rig scene and answer safety questions. Each round gives you 20 seconds. Score as high as you can!',
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF003E9A),
@@ -85,11 +82,8 @@ class GamePage extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(48)),
 
-          // Play button with custom image
           GestureDetector(
-            onTap: () {
-              controller.startGame();
-            },
+            onTap: () => controller.startGame(context),
             child: Image.asset(
               appAssets.playButton,
               width: context.responsiveSize(160),
@@ -100,7 +94,6 @@ class GamePage extends StatelessWidget {
 
           const Spacer(),
 
-          // How to Play link
           GestureDetector(
             onTap: () {
               controller.showInstructions.value = true;
@@ -131,7 +124,6 @@ class GamePage extends StatelessWidget {
     );
   }
 
-  // Instructions Screen (Right side of screenshot)
   Widget _buildInstructionsScreen(BuildContext context, GamePageController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
@@ -139,37 +131,29 @@ class GamePage extends StatelessWidget {
         children: [
           SizedBox(height: context.responsiveSize(20)),
 
-          // Leaderboard button
-
           leaderboardButton(context),
 
           const Spacer(),
 
-          // Game controller icon
           Container(
             width: context.responsiveSize(85),
             height: context.responsiveSize(85),
-            decoration: BoxDecoration(
-              color: const Color(0xFFE6F0FF),
+            decoration: const BoxDecoration(
+              color: Color(0xFFE6F0FF),
               shape: BoxShape.circle,
             ),
             child: Center(
-              child: Image.asset(appAssets.game,
+              child: Image.asset(
+                appAssets.game,
                 width: context.responsiveSize(45),
                 height: context.responsiveSize(45),
                 fit: BoxFit.contain,
               ),
             ),
-            // child: Icon(
-            //   Icons.sports_esports,
-            //   color: const Color(0xFF0047AB),
-            //   size: context.responsiveSize(50),
-            // ),
           ),
 
           SizedBox(height: context.responsiveSize(32)),
 
-          // Title
           AppText(
             data: 'How to Play:',
             fontSize: 24,
@@ -181,24 +165,21 @@ class GamePage extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(16)),
 
-          // Instructions
           AppText(
-            data: '"Tap on all unsafe conditions in the scene before time runs out. Each correct tap increases your score. Find them all to win!"',
+            data: '"The game has two types of rounds:\n\n🔍 Hazard Spot — Tap on unsafe conditions in the rig scene.\n\n📝 Quiz — Pick the correct answer about safety.\n\nYou get 20 seconds per round. Score points for every correct action!"',
             fontSize: 14,
             fontWeight: FontWeight.w400,
             color: const Color(0xFF003E9A),
             useResponsiveFontSize: true,
             textAlign: TextAlign.center,
-            maxLines: 5,
+            maxLines: 12,
           ),
 
           SizedBox(height: context.responsiveSize(48)),
 
-          // Navigation buttons
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Back button
               GestureDetector(
                 onTap: () {
                   controller.showInstructions.value = false;
@@ -217,14 +198,9 @@ class GamePage extends StatelessWidget {
                   ),
                 ),
               ),
-
               SizedBox(width: context.responsiveSize(24)),
-
-              // Next/Start button
               GestureDetector(
-                onTap: () {
-                  controller.startGame();
-                },
+                onTap: () => controller.startGame(context),
                 child: Container(
                   width: context.responsiveSize(60),
                   height: context.responsiveSize(60),
@@ -233,7 +209,7 @@ class GamePage extends StatelessWidget {
                   ),
                   child: Center(
                     child: Image.asset(
-                      appAssets.arrowBackIcon,
+                      appAssets.arrowForwardIcon,
                       width: context.responsiveSize(60),
                     ),
                   ),
@@ -251,23 +227,22 @@ class GamePage extends StatelessWidget {
   }
 
   Widget leaderboardButton(BuildContext context) {
-    return  Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         GestureDetector(
           onTap: () {
-            // Navigate to leaderboard
-            AppNavigation.push(context, LeaderboardView());
+            AppNavigation.push(context, const LeaderboardView());
           },
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.symmetric(vertical: context.responsiveSize(12),
+                padding: EdgeInsets.symmetric(
+                    vertical: context.responsiveSize(12),
                     horizontal: context.responsiveSize(16)),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0047AB),
                   borderRadius: BorderRadius.circular(context.responsiveSize(12)),
-
                   boxShadow: [
                     BoxShadow(
                       color: Colors.blue.withOpacity(0.05),
@@ -276,13 +251,12 @@ class GamePage extends StatelessWidget {
                     ),
                   ],
                 ),
-                child:
-                Image.asset(appAssets.trophyIcon,
-
-                  width: context.responsiveSize(24),),
-
+                child: Image.asset(
+                  appAssets.trophyIcon,
+                  width: context.responsiveSize(24),
+                ),
               ),
-              SizedBox(height: context.responsiveSize(3),),
+              SizedBox(height: context.responsiveSize(3)),
               AppText(
                 data: 'Leaderboard',
                 fontSize: 10,
@@ -297,5 +271,3 @@ class GamePage extends StatelessWidget {
     );
   }
 }
-
-

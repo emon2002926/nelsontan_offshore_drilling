@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
-import 'package:nelsontan_offshore_drilling/core/widgets/app_bar/build_app_bar.dart';
 import 'package:nelsontan_offshore_drilling/features/notification/views/notifications_screen.dart';
 import 'dart:io';
 

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nelsontan_offshore_drilling/features/cards/views/cards_page.dart';
-import 'package:nelsontan_offshore_drilling/features/game/views/game_page.dart';
+import 'package:nelsontan_offshore_drilling/features/games/views/game_page.dart';
 import 'package:nelsontan_offshore_drilling/features/home/views/home_screen.dart';
 import 'package:nelsontan_offshore_drilling/features/profile/views/profile_page.dart';
 import 'package:nelsontan_offshore_drilling/features/videos/views/videos_page.dart';
@@ -130,7 +129,6 @@ import 'features/safety_card/views/safety_card_screen.dart';
         bottomNavigationBar: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-
             CustomBottomNavigationBar(
               currentIndex: currentIndex,
               onTabSelected: onTabSelected,

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_core/src/get_main.dart';
 
 import '../../../core/constants/app_assert_image.dart';
 import '../../../core/util/app_navigation.dart';
@@ -9,7 +8,6 @@ import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
 import '../../video_player/models/video_source.dart';
 import '../../video_player/video_player_screen/video_player_screen.dart';
-import '../../video_player/widgets/app_video_player.dart';
 class VideosPage extends StatelessWidget {
    VideosPage({super.key});
 

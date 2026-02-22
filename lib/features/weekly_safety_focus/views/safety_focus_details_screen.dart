@@ -1,9 +1,7 @@
 // features/home/presentation/safety_focus_details_screen.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
 
-import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../models/weekly_safety_focus_model.dart';

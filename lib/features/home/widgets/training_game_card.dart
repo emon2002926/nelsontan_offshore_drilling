@@ -1,6 +1,5 @@
 // features/home/widgets/training_game_card.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_colors.dart';
 

@@ -1,6 +1,5 @@
 // features/home/widgets/submit_safety_card_button.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';

@@ -4,10 +4,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
-import 'package:flutter/material.dart';
-import 'dart:ui';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:get/get.dart'; // for .tr if you're using GetX
+// for .tr if you're using GetX
 
   class AppText extends StatelessWidget {
     const AppText({

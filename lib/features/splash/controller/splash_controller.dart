@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/features/auth/views/signin_screen.dart';
-import 'package:nelsontan_offshore_drilling/features/onboarding/views/onboarding_screen.dart';
 import '../../../../core/util/storage_service.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/util/app_navigation.dart';

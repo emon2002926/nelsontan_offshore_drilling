@@ -1,6 +1,5 @@
 // account_created_success_screen.dart
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/features/auth/views/signin_screen.dart';
 
 import '../../../core/constants/app_assert_image.dart';
