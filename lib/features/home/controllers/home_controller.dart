@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
 
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
+import '../../../home_page.dart';
 import '../../safety_card/views/safety_card_screen.dart';
 import '../../weekly_safety_focus/views/safety_focus_details_screen.dart';
 import '../models/training_game_model.dart';
@@ -81,10 +82,8 @@ class HomeController extends GetxController {
 
   // Handle play game
   void onPlayGame(BuildContext context) {
-    if (trainingGame.value == null) return;
+    context.findAncestorStateOfType<HomePageState>()?.onTabSelected(2);
 
-    // TODO: Navigate to game screen
-    CustomSnackBar.info('Starting: ${trainingGame.value!.title}');
   }
 
   // Handle game settings
