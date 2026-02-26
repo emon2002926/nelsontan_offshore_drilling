@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../../../core/constants/app_assert_image.dart';
 import '../../../core/util/app_navigation.dart';
@@ -80,7 +79,7 @@ class VideosPage extends StatelessWidget {
           // Icon
           Container(
             child: Image.asset(
-              appAssets.topHeaderIcon,
+              appAssets.bxsVideos,
               width: context.responsiveSize(40),
               height: context.responsiveSize(40),
               colorBlendMode: BlendMode.srcIn,
@@ -139,10 +138,11 @@ class VideosPage extends StatelessWidget {
       }) {
     return GestureDetector(
       onTap: () {
-        Get.to(() => VideoPlayerScreen(
+        AppNavigation.push(context, VideoPlayerScreen(
           videoSource: videoSource,
           title: title,
         ));
+
       },
       child: Container(
 

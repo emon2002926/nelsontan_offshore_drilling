@@ -29,6 +29,7 @@
     final String arrowForwardIcon = "assets/icons/arrow_back.png";
     final String arrowBackIcon = "assets/icons/arrow_forward.png";
     final String trophyIcon = "assets/icons/trophy_icon.png";
+    final String bxsVideos = "assets/icons/bxs_videos.png";
 
 
     final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";

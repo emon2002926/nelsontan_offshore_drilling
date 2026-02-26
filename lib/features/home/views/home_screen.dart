@@ -29,14 +29,16 @@ class HomeScreen extends StatelessWidget {
           child: SingleChildScrollView(
             child: Column(
               children: [
+                SizedBox(height: context.heightPercentage(1)),
+
                 topHeader(context,appAssets.topHeaderIcon,appAssets.topHeaderNotificationIcon),
-                SizedBox(height: context.responsiveSize(12)),
+                SizedBox(height: context.responsiveSize(10)),
 
                 AppVideoPlayer(
                   videoSource: VideoSource.asset('assets/videos/demo.mp4'
                   ,thumbnailAssetPath:appAssets.thumbnailImage ),
                   width: context.widthPercentage(100),
-                  height: context.heightPercentage(28),
+                  height: context.heightPercentage(23),
                   borderRadius: 16,
                   autoPlay: false,
                 ),
@@ -89,12 +91,11 @@ class HomeScreen extends StatelessWidget {
        child: Row(
          children: [
            // Left icon
-           Padding(
-             padding: const EdgeInsets.all(8),
-             child: Image.asset(
+
+              Image.asset(
                headerSaveIcon,
                height: context.responsiveSize(24),
-             ),
+
            ),
            // Title
            AppText(

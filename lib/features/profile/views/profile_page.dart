@@ -153,7 +153,7 @@ class ProfilePage extends StatelessWidget {
     return Stack(
       children: [
         CircleAvatar(
-          radius: context.responsiveSize(40),
+          radius: context.responsiveSize(44),
           backgroundColor: const Color(0xFFE0E0E0),
           backgroundImage: const AssetImage('assets/icons/profile_icon.png'),
         ),
@@ -163,7 +163,7 @@ class ProfilePage extends StatelessWidget {
           child: GestureDetector(
             onTap: () => controller.changeProfilePhoto(),
             child: Container(
-              padding: EdgeInsets.all(context.responsiveSize(8)),
+              padding: EdgeInsets.all(context.responsiveSize(2)),
               decoration: BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,

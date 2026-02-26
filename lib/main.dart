@@ -15,15 +15,15 @@ void main() async{
   ]);
 
   // Set status bar icons to white throughout the app
-  // SystemChrome.setSystemUIOverlayStyle(
-  //   const SystemUiOverlayStyle(
-  //     statusBarColor: Colors.transparent,
-  //     statusBarIconBrightness: Brightness.light, // White icons on Android
-  //     statusBarBrightness: Brightness.dark, // White icons on iOS
-  //     systemNavigationBarColor: Colors.black,
-  //     systemNavigationBarIconBrightness: Brightness.light,
-  //   ),
-  // );
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      statusBarIconBrightness: Brightness.light, // White icons on Android
+      statusBarBrightness: Brightness.dark, // White icons on iOS
+      systemNavigationBarColor: Colors.black,
+      systemNavigationBarIconBrightness: Brightness.light,
+    ),
+  );
   runApp(const MyApp());
 
 
@@ -39,13 +39,13 @@ class MyApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: ThemeData(
             // Ensure status bar styling is applied to all AppBars
-            appBarTheme: const AppBarTheme(
-              systemOverlayStyle: SystemUiOverlayStyle(
-                statusBarColor: Colors.transparent,
-                statusBarIconBrightness: Brightness.light,
-                statusBarBrightness: Brightness.dark,
-              ),
-            ),
+            // appBarTheme: const AppBarTheme(
+            //   systemOverlayStyle: SystemUiOverlayStyle(
+            //     statusBarColor: Colors.transparent,
+            //     statusBarIconBrightness: Brightness.light,
+            //     statusBarBrightness: Brightness.dark,
+            //   ),
+            // ),
           ),
           home: const SplashScreen(),
         );
