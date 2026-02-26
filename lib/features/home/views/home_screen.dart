@@ -23,8 +23,9 @@ class HomeScreen extends StatelessWidget {
     final controller = Get.put(HomeController());
 
     return Scaffold(
+      backgroundColor: Colors.white,
       body: SafeArea(
-        child: Padding(
+                child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: SingleChildScrollView(
             child: Column(
@@ -97,11 +98,12 @@ class HomeScreen extends StatelessWidget {
                height: context.responsiveSize(24),
 
            ),
+           SizedBox(width: context.responsiveSize(12)),
            // Title
            AppText(
              data: "Homepage",
              fontSize: 20,
-             fontWeight: FontWeight.w800,
+             fontWeight: FontWeight.w600,
            ),
            const Spacer(), // Pushes notification icon to the right
            // Right notification icon

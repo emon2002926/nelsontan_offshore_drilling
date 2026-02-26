@@ -30,6 +30,9 @@
     final String arrowBackIcon = "assets/icons/arrow_forward.png";
     final String trophyIcon = "assets/icons/trophy_icon.png";
     final String bxsVideos = "assets/icons/bxs_videos.png";
+    final String medalGold = "assets/icons/gold_icon.png";
+    final String medalSilver = "assets/icons/silver_icon.png";
+    final String medalBronze = "assets/icons/bronze_icon.png";
 
 
     final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";
