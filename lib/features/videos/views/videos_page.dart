@@ -6,7 +6,7 @@ import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
 import '../../video_player/models/video_source.dart';
-import '../../video_player/video_player_screen/video_player_screen.dart';
+import 'video_player_screen.dart';
 class VideosPage extends StatelessWidget {
    VideosPage({super.key});
 

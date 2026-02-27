@@ -5,15 +5,6 @@ import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart
 import '../../../core/util/screen_size.dart';
 import '../controllers/leader_bord_controller.dart';
 
-// ─── Colors ───
-import 'package:flutter/material.dart';
-
-import 'package:get/get.dart';
-import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
-import '../../../core/util/screen_size.dart';
-import '../controllers/leader_bord_controller.dart';
-
-// ─── Colors ───
 const _kBackground = Color(0xFFF5F6FA);
 const _kTextPrimary = Color(0xFF6E6C6C);
 const _kTextSecondary = Color(0xFF90A4AE);

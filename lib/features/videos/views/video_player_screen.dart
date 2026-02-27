@@ -5,13 +5,13 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
-import '../models/video_source.dart';
-import '../widgets/app_video_player.dart';
+import '../../video_player/models/video_source.dart';
+import '../../video_player/widgets/app_video_player.dart';
 
 // lib/features/video_player/views/video_player_screen.dart
 
 import 'package:get/get.dart';
-import '../controllers/video_player_controller.dart';
+import '../../video_player/controllers/video_player_controller.dart';
 
 class VideoPlayerScreen extends StatelessWidget {
   final VideoSource videoSource;
