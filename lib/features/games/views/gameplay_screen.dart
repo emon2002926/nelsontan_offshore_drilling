@@ -562,28 +562,28 @@ class GameplayScreen extends StatelessWidget {
           SizedBox(height: context.responsiveSize(32)),
 
           // Play Again
-          GestureDetector(
-            onTap: () => controller.playAgain(),
-            child: Container(
-              width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                  vertical: context.responsiveSize(14)),
-              decoration: BoxDecoration(
-                color: const Color(0xFF0047AB),
-                borderRadius:
-                BorderRadius.circular(context.responsiveSize(12)),
-              ),
-              child: Center(
-                child: AppText(
-                  data: 'Play Again',
-                  fontSize: 18,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  useResponsiveFontSize: true,
-                ),
-              ),
-            ),
-          ),
+          // GestureDetector(
+          //   onTap: () => controller.playAgain(),
+          //   child: Container(
+          //     width: double.infinity,
+          //     padding: EdgeInsets.symmetric(
+          //         vertical: context.responsiveSize(14)),
+          //     decoration: BoxDecoration(
+          //       color: const Color(0xFF0047AB),
+          //       borderRadius:
+          //       BorderRadius.circular(context.responsiveSize(12)),
+          //     ),
+          //     child: Center(
+          //       child: AppText(
+          //         data: 'Play Again',
+          //         fontSize: 18,
+          //         fontWeight: FontWeight.w600,
+          //         color: Colors.white,
+          //         useResponsiveFontSize: true,
+          //       ),
+          //     ),
+          //   ),
+          // ),
 
           SizedBox(height: context.responsiveSize(16)),
 
