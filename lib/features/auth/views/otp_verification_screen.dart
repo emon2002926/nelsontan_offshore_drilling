@@ -1,4 +1,3 @@
-// otp_verification_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -22,7 +21,7 @@ class OtpVerificationScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(
-      OtpVerificationController(email: email,isFromSignUp: isFromSignUp),
+      OtpVerificationController(),
     );
 
     return Scaffold(
@@ -158,7 +157,7 @@ class OtpVerificationScreen extends StatelessWidget {
                   Obx(
                         () => AppButton(
                       buttonText: 'Verify Code',
-                      onPressed: () => controller.verifyOtp(context),
+                      onPressed: () => controller.verifyOtp(context,email,isFromSignUp),
                       fillColor: const Color(0xFF0047AB),
                       textColor: Colors.white,
                       fontSize: 18,
@@ -198,7 +197,7 @@ class OtpVerificationScreen extends StatelessWidget {
                       ],
                     )
                         : GestureDetector(
-                      onTap: () => controller.resendOtp(context),
+                      onTap: () => controller.resendOtp(context,email,isFromSignUp),
                       child: RichText(
                         text: TextSpan(
                           style: TextStyle(

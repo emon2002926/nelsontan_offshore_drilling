@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
 
 import '../../../core/util/app_navigation.dart';
-import '../../../core/util/storage_service.dart';
 import '../../auth/views/signin_screen.dart';
 
 class OnboardingController extends GetxController {
@@ -54,10 +53,10 @@ class OnboardingController extends GetxController {
 
   void completeOnboarding(BuildContext context) {
     // Save onboarding completion status
-    StorageService.saveOnboardingCompleted();
+    // StorageService.saveOnboardingCompleted();
 
     // Navigate to Sign In or Home
-    AppNavigation.pushAndClear(context, const SignInScreen());
+    AppNavigation.pushAndClear( const SignInScreen());
   }
 
   @override

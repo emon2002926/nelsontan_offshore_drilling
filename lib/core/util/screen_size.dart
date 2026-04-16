@@ -1,32 +1,67 @@
 // lib/utils/size_config.dart
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
-    extension ScreenSize on BuildContext {
-      // Screen dimensions
-      double get screenWidth => MediaQuery.of(this).size.width;
-      double get screenHeight => MediaQuery.of(this).size.height;
+extension ScreenSize on BuildContext {
+  static const double _designWidth  = 393.0;
+  static const double _designHeight = 852.0;
 
-      // Responsive width (percentage of screen width)
-      double widthPercentage(double percentage) => screenWidth * (percentage / 100);
+  // ─── Tablet breakpoint ───────────────────────────────────────────────────
+  bool get isTabletDevice => MediaQuery.of(this).size.shortestSide >= 600;
 
-      // Responsive height (percentage of screen height)
-      double heightPercentage(double percentage) => screenHeight * (percentage / 100);
+  // ─── Raw screen info ─────────────────────────────────────────────────────
+  double get screenWidth  => MediaQuery.of(this).size.width;
+  double get screenHeight => MediaQuery.of(this).size.height;
 
-      // Responsive size (general purpose - based on screen width, 375px baseline)
-      double responsiveSize(double size) => screenWidth * (size / 375);
+  // ─── Scale factors ───────────────────────────────────────────────────────
+  double get _scaleWidth  => screenWidth  / _designWidth;
+  double get _scaleHeight => screenHeight / _designHeight;
 
-      // Responsive font size (based on screen width)
-      double responsiveFontSize(double size) => screenWidth * (size / 375);
+  // Tablet cap: prevent UI from scaling infinitely on large screens
+  double get _tabletScaleCap => isTabletDevice ? 1.4 : 1.0;
 
-      // Responsive spacing
-      double get spacing4 => screenWidth * 0.01;
-      double get spacing8 => screenWidth * 0.02;
-      double get spacing12 => screenWidth * 0.03;
-      double get spacing16 => screenWidth * 0.04;
-      double get spacing24 => screenWidth * 0.06;
-      double get spacing32 => screenWidth * 0.08;
+  double get _scaleText => min(_scaleWidth, _scaleHeight) * _tabletScaleCap;
 
-      // Card dimensions (for tarot cards)
-      double get cardWidth => screenWidth * 0.25; // ~25% of screen
-      double get cardHeight => cardWidth * 1.5; // Maintain aspect ratio
-    }
+  // ─── Core converters ─────────────────────────────────────────────────────
+
+  /// Width-based — horizontal sizes, padding, widths
+  double w(double px) => px * (_scaleWidth).clamp(0.7, _tabletScaleCap);
+
+  /// Height-based — vertical sizes, heights
+  double h(double px) => px * (_scaleHeight).clamp(0.7, _tabletScaleCap);
+
+  /// Font size — matches Figma px, clamped for tablets
+  double sp(double px) => px * min(_scaleWidth, _scaleHeight).clamp(0.8, 1.3);
+
+  // ─── Responsive layout helpers ────────────────────────────────────────────
+
+  /// Max content width — centers content on large tablets like iPad Pro
+  double get maxContentWidth => isTabletDevice
+      ? screenWidth.clamp(0, 600)
+      : screenWidth;
+
+  /// Horizontal page padding — wider on tablets
+  double get pagePadding => isTabletDevice ? w(48) : w(20);
+
+  /// Column count for grids
+  int get gridColumns => isTabletDevice ? 2 : 1;
+
+  // ─── Spacing ──────────────────────────────────────────────────────────────
+  double get spacing4  => w(4);
+  double get spacing8  => w(8);
+  double get spacing12 => w(12);
+  double get spacing16 => w(16);
+  double get spacing24 => w(24);
+  double get spacing32 => w(32);
+
+  // ─── Card dimensions ─────────────────────────────────────────────────────
+  double get cardWidth  => isTabletDevice ? screenWidth * 0.18 : screenWidth * 0.25;
+  double get cardHeight => cardWidth * 1.5;
+
+  // ─── Deprecated ──────────────────────────────────────────────────────────
+  double widthPercentage(double percentage)  => screenWidth  * (percentage / 100);
+  double heightPercentage(double percentage) => screenHeight * (percentage / 100);
+  double responsiveSize(double size)         => sp(size);
+  double responsiveFontSize(double size)     => sp(size);
+}

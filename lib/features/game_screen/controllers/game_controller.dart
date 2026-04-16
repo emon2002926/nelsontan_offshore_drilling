@@ -14,7 +14,7 @@ class GamePageController extends GetxController {
   final RxInt selectedGameMode = 0.obs;
 
   void startGame(BuildContext context) {
-    AppNavigation.push(context, const GameplayScreen());
+    AppNavigation.push( const GameplayScreen(),context: context);
   }
 
   void selectGameMode(int index) {

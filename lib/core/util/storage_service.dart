@@ -1,18 +1,10 @@
 import 'package:get_storage/get_storage.dart';
 
-
-
 class StorageService {
   static final _box = GetStorage();
   static const _tokenKey = 'access_token';
   static const _refreshTokenKey = 'refresh_token';
-  static const _onboardingCompletedKey = 'onboarding_completed';
-  static Future<void> saveOnboardingCompleted() async {
-    await _box.write(_onboardingCompletedKey, true);
-  }
-
-  static bool get isOnboardingCompleted =>
-      _box.read(_onboardingCompletedKey) ?? false;
+  static const _languageKey = 'app_language';
 
   // Access Token
   static Future<void> saveToken(String accessToken) async {
@@ -30,6 +22,12 @@ class StorageService {
   static String? get refreshToken => _box.read(_refreshTokenKey);
 
   // Language Storage
+  static Future<void> saveLanguage(String languageCode) async {
+    await _box.write(_languageKey, languageCode);
+  }
+
+  static String get language => _box.read(_languageKey) ?? 'en'; // Default to English
+  static bool get hasLanguage => _box.hasData(_languageKey);
 
   // Clear methods
   static Future<void> clearToken() async {
@@ -38,6 +36,8 @@ class StorageService {
   }
 
   static Future<void> logout() async {
+    final savedLanguage = language; // Preserve language preference
     await _box.erase(); // Clear everything
+    await saveLanguage(savedLanguage); // Restore language preference
   }
 }

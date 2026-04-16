@@ -74,7 +74,7 @@ class SafetyCardScreen extends StatelessWidget {
                         ),
                         GestureDetector(
                           onTap: () =>
-                              AppNavigation.push(context, NotificationsScreen()),
+                              AppNavigation.push( NotificationsScreen(),context: context),
                           child: Icon(
                             Icons.notifications_none,
                             color: Colors.black,

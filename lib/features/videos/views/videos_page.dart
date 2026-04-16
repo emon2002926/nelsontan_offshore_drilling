@@ -115,7 +115,7 @@ class VideosPage extends StatelessWidget {
           IconButton(
             onPressed: () {
               // Handle notification tap
-              AppNavigation.push(context, const NotificationsScreen());
+              AppNavigation.push( const NotificationsScreen(),context: context);
 
             },
             icon: const Icon(
@@ -138,7 +138,7 @@ class VideosPage extends StatelessWidget {
       }) {
     return GestureDetector(
       onTap: () {
-        AppNavigation.push(context, VideoPlayerScreen(
+        AppNavigation.push( VideoPlayerScreen(
           videoSource: videoSource,
           title: title,
         ));

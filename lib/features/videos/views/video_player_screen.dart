@@ -138,7 +138,7 @@ class VideoPlayerScreen extends StatelessWidget {
           IconButton(
             onPressed: () {
               // Handle notification tap
-              AppNavigation.push(context, const NotificationsScreen());
+              AppNavigation.push( const NotificationsScreen(),context: context);
 
             },
             icon: const Icon(

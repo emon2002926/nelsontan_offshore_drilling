@@ -99,6 +99,6 @@ class AccountCreatedSuccessScreen extends StatelessWidget {
   // Navigate to Sign In screen
   void _navigateToSignIn(BuildContext context) {
     // Clear all previous screens and go to sign in
-    AppNavigation.pushAndClear(context, const SignInScreen());
+    AppNavigation.pushAndClear( const SignInScreen());
   }
 }

@@ -59,8 +59,8 @@ class HomeController extends GetxController {
     if (weeklySafetyFocus.value == null) return;
 
     AppNavigation.push(
-      context,
-      SafetyFocusDetailsScreen(data: weeklySafetyFocus.value!),
+
+      SafetyFocusDetailsScreen(data: weeklySafetyFocus.value!),context: context
     );
   }
   Future<void> fetchTrainingGame() async {
@@ -95,7 +95,7 @@ class HomeController extends GetxController {
 
   // Submit safety card
   Future<void> submitSafetyCard(BuildContext context) async {
-    AppNavigation.push(context,  SafetyCardScreen());
+    AppNavigation.push(  SafetyCardScreen());
   }
 
 

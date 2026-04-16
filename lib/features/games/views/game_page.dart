@@ -232,7 +232,7 @@ class GamePage extends StatelessWidget {
       children: [
         GestureDetector(
           onTap: () {
-            AppNavigation.push(context, const LeaderboardView());
+            AppNavigation.push( const LeaderboardView(),context: context);
           },
           child: Column(
             children: [

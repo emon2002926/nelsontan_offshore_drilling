@@ -51,7 +51,7 @@ class NotificationsController extends GetxController {
       //   builder: (context) => _buildNotificationDetails(context, notification),
       // );
 
-      AppNavigation.push(context, NotificationDetailsScreen(notification: notification));
+      AppNavigation.push( NotificationDetailsScreen(notification: notification),context: context);
     }
   }
 

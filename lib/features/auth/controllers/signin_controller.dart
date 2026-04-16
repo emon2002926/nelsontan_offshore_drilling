@@ -1,4 +1,6 @@
 // sign_in_controller.dart
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
@@ -6,12 +8,16 @@ import 'package:nelsontan_offshore_drilling/core/widgets/snakbar/custom_snackbar
 import 'package:nelsontan_offshore_drilling/features/auth/views/signup_screen.dart';
 import 'package:nelsontan_offshore_drilling/home_page.dart';
 
+import '../../../core/services/api_services.dart';
+import '../../../core/util/storage_service.dart';
 import '../views/forget_password_screen.dart';
 
 class SignInController extends GetxController {
   // Text Controllers
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final ApiServices _api = Get.find<ApiServices>();
+
 
   // Focus Nodes
   final emailFocus = FocusNode();
@@ -51,36 +57,47 @@ class SignInController extends GetxController {
     return null;
   }
 
-  // Sign In Action
-  Future<void> signIn(BuildContext context) async {
-    if (formKey.currentState!.validate()) {
-      isLoading.value = true;
 
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
+  Future<void> login() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-      // TODO: Implement actual sign in API call
-      print('Email: ${emailController.text}');
-      print('Password: ${passwordController.text}');
+    if (!formKey.currentState!.validate()) return; // use your form validator
 
+    isLoading.value = true;
+    try {
+      final data = await _api.post(
+        '/auth/user/signin',
+        body: {"email": email, "password": password},
+      );
+
+      final accessToken = data?["data"]; // ✅ fixed — token is directly in "data"
+      if (accessToken != null) {
+        StorageService.saveToken(accessToken);
+        CustomSnackBar.success('Login Successful');
+        Get.offAll(() => HomePage());
+      } else {
+        CustomSnackBar.error('Token not received. Please try again.');
+      }
+
+    } on HttpException catch (e) {
+      // ✅ never leave this empty
+      CustomSnackBar.error(e.message);
+    } catch (e) {
+      CustomSnackBar.error('Something went wrong. Please try again.');
+    } finally {
       isLoading.value = false;
-
-      // Navigate to home screen or show success message
-      CustomSnackBar.success("Sign In Successful");
-
-      AppNavigation.pushAndClear(context, HomePage());
     }
   }
 
-  // Navigate to Sign Up
   void navigateToSignUp() {
-    AppNavigation.push(Get.context!, SignUpScreen());
+    AppNavigation.push( SignUpScreen());
   }
 
   // Navigate to Forget Password
   void navigateToForgetPassword(BuildContext context) {
 
-    AppNavigation.push(context, ForgetPasswordScreen());
+    AppNavigation.push( ForgetPasswordScreen());
   }
 
   @override
@@ -95,4 +112,9 @@ class SignInController extends GetxController {
 
     super.onClose();
   }
+
+
+
+
+
 }

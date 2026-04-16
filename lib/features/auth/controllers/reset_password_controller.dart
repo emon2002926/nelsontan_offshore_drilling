@@ -103,7 +103,7 @@ class ResetPasswordController extends GetxController {
 
         // Navigate to sign in screen
         await Future.delayed(const Duration(milliseconds: 500));
-        AppNavigation.pushAndClear(context, const SignInScreen());
+        AppNavigation.pushAndClear( const SignInScreen());
 
       } catch (e) {
         isLoading.value = false;

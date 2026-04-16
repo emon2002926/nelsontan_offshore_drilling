@@ -109,7 +109,7 @@ class HomeScreen extends StatelessWidget {
            // Right notification icon
            GestureDetector(
              onTap: () {
-               AppNavigation.push(context, NotificationsScreen());
+               AppNavigation.push( NotificationsScreen(),context: context);
              },
              child: Padding(
                padding: const EdgeInsets.all(8),

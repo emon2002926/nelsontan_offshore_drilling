@@ -13,7 +13,8 @@ class SignInScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SignInController());
+    // final controller = Get.put(SignInController());
+    final controller = Get.find<SignInController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -128,7 +129,7 @@ class SignInScreen extends StatelessWidget {
                     Obx(
                           () => AppButton(
                         buttonText: 'Sign In',
-                        onPressed: ()=> controller.signIn(context),
+                        onPressed: ()=> controller.login(),
                         fillColor: const Color(0xFF0047AB),
                         textColor: Colors.white,
                         fontSize: 18,
