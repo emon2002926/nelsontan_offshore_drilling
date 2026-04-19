@@ -5,8 +5,13 @@ import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
+import '../../../home_page.dart';
+import '../models/sign_in_response_model.dart';
 import '../views/account_created_success_screen.dart';
+import '../views/account_status_screen.dart';
+import '../views/client_rig_select_screen.dart';
 import '../views/reset_password_screen.dart';
+import '../views/signin_screen.dart';
 
 class OtpVerificationController extends GetxController {
   final ApiServices _api = Get.find<ApiServices>();
@@ -39,8 +44,6 @@ class OtpVerificationController extends GetxController {
 
   // ── Verify OTP ────────────────────────────────────────────────────────────
   Future<void> verifyOtp(BuildContext context, String email, bool isFromSignUp) async {
-    // AppNavigation.push(ResetPasswordScreen(email: email, otp: otpCode));
-
     if (!isOtpComplete) {
       CustomSnackBar.warning('Please enter complete 6-digit code');
       return;
@@ -49,32 +52,49 @@ class OtpVerificationController extends GetxController {
     isLoading.value = true;
     try {
       if (isFromSignUp) {
-        // POST /auth/user/verify-email → returns JWT token in data
-        final data = await _api.post(
+        // POST /auth/user/verify-email → same structure as SignInResponseModel
+        final raw      = await _api.post(
           '/auth/user/verify-email',
-          body: {
-            "email": email,
-            "otp": int.parse(otpCode), // ✅ API expects integer
-          },
+          body: {"email": email, "otp": int.parse(otpCode)},
         );
+        final response = SignInResponseModel.fromJson(raw);
+        final token    = response.data?.token;
+        final user     = response.data?.user;
 
-        final token = data?["data"];
-        if (token != null) {
+        if (token != null && token.isNotEmpty) {
           StorageService.saveToken(token);
         }
 
         CustomSnackBar.success('Email verified successfully!');
         await Future.delayed(const Duration(milliseconds: 500));
-        AppNavigation.push(AccountCreatedSuccessScreen());
+
+        // ── Decision making using approveStatus ──────────────────────────
+        if (user == null || user.isNotSubmitted) {
+          // Fresh signup — needs to select client & rig
+          AppNavigation.pushAndClear(const ClientRigSelectScreen());
+          return;
+        }
+
+        if (user.isPending) {
+          AppNavigation.pushAndClear(
+            const AccountStatusScreen(status: AccountStatus.pending),
+          );
+          return;
+        }
+
+        if (user.isApproved && user.isActive) {
+          AppNavigation.pushAndClear(HomePage());
+          return;
+        }
+
+        // Fallback for any other status
+        AppNavigation.pushAndClear(const SignInScreen());
 
       } else {
-        // POST /auth/user/verify-otp → just returns success, no token
+        // POST /auth/user/verify-otp → no token, just success
         await _api.post(
           '/auth/user/verify-otp',
-          body: {
-            "email": email,
-            "otp": int.parse(otpCode), // ✅ API expects integer
-          },
+          body: {"email": email, "otp": int.parse(otpCode)},
         );
 
         CustomSnackBar.success('OTP verified successfully!');
@@ -92,7 +112,6 @@ class OtpVerificationController extends GetxController {
       isLoading.value = false;
     }
   }
-
   // ── Resend OTP ────────────────────────────────────────────────────────────
   Future<void> resendOtp(BuildContext context, String email, bool isFromSignUp) async {
     isResending.value = true;

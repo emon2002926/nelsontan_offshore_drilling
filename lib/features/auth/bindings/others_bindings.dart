@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import '../controllers/forget_password_controller.dart';
+import '../controllers/otp_verification_controller.dart';
 import '../controllers/signin_controller.dart';
 import '../controllers/signup_controller.dart';
 class AuthBindings {
@@ -16,15 +17,15 @@ class AuthBindings {
       fenix: true,
     );
   }
-  // static void otpDependencies(){
-  //   Get.lazyPut<EnterOtpController>(
-  //         ()=> EnterOtpController(),
-  //     fenix: true,
-  //   );
-  // }
   static void forgotPassDependencies(){
     Get.lazyPut<ForgetPasswordController>(
           ()=> ForgetPasswordController(),
+      fenix: true,
+    );
+  }
+  static void otpVerificationDependencies(){
+    Get.lazyPut<OtpVerificationController>(
+          ()=> OtpVerificationController(),
       fenix: true,
     );
   }

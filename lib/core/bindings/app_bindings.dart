@@ -11,6 +11,7 @@ class AppBindings {
     // NotificationBinding.dependencies();
     // UnitsBinding.dependencies();
     AuthBindings.forgotPassDependencies();
+    AuthBindings.otpVerificationDependencies();
     // OtherAuthBindings.otpDependencies();
     // OtherAuthBindings.resetPassDependencies();
   }

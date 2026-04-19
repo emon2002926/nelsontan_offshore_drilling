@@ -20,9 +20,7 @@ class OtpVerificationScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(
-      OtpVerificationController(),
-    );
+    final controller = Get.find<OtpVerificationController>() ;
 
     return Scaffold(
       backgroundColor: Colors.white,
