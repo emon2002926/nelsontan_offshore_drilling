@@ -2,9 +2,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
-import 'dart:convert';
 
-import 'package:http/http.dart' as http;
 
 import '../util/app_log.dart';
 

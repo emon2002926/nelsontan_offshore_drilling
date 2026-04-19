@@ -39,6 +39,8 @@ class OtpVerificationController extends GetxController {
 
   // ── Verify OTP ────────────────────────────────────────────────────────────
   Future<void> verifyOtp(BuildContext context, String email, bool isFromSignUp) async {
+    // AppNavigation.push(ResetPasswordScreen(email: email, otp: otpCode));
+
     if (!isOtpComplete) {
       CustomSnackBar.warning('Please enter complete 6-digit code');
       return;

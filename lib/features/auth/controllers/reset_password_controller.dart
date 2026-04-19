@@ -2,127 +2,124 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
+import '../../../core/util/form_validator.dart';
+import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../views/signin_screen.dart';
 
 class ResetPasswordController extends GetxController {
-  // Text Controllers
-  final newPasswordController = TextEditingController();
+  final ApiServices _api = Get.find<ApiServices>();
+
+  final newPasswordController     = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // Focus Nodes
-  final newPasswordFocus = FocusNode();
+  final newPasswordFocus     = FocusNode();
   final confirmPasswordFocus = FocusNode();
 
-  // Observable states
-  final isNewPasswordVisible = false.obs;
+  final isNewPasswordVisible     = false.obs;
   final isConfirmPasswordVisible = false.obs;
-  final isLoading = false.obs;
+  final isLoading                = false.obs;
 
-  // Form key
   final formKey = GlobalKey<FormState>();
 
-  // Email and OTP passed from previous screen
   final String email;
   final String? otp;
 
-  ResetPasswordController({
-    required this.email,
-    this.otp,
-  });
+  ResetPasswordController({required this.email, this.otp});
 
-  // Toggle password visibility
-  void toggleNewPasswordVisibility() {
-    isNewPasswordVisible.value = !isNewPasswordVisible.value;
-  }
+  void toggleNewPasswordVisibility()     => isNewPasswordVisible.value = !isNewPasswordVisible.value;
+  void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
 
-  void toggleConfirmPasswordVisibility() {
-    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
-  }
-
-  // Validators
+  // ── Validators ────────────────────────────────────────────────────────────
   String? validateNewPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please enter a new password';
+    if (value == null || value.isEmpty) return 'Please enter a new password';
+    if (!FormValidator.isValidPassword(value)) {
+      return value.length < 8
+          ? 'Password must be at least 8 characters'
+          : 'Password must contain at least one uppercase letter';
     }
-    if (value.length < 8) {
-      return 'Password must be at least 8 characters';
-    }
-    // Optional: Add more password strength validations
-    if (!value.contains(RegExp(r'[A-Z]'))) {
-      return 'Password must contain at least one uppercase letter';
-    }
-    if (!value.contains(RegExp(r'[a-z]'))) {
-      return 'Password must contain at least one lowercase letter';
-    }
-    if (!value.contains(RegExp(r'[0-9]'))) {
-      return 'Password must contain at least one number';
-    }
+    if (!value.contains(RegExp(r'[a-z]'))) return 'Password must contain at least one lowercase letter';
+    if (!value.contains(RegExp(r'[0-9]'))) return 'Password must contain at least one number';
     return null;
   }
 
   String? validateConfirmPassword(String? value) {
-    if (value == null || value.isEmpty) {
-      return 'Please re-enter your password';
-    }
-    if (value != newPasswordController.text) {
-      return 'Passwords do not match';
-    }
+    if (value == null || value.isEmpty) return 'Please re-enter your password';
+    if (value != newPasswordController.text) return 'Passwords do not match';
     return null;
   }
 
-  // Update Password Action
+  // ── Update Password ───────────────────────────────────────────────────────
   Future<void> updatePassword(BuildContext context) async {
-    if (formKey.currentState!.validate()) {
-      isLoading.value = true;
+    if (!formKey.currentState!.validate()) return;
 
-      try {
-        // Simulate API call
-        await Future.delayed(const Duration(seconds: 2));
+    final password        = newPasswordController.text.trim();
+    final confirmPassword = confirmPasswordController.text.trim();
 
-        // TODO: Implement actual reset password API call
-        // Example:
-        // final response = await AuthService.resetPassword(
-        //   email: email,
-        //   otp: otp,
-        //   newPassword: newPasswordController.text,
-        // );
+    // Sequential snackbar guards
+    final isValid = FormValidator.validateAll([
+      FormFieldEntry(value: password,        errorMessage: 'Please enter a new password',   focusNode: newPasswordFocus),
+      FormFieldEntry(value: confirmPassword, errorMessage: 'Please re-enter your password', focusNode: confirmPasswordFocus),
+    ]);
+    if (!isValid) return;
 
-        print('Email: $email');
-        print('OTP: $otp');
-        print('New Password: ${newPasswordController.text}');
+    if (!FormValidator.isValidPassword(password)) {
+      final msg = password.length < 8
+          ? 'Password must be at least 8 characters'
+          : 'Password must contain at least one uppercase letter';
+      CustomSnackBar.error(msg);
+      newPasswordFocus.requestFocus();
+      return;
+    }
 
-        isLoading.value = false;
+    if (password != confirmPassword) {
+      CustomSnackBar.error('Passwords do not match');
+      confirmPasswordFocus.requestFocus();
+      return;
+    }
 
-        // Show success message
-        CustomSnackBar.success(
-          'Password updated successfully!',
-          duration: const Duration(seconds: 3),
-        );
+    isLoading.value = true;
+    try {
+      // POST /auth/user/set-password  body: { email, otp: int, password }
+      // Response: { success: true, data: "<JWT token>" }
+      final data = await _api.post(
+        '/auth/user/set-password',
+        body: {
+          "email":    email,
+          "otp":      int.parse(otp ?? '0'), // ✅ API expects integer
+          "password": password,
+        },
+      );
 
-        // Navigate to sign in screen
-        await Future.delayed(const Duration(milliseconds: 500));
-        AppNavigation.pushAndClear( const SignInScreen());
-
-      } catch (e) {
-        isLoading.value = false;
-        CustomSnackBar.error('Failed to update password. Please try again.');
-        print('Error: $e');
+      // API returns a fresh token after password reset — save it
+      final token = data?["data"];
+      if (token != null) {
+        StorageService.saveToken(token);
       }
+
+      CustomSnackBar.success('Password updated successfully!',
+          duration: const Duration(seconds: 3));
+
+      await Future.delayed(const Duration(milliseconds: 500));
+      AppNavigation.pushAndClear(const SignInScreen());
+
+    } on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
+    } catch (e) {
+      CustomSnackBar.error('Failed to update password. Please try again.');
+    } finally {
+      isLoading.value = false;
     }
   }
 
   @override
   void onClose() {
-    // Dispose controllers
     newPasswordController.dispose();
     confirmPasswordController.dispose();
-
-    // Dispose focus nodes
     newPasswordFocus.dispose();
     confirmPasswordFocus.dispose();
-
     super.onClose();
   }
 }

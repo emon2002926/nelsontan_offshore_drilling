@@ -22,6 +22,8 @@ class ForgetPasswordController extends GetxController {
   }
 
   Future<void> resetPassword(BuildContext context) async {
+
+
     if (!formKey.currentState!.validate()) return;
 
     final email = emailController.text.trim();

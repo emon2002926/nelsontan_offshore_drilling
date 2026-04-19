@@ -4,7 +4,6 @@ import 'package:nelsontan_offshore_drilling/features/auth/views/signin_screen.da
 import '../../../../core/util/storage_service.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/util/app_navigation.dart';
-import '../../../home_page.dart';
 import '../../onboarding/views/onboarding_screen.dart';
 
 class SplashController extends GetxController {

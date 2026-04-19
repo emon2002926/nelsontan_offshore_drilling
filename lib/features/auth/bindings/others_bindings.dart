@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import '../controllers/forget_password_controller.dart';
-import '../controllers/reset_password_controller.dart';
 import '../controllers/signin_controller.dart';
 import '../controllers/signup_controller.dart';
 class AuthBindings {
