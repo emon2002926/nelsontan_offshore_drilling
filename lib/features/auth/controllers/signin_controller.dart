@@ -89,8 +89,8 @@ class SignInController extends GetxController {
       // ── Decision making using model ───────────────────────────────
       if (!user.isApproved) {
         final screen = switch (true) {
-          _ when user.isPending   =>  const ClientRigSelectScreen( ),
-          // _ when user.isPending   => const AccountStatusScreen(status: AccountStatus.pending),
+          _ when user.isActive   =>  const HomePage( ),
+          _ when user.isPending   => const AccountStatusScreen(status: AccountStatus.pending),
           _ when user.isInactive  => const AccountStatusScreen(status: AccountStatus.inactive),
           _ when user.isSuspended => const AccountStatusScreen(status: AccountStatus.suspended),
           _ when user.isDeleted   => const AccountStatusScreen(status: AccountStatus.deleted),

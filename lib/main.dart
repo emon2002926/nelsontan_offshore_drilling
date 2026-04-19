@@ -8,11 +8,14 @@ import 'core/util/app_navigation.dart';
 import 'features/splash/controller/splash_controller.dart';
 import 'features/splash/views/splash_screen.dart';
 void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
 
   await GetStorage.init();
   AppBindings.init();
   Get.lazyPut(() => SplashController());
   Get.put(ApiServices(baseUrl: 'http://10.10.7.108:8000/api/v1'));
+  // Get.put(SplashController());
+
 
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -45,13 +48,13 @@ class MyApp extends StatelessWidget {
            navigatorKey: AppNavigation.navigatorKey,
            theme: ThemeData(
             // Ensure status bar styling is applied to all AppBars
-            // appBarTheme: const AppBarTheme(
-            //   systemOverlayStyle: SystemUiOverlayStyle(
-            //     statusBarColor: Colors.transparent,
-            //     statusBarIconBrightness: Brightness.light,
-            //     statusBarBrightness: Brightness.dark,
-            //   ),
-            // ),
+            appBarTheme: const AppBarTheme(
+              systemOverlayStyle: SystemUiOverlayStyle(
+                statusBarColor: Colors.transparent,
+                statusBarIconBrightness: Brightness.light,
+                statusBarBrightness: Brightness.dark,
+              ),
+            ),
           ),
           home: const SplashScreen(),
         );

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/features/auth/views/signin_screen.dart';
 import '../../../../core/util/storage_service.dart';
@@ -21,21 +22,22 @@ class SplashController extends GetxController {
   }
 
   void _navigate() {
-    if (!StorageService.hasToken || !StorageService.hasUser) {
-      AppNavigation.pushAndClear(OnboardingScreen());
-      return;
-    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!StorageService.hasToken || !StorageService.hasUser) {
+        Get.offAll(() => OnboardingScreen());
+        return;
+      }
 
-    final u = StorageService.user!;
+      final u = StorageService.user!;
 
-    if (u.isNotSubmitted) { AppNavigation.pushAndClear(const ClientRigSelectScreen());                                        return; }
-    if (u.isPending)      { AppNavigation.pushAndClear(const AccountStatusScreen(status: AccountStatus.pending));             return; }
-    if (u.isSuspended)    { AppNavigation.pushAndClear(const AccountStatusScreen(status: AccountStatus.suspended));           return; }
-    if (u.isInactive)     { AppNavigation.pushAndClear(const AccountStatusScreen(status: AccountStatus.inactive));            return; }
-    if (u.isDeleted)      { AppNavigation.pushAndClear(const AccountStatusScreen(status: AccountStatus.deleted));             return; }
-    if (u.isApproved && u.isActive) { AppNavigation.pushAndClear(HomePage());                                                return; }
+      if (u.isNotSubmitted) { Get.offAll(() => const ClientRigSelectScreen());                               return; }
+      if (u.isPending)      { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.pending));    return; }
+      if (u.isSuspended)    { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.suspended));  return; }
+      if (u.isInactive)     { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.inactive));   return; }
+      if (u.isDeleted)      { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.deleted));    return; }
+      if (u.isApproved)     { Get.offAll(() => HomePage());                                                  return; }
 
-    // Fallback — something unexpected, send to sign in
-    AppNavigation.pushAndClear(const SignInScreen());
+      Get.offAll(() => OnboardingScreen());
+    });
   }
 }

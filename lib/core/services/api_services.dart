@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -81,6 +82,33 @@ class ApiServices {
       uri: url,
       body: response.body,
     );
+  }
+
+  Future<dynamic> putFormData(
+      String endpoints, {
+        Map<String, String>? headers,
+        required Map<String, String> fields,
+        File? imageFile,
+        String imageFieldName = "image",
+      }) async {
+    final url = Uri.parse('$baseUrl$endpoints');
+    AppLog.request(endpoints, method: 'PUT [form-data]', body: fields);
+
+    final request = http.MultipartRequest('PUT', url);
+    request.headers.addAll({'Accept': 'application/json', ...?headers});
+    request.fields.addAll(fields);
+
+    if (imageFile != null) {
+      request.files.add(await http.MultipartFile.fromPath(
+        imageFieldName,
+        imageFile.path,
+        contentType: http.MediaType('image', imageFile.path.split('.').last),
+      ));
+    }
+
+    final streamedResponse = await _httpClient.send(request);
+    final response         = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response, url, endpoints);
   }
 }
 
