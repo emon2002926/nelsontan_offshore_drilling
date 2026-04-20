@@ -1,14 +1,21 @@
 // features/safety_card/presentation/controllers/safety_card_controller.dart
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
+import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
+import '../../auth/views/signin_screen.dart';
 import '../models/safety_card_model.dart';
 
 class SafetyCardController extends GetxController {
+  final ApiServices _api = Get.find<ApiServices>();
+
   // Form key
   final formKey = GlobalKey<FormState>();
 
@@ -18,36 +25,150 @@ class SafetyCardController extends GetxController {
   // Focus Nodes
   final descriptionFocus = FocusNode();
 
-  // Observable values
-  final Rx<String?> selectedCardType = Rx<String?>(null);
-  final Rx<String?> selectedArea = Rx<String?>(null);
-  final RxList<String> selectedHazardCategories = <String>[].obs; // Changed to list for multiple selection
-  final Rx<String?> selectedRiskSeverity = Rx<String?>('Medium');
-  final Rx<String?> uploadedPhotoPath = Rx<String?>(null);
+  // ── API-driven dropdown data ─────────────────────────────────────────────
+  final RxList<CardTypeModel> cardTypes = <CardTypeModel>[].obs;
+  final RxList<AreaModel> areas         = <AreaModel>[].obs;
+  final RxList<HazardModel> hazards     = <HazardModel>[].obs;
+  final RxBool isLoadingDropdowns       = false.obs;
 
-  final RxBool actionTaken = false.obs;
-  final RxBool immediateActionRequired = false.obs;
-  final RxBool submitAnonymously = false.obs;
-  final RxBool isSubmitting = false.obs;
+  // ── Selected values (hold the model, not just a string) ─────────────────
+  final Rx<CardTypeModel?> selectedCardType   = Rx<CardTypeModel?>(null);
+  final Rx<AreaModel?>     selectedArea       = Rx<AreaModel?>(null);
+  final RxList<HazardModel> selectedHazards  = <HazardModel>[].obs;
 
-  // Dropdown options
-  final List<String> cardTypes = ['Unsafe Act', 'Unsafe Condition', 'Near Miss', 'Good Practice'];
-  final List<String> areas = ['Drilling', 'Production', 'Maintenance', 'Logistics', 'HSE'];
-
-  final List<Map<String, dynamic>> hazardCategories = [
-    {'icon': '🪜', 'label': 'Fall Hazard'},
-    {'icon': '🧪', 'label': 'Chemical Exposure'},
-    {'icon': '💥', 'label': 'Struck By'},
-    {'icon': '⚡', 'label': 'Electrical'},
-    {'icon': '🔥', 'label': 'Fire'},
-  ];
+  // ── Other fields ─────────────────────────────────────────────────────────
+  final Rx<String?>  selectedRiskSeverity = Rx<String?>('Medium');
+  final Rx<String?>  uploadedPhotoPath    = Rx<String?>(null);
+  final RxBool actionTaken              = false.obs;
+  final RxBool immediateActionRequired  = false.obs;
+  final RxBool submitAnonymously        = false.obs;
+  final RxBool isSubmitting             = false.obs;
 
   final List<String> riskSeverities = ['Low', 'Medium', 'High'];
+
+  // Hazard categories still shown as chips (icon + label mapped from API name)
+  // We keep the icon mapping local; label comes from HazardModel.name
+  static const Map<String, String> _hazardIcons = {
+    'default': '⚠️',
+    'fall': '🪜',
+    'chemical': '🧪',
+    'struck': '💥',
+    'electrical': '⚡',
+    'fire': '🔥',
+  };
+
+  String hazardIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('fall'))       return '🪜';
+    if (lower.contains('chemical'))   return '🧪';
+    if (lower.contains('struck'))     return '💥';
+    if (lower.contains('electric'))   return '⚡';
+    if (lower.contains('fire'))       return '🔥';
+    return '⚠️';
+  }
 
   @override
   void onInit() {
     super.onInit();
-    selectedCardType.value = cardTypes[0]; // Default to first option
+    fetchDropdowns();
+  }
+
+  // ── GET /card-submission/type-hazard-area ────────────────────────────────
+  Future<void> fetchDropdowns() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      CustomSnackBar.error('Session expired. Please sign in again.');
+      AppNavigation.pushAndClear(const SignInScreen());
+      return;
+    }
+
+    isLoadingDropdowns.value = true;
+    try {
+      final raw = await _api.get(
+        '/card-submission/type-hazard-area',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      final data = CardTypeHazardAreaModel.fromJson(
+        raw['data'] as Map<String, dynamic>,
+      );
+
+      cardTypes.assignAll(data.cardTypes);
+      areas.assignAll(data.areas);
+      hazards.assignAll(data.hazards);
+
+      // Default first card type selected
+      if (cardTypes.isNotEmpty) selectedCardType.value = cardTypes.first;
+    } on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
+    } catch (e) {
+      CustomSnackBar.error('Failed to load form data. Please try again.');
+    } finally {
+      isLoadingDropdowns.value = false;
+    }
+  }
+
+  // ── POST /card-submission/create  (multipart/form-data) ─────────────────
+  Future<void> submitSafetyCard(BuildContext context) async {
+    if (!formKey.currentState!.validate()) return;
+
+    if (selectedCardType.value == null) {
+      CustomSnackBar.warning('Please select a card type');
+      return;
+    }
+    if (selectedArea.value == null) {
+      CustomSnackBar.warning('Please select an area of observation');
+      return;
+    }
+    if (selectedHazards.isEmpty) {
+      CustomSnackBar.warning('Please select at least one hazard category');
+      return;
+    }
+
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      CustomSnackBar.error('Session expired. Please sign in again.');
+      AppNavigation.pushAndClear(const SignInScreen());
+      return;
+    }
+
+    isSubmitting.value = true;
+    try {
+      // Build form-data fields matching the API keys in the screenshot
+      final fields = <String, String>{
+        'cardTypeId':        selectedCardType.value!.id.toString(),
+        'areaId':            selectedArea.value!.id.toString(),
+        'hazardId':          selectedHazards.first.id.toString(), // single hazard per API
+        'description':       descriptionController.text.trim(),
+        'riskSeverity':      (selectedRiskSeverity.value ?? 'Medium').toUpperCase(),
+        'actionTaken':       actionTaken.value.toString(),
+        'immediateAction':   immediateActionRequired.value.toString(),
+        'submitAnonymously': submitAnonymously.value.toString(),
+      };
+
+      final imageFile = uploadedPhotoPath.value != null
+          ? File(uploadedPhotoPath.value!)
+          : null;
+
+      await _api.postFormData(
+        '/card-submission/create',
+        headers: {'Authorization': 'Bearer $token'},
+        fields: fields,
+        imageFile: imageFile,
+        imageFieldName: 'media',
+      );
+
+      CustomSnackBar.success('Safety card submitted successfully!');
+      await Future.delayed(const Duration(milliseconds: 500));
+      // AppNavigation.pop(context);
+      resetForm();
+    } on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
+    } catch (e) {
+      CustomSnackBar.error('Failed to submit safety card. Please try again.');
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 
   // Validators
@@ -61,28 +182,25 @@ class SafetyCardController extends GetxController {
     return null;
   }
 
-  // Pick image
+  // Image picker
   Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
-      final ImagePicker picker = ImagePicker();
+      final picker = ImagePicker();
       final XFile? image = await picker.pickImage(
         source: source,
         maxWidth: 1920,
         maxHeight: 1080,
         imageQuality: 85,
       );
-
       if (image != null) {
         uploadedPhotoPath.value = image.path;
         CustomSnackBar.success('Photo uploaded successfully');
       }
     } catch (e) {
       CustomSnackBar.error('Failed to pick image');
-      print('Error picking image: $e');
     }
   }
 
-  // Show photo options
   void showPhotoOptions(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -106,7 +224,8 @@ class SafetyCardController extends GetxController {
                 },
               ),
               ListTile(
-                leading: const Icon(Icons.photo_library, color: Color(0xFF0047AB)),
+                leading:
+                const Icon(Icons.photo_library, color: Color(0xFF0047AB)),
                 title: const Text('Choose from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
@@ -130,74 +249,17 @@ class SafetyCardController extends GetxController {
     );
   }
 
-  // Submit safety card
-  Future<void> submitSafetyCard(BuildContext context) async {
-    if (!formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (selectedCardType.value == null) {
-      CustomSnackBar.warning('Please select a card type');
-      return;
-    }
-
-    if (selectedArea.value == null) {
-      CustomSnackBar.warning('Please select an area of observation');
-      return;
-    }
-
-    if (selectedHazardCategories.isEmpty) {
-      CustomSnackBar.warning('Please select at least one hazard category');
-      return;
-    }
-
-    isSubmitting.value = true;
-
-    try {
-      final card = SafetyCardModel(
-        cardType: selectedCardType.value,
-        areaOfObservation: selectedArea.value,
-        hazardCategories: selectedHazardCategories.toList(), // Changed to list
-        description: descriptionController.text.trim(),
-        riskSeverity: selectedRiskSeverity.value,
-        photoPath: uploadedPhotoPath.value,
-        actionTaken: actionTaken.value,
-        immediateActionRequired: immediateActionRequired.value,
-        submitAnonymously: submitAnonymously.value,
-      );
-
-      // Simulate API call
-      await Future.delayed(const Duration(seconds: 2));
-
-      // TODO: Replace with actual API call
-      print('Submitting safety card: ${card.toJson()}');
-
-      isSubmitting.value = false;
-
-      CustomSnackBar.success('Safety card submitted successfully!');
-
-      // Navigate back
-      await Future.delayed(const Duration(milliseconds: 500));
-      AppNavigation.pop(context);
-
-    } catch (e) {
-      isSubmitting.value = false;
-      CustomSnackBar.error('Failed to submit safety card');
-      print('Error: $e');
-    }
-  }
-
-  // Reset form
   void resetForm() {
     descriptionController.clear();
-    selectedCardType.value = cardTypes[0];
-    selectedArea.value = null;
-    selectedHazardCategories.clear(); // Clear the list
-    selectedRiskSeverity.value = 'Medium';
-    uploadedPhotoPath.value = null;
-    actionTaken.value = false;
+    selectedCardType.value =
+    cardTypes.isNotEmpty ? cardTypes.first : null;
+    selectedArea.value    = null;
+    selectedHazards.clear();
+    selectedRiskSeverity.value  = 'Medium';
+    uploadedPhotoPath.value     = null;
+    actionTaken.value           = false;
     immediateActionRequired.value = false;
-    submitAnonymously.value = false;
+    submitAnonymously.value     = false;
   }
 
   @override

@@ -20,6 +20,23 @@ class ApiServices {
     "Content-Type": "application/json",
   };
 
+  // ── MIME helper ──────────────────────────────────────────────────────────
+  // Returns [type, subtype] e.g. ['image', 'jpeg'] or ['video', 'mp4']
+  List<String> _mimeType(String extension) {
+    switch (extension.toLowerCase()) {
+      case 'jpg':
+      case 'jpeg': return ['image', 'jpeg'];
+      case 'png':  return ['image', 'png'];
+      case 'webp': return ['image', 'webp'];
+      case 'gif':  return ['image', 'gif'];
+      case 'mp4':  return ['video', 'mp4'];
+      case 'mpeg': return ['video', 'mpeg'];
+      case 'mov':  return ['video', 'quicktime'];
+      case 'webm': return ['video', 'webm'];
+      default:     return ['application', 'octet-stream'];
+    }
+  }
+
   Future<dynamic> get(String endpoints, {Map<String, String>? headers}) async {
     final url = Uri.parse('$baseUrl$endpoints');
     AppLog.request(endpoints, method: 'GET');
@@ -51,21 +68,71 @@ class ApiServices {
     return _handleResponse(response, url, endpoints);
   }
 
-  Future<dynamic> postFormData(String endpoints, {Map<String, String>? headers, required Map<String, String> fields}) async {
-    final url = Uri.parse('$baseUrl$endpoints');
-    AppLog.request(endpoints, method: 'POST [form-data]', body: fields);
-    final request = http.MultipartRequest('POST', url);
-    request.headers.addAll({'Accept': 'application/json', ...?headers});
-    request.fields.addAll(fields);
-    final streamedResponse = await _httpClient.send(request);
-    final response = await http.Response.fromStream(streamedResponse);
-    return _handleResponse(response, url, endpoints);
-  }
   Future<dynamic> put(String endpoints, {Map<String, String>? headers, dynamic body}) async {
     final url = Uri.parse('$baseUrl$endpoints');
     AppLog.request(endpoints, method: 'PUT', body: body);
     final encodedBody = body != null ? jsonEncode(body) : null;
     final response = await _httpClient.put(url, headers: {..._defaultHeader, ...?headers}, body: encodedBody);
+    return _handleResponse(response, url, endpoints);
+  }
+
+  /// POST multipart/form-data — optional file attachment with correct MIME type
+  Future<dynamic> postFormData(
+      String endpoints, {
+        Map<String, String>? headers,
+        required Map<String, String> fields,
+        File? imageFile,
+        String imageFieldName = "image",
+      }) async {
+    final url = Uri.parse('$baseUrl$endpoints');
+    AppLog.request(endpoints, method: 'POST [form-data]', body: fields);
+
+    final request = http.MultipartRequest('POST', url);
+    request.headers.addAll({'Accept': 'application/json', ...?headers});
+    request.fields.addAll(fields);
+
+    if (imageFile != null) {
+      final ext  = imageFile.path.split('.').last;
+      final mime = _mimeType(ext);
+      request.files.add(await http.MultipartFile.fromPath(
+        imageFieldName,
+        imageFile.path,
+        contentType: http.MediaType(mime[0], mime[1]),
+      ));
+    }
+
+    final streamedResponse = await _httpClient.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
+    return _handleResponse(response, url, endpoints);
+  }
+
+  /// PUT multipart/form-data — optional file attachment with correct MIME type
+  Future<dynamic> putFormData(
+      String endpoints, {
+        Map<String, String>? headers,
+        required Map<String, String> fields,
+        File? imageFile,
+        String imageFieldName = "image",
+      }) async {
+    final url = Uri.parse('$baseUrl$endpoints');
+    AppLog.request(endpoints, method: 'PUT [form-data]', body: fields);
+
+    final request = http.MultipartRequest('PUT', url);
+    request.headers.addAll({'Accept': 'application/json', ...?headers});
+    request.fields.addAll(fields);
+
+    if (imageFile != null) {
+      final ext  = imageFile.path.split('.').last;
+      final mime = _mimeType(ext);
+      request.files.add(await http.MultipartFile.fromPath(
+        imageFieldName,
+        imageFile.path,
+        contentType: http.MediaType(mime[0], mime[1]),
+      ));
+    }
+
+    final streamedResponse = await _httpClient.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
     return _handleResponse(response, url, endpoints);
   }
 
@@ -82,33 +149,6 @@ class ApiServices {
       uri: url,
       body: response.body,
     );
-  }
-
-  Future<dynamic> putFormData(
-      String endpoints, {
-        Map<String, String>? headers,
-        required Map<String, String> fields,
-        File? imageFile,
-        String imageFieldName = "image",
-      }) async {
-    final url = Uri.parse('$baseUrl$endpoints');
-    AppLog.request(endpoints, method: 'PUT [form-data]', body: fields);
-
-    final request = http.MultipartRequest('PUT', url);
-    request.headers.addAll({'Accept': 'application/json', ...?headers});
-    request.fields.addAll(fields);
-
-    if (imageFile != null) {
-      request.files.add(await http.MultipartFile.fromPath(
-        imageFieldName,
-        imageFile.path,
-        contentType: http.MediaType('image', imageFile.path.split('.').last),
-      ));
-    }
-
-    final streamedResponse = await _httpClient.send(request);
-    final response         = await http.Response.fromStream(streamedResponse);
-    return _handleResponse(response, url, endpoints);
   }
 }
 

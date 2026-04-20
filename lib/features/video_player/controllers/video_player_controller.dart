@@ -10,22 +10,23 @@ import '../models/video_source.dart';
 class AppVideoPlayerController extends GetxController {
   VideoPlayerController? videoController;
 
-  final RxBool isInitialized = false.obs;
-  final RxBool isPlaying = false.obs;
-  final RxBool isLoading = true.obs;
-  final RxBool showControls = false.obs;
+  final RxBool isInitialized     = false.obs;
+  final RxBool isPlaying         = false.obs;
+  final RxBool isLoading         = true.obs;
+  final RxBool showControls      = false.obs;
   final RxBool hasStartedPlaying = false.obs;
+  final RxBool isMuted           = false.obs;
+
   final Rx<Duration> currentPosition = Duration.zero.obs;
-  final Rx<Duration> totalDuration = Duration.zero.obs;
+  final Rx<Duration> totalDuration   = Duration.zero.obs;
 
   Future<void> initializeVideo(VideoSource source) async {
     try {
       isLoading.value = true;
 
-      // Dispose previous controller if exists
       await videoController?.dispose();
+      videoController = null;
 
-      // Create controller based on source type
       switch (source.type) {
         case VideoSourceType.asset:
           videoController = VideoPlayerController.asset(source.path);
@@ -42,12 +43,18 @@ class AppVideoPlayerController extends GetxController {
 
       await videoController!.initialize();
 
-      // Add listener for position updates
+      // Read duration immediately after initialize — works for most formats
+      final initialDuration = videoController!.value.duration;
+      if (initialDuration > Duration.zero) {
+        totalDuration.value = initialDuration;
+      }
+
+      // Listener keeps updating duration in case it arrives late
+      // (common with some HTTP servers / containers)
       videoController!.addListener(_videoListener);
 
-      totalDuration.value = videoController!.value.duration;
       isInitialized.value = true;
-      isLoading.value = false;
+      isLoading.value     = false;
     } catch (e) {
       isLoading.value = false;
       CustomSnackBar.error('Failed to load video: ${e.toString()}');
@@ -55,25 +62,49 @@ class AppVideoPlayerController extends GetxController {
   }
 
   void _videoListener() {
-    if (videoController != null) {
-      currentPosition.value = videoController!.value.position;
-      isPlaying.value = videoController!.value.isPlaying;
+    if (videoController == null) return;
+    final value = videoController!.value;
+
+    currentPosition.value = value.position;
+    isPlaying.value       = value.isPlaying;
+
+    // Always update duration from listener — some servers report it late
+    if (value.duration > Duration.zero &&
+        value.duration != totalDuration.value) {
+      totalDuration.value = value.duration;
     }
   }
 
   void togglePlayPause() {
-    if (videoController != null) {
-      if (videoController!.value.isPlaying) {
-        videoController!.pause();
-      } else {
-        hasStartedPlaying.value = true;
-        videoController!.play();
-      }
+    if (videoController == null) return;
+    if (videoController!.value.isPlaying) {
+      videoController!.pause();
+    } else {
+      hasStartedPlaying.value = true;
+      videoController!.play();
     }
   }
 
   void seekTo(Duration position) {
-    videoController?.seekTo(position);
+    final clamped = position.isNegative
+        ? Duration.zero
+        : position > totalDuration.value
+        ? totalDuration.value
+        : position;
+    videoController?.seekTo(clamped);
+  }
+
+  void skipForward() {
+    seekTo(currentPosition.value + const Duration(seconds: 5));
+  }
+
+  void skipBackward() {
+    seekTo(currentPosition.value - const Duration(seconds: 5));
+  }
+
+  void toggleMute() {
+    isMuted.value = !isMuted.value;
+    videoController?.setVolume(isMuted.value ? 0.0 : 1.0);
   }
 
   void toggleControls() {

@@ -3,104 +3,115 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
 
+import '../../../core/services/api_services.dart';
+import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../home_page.dart';
+import '../../auth/views/signin_screen.dart';
 import '../../safety_card/views/safety_card_screen.dart';
 import '../../weekly_safety_focus/views/safety_focus_details_screen.dart';
+import '../models/app_home_model.dart';
 import '../models/training_game_model.dart';
 import '../../weekly_safety_focus/models/weekly_safety_focus_model.dart';
 
 class HomeController extends GetxController {
-  // Observable for weekly safety focus
-  final Rx<WeeklySafetyFocusModel?> weeklySafetyFocus = Rx<WeeklySafetyFocusModel?>(null);
-  final RxBool isLoadingSafetyFocus = false.obs;
+  final ApiServices _api = Get.find<ApiServices>();
 
-  // Training & Game
+
+  final Rx<AppHomeModel?> appHome = Rx<AppHomeModel?>(null);
+  final RxBool isLoadingHome = false.obs;
+
+
   final Rx<TrainingGameModel?> trainingGame = Rx<TrainingGameModel?>(null);
   final RxBool isLoadingTrainingGame = false.obs;
 
   final RxBool isSubmittingSafetyCard = false.obs;
 
 
+  final Rx<WeeklySafetyFocusModel?> weeklySafetyFocus =
+  Rx<WeeklySafetyFocusModel?>(null);
 
-
+  RxBool get isLoadingSafetyFocus => isLoadingHome;
 
   @override
   void onInit() {
     super.onInit();
-    fetchWeeklySafetyFocus();
+    fetchAppHome();
   }
 
-  // Fetch weekly safety focus
-  Future<void> fetchWeeklySafetyFocus() async {
-    isLoadingSafetyFocus.value = true;
+  Future<void> fetchAppHome() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      CustomSnackBar.error('Session expired. Please sign in again.');
+      AppNavigation.pushAndClear(const SignInScreen());
+      return;
+    }
 
+    isLoadingHome.value = true;
     try {
-      // Simulate API call delay
-      await Future.delayed(const Duration(seconds: 1));
+      final raw = await _api.get(
+        '/app/home',
+        headers: {"Authorization": "Bearer $token"},
+      );
 
-      // TODO: Replace with actual API call
-      // final response = await ApiService.getWeeklySafetyFocus();
-      // weeklySafetyFocus.value = WeeklySafetyFocusModel.fromJson(response.data);
+      appHome.value = AppHomeModel.fromJson(raw["data"]);
 
-      // Using dummy data for now
-      weeklySafetyFocus.value = WeeklySafetyFocusModel.dummy();
+      print("video title: ${appHome.value?.videos?.thumbnail}");
 
+      final alert = appHome.value?.alerts;
+      weeklySafetyFocus.value = alert == null
+          ? null
+          : WeeklySafetyFocusModel(
+        id: alert.id.toString(),
+        title: alert.title,
+        description: alert.description,
+        imageUrl: alert.file,
+      );
+    } on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
     } catch (e) {
-      CustomSnackBar.error('Failed to load safety focus');
-      print('Error fetching weekly safety focus: $e');
+      CustomSnackBar.error('Failed to load home data. Please try again.');
     } finally {
-      isLoadingSafetyFocus.value = false;
+      isLoadingHome.value = false;
     }
   }
 
-  // Handle read more action
   void onReadMoreSafetyFocus(BuildContext context) {
-    if (weeklySafetyFocus.value == null) return;
-
+    final data = weeklySafetyFocus.value;
+    if (data == null) return;
     AppNavigation.push(
-
-      SafetyFocusDetailsScreen(data: weeklySafetyFocus.value!),context: context
+      SafetyFocusDetailsScreen(data: data),
+      context: context,
     );
   }
+
   Future<void> fetchTrainingGame() async {
     isLoadingTrainingGame.value = true;
-
     try {
-      await Future.delayed(const Duration(seconds: 1));
-
-      // TODO: Replace with actual API call
+      // TODO: Replace with actual API call when endpoint is available
       trainingGame.value = TrainingGameModel.dummy();
-
+    } on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
     } catch (e) {
-      CustomSnackBar.error('Failed to load training game');
-      print('Error fetching training game: $e');
+      CustomSnackBar.error('Failed to load training game. Please try again.');
     } finally {
       isLoadingTrainingGame.value = false;
     }
   }
 
-  // Handle play game
   void onPlayGame(BuildContext context) {
     context.findAncestorStateOfType<HomePageState>()?.onTabSelected(2);
-
   }
 
-  // Handle game settings
   void onGameSettings(BuildContext context) {
     CustomSnackBar.info('Opening game settings...');
   }
 
-
-
-  // Submit safety card
   Future<void> submitSafetyCard(BuildContext context) async {
-    AppNavigation.push(  SafetyCardScreen());
+    AppNavigation.push(SafetyCardScreen());
   }
 
-
-  // Refresh safety focus
-  Future<void> refreshSafetyFocus() async {
-    await fetchWeeklySafetyFocus();
+  Future<void> refreshHome() async {
+    await fetchAppHome();
   }
 }

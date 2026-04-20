@@ -9,8 +9,9 @@ import '../../../home_page.dart';
 import '../../auth/views/account_status_screen.dart';
 import '../../auth/views/client_rig_select_screen.dart';
 import '../../onboarding/views/onboarding_screen.dart';
-
 class SplashController extends GetxController {
+  final box = GetStorage();
+
   @override
   void onInit() {
     super.onInit();
@@ -18,26 +19,32 @@ class SplashController extends GetxController {
   }
 
   void _startTimer() {
-    Timer(const Duration(seconds: 3), _navigate);
-  }
+    Timer(const Duration(seconds: 3), () {
+      String? accessToken = StorageService.accessToken;
 
-  void _navigate() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!StorageService.hasToken || !StorageService.hasUser) {
-        Get.offAll(() => OnboardingScreen());
-        return;
-      }
 
       final u = StorageService.user!;
 
-      if (u.isNotSubmitted) { Get.offAll(() => const ClientRigSelectScreen());                               return; }
-      if (u.isPending)      { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.pending));    return; }
-      if (u.isSuspended)    { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.suspended));  return; }
-      if (u.isInactive)     { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.inactive));   return; }
-      if (u.isDeleted)      { Get.offAll(() => const AccountStatusScreen(status: AccountStatus.deleted));    return; }
-      if (u.isApproved)     { Get.offAll(() => HomePage());                                                  return; }
+      if (accessToken != null && accessToken.isNotEmpty) {
+        if(u.isActive){
+          AppNavigation.pushAndClear( HomePage());
+        }else if(u.isPending){
+          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.pending));
+        }else if(u.isSuspended){
+          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.suspended));
+        }else if(u.isInactive){
+          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.inactive));
+        }else if(u.isDeleted){
+          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.deleted));
+        }else if(u.isApproved){
+          AppNavigation.pushAndClear( HomePage());
+        }
 
-      Get.offAll(() => OnboardingScreen());
+      } else{
+        AppNavigation.pushAndClear( OnboardingScreen());
+      }
     });
   }
+
 }
+
