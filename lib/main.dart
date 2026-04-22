@@ -12,9 +12,8 @@ void main() async{
 
   await GetStorage.init();
   AppBindings.init();
-  Get.lazyPut(() => SplashController());
   Get.put(ApiServices(baseUrl: 'http://10.10.7.108:8000/api/v1'));
-  // Get.put(SplashController());
+  Get.put(SplashController());
 
 
   SystemChrome.setPreferredOrientations([

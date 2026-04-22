@@ -20,31 +20,37 @@ class SplashController extends GetxController {
 
   void _startTimer() {
     Timer(const Duration(seconds: 3), () {
-      String? accessToken = StorageService.accessToken;
-
-
-      final u = StorageService.user!;
+      final String? accessToken = StorageService.accessToken;
 
       if (accessToken != null && accessToken.isNotEmpty) {
-        if(u.isActive){
-          AppNavigation.pushAndClear( HomePage());
-        }else if(u.isPending){
-          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.pending));
-        }else if(u.isSuspended){
-          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.suspended));
-        }else if(u.isInactive){
-          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.inactive));
-        }else if(u.isDeleted){
-          AppNavigation.pushAndClear( const AccountStatusScreen(status: AccountStatus.deleted));
-        }else if(u.isApproved){
-          AppNavigation.pushAndClear( HomePage());
+        final u = StorageService.user; // ← no force unwrap, INSIDE the if-block
+
+        if (u == null) {
+          AppNavigation.pushAndClear(OnboardingScreen());
+          return;
         }
 
-      } else{
-        AppNavigation.pushAndClear( OnboardingScreen());
+        if (u.isActive || u.isApproved) {
+          AppNavigation.pushAndClear(HomePage());
+        } else if (u.isPending) {
+          AppNavigation.pushAndClear(
+              const AccountStatusScreen(status: AccountStatus.pending));
+        } else if (u.isSuspended) {
+          AppNavigation.pushAndClear(
+              const AccountStatusScreen(status: AccountStatus.suspended));
+        } else if (u.isInactive) {
+          AppNavigation.pushAndClear(
+              const AccountStatusScreen(status: AccountStatus.inactive));
+        } else if (u.isDeleted) {
+          AppNavigation.pushAndClear(
+              const AccountStatusScreen(status: AccountStatus.deleted));
+        } else {
+          AppNavigation.pushAndClear(OnboardingScreen());
+        }
+
+      } else {
+        AppNavigation.pushAndClear(OnboardingScreen());
       }
     });
   }
-
 }
-

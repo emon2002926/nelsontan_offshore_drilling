@@ -37,6 +37,7 @@
 
     final String weeklySafetyBannerBg = "assets/images/weekly_safety_banner_bg.png";
     final String trainingGameBg = "assets/images/training_game_bg.png";
+    final String submitDailyDebrief = "assets/images/submitDailyDebrief2.png";
     final String playButton = "assets/images/play_button.png";
 
 

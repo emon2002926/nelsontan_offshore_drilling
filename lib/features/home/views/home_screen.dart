@@ -7,9 +7,11 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../home_page.dart';
 import '../../notification/views/notifications_screen.dart';
+import '../../safety_card/views/submit_daily_debrief_screen.dart';
 import '../../video_player/models/video_source.dart';
 import '../../video_player/widgets/app_video_player.dart';
 import '../controllers/home_controller.dart';
+import '../widgets/submit_daily_debrief.dart';
 import '../widgets/submit_safety_card_button.dart';
 import '../widgets/training_game_card.dart';
 import '../../weekly_safety_focus/widget/weekly_safety_focus_card.dart';
@@ -78,6 +80,20 @@ class HomeScreen extends StatelessWidget {
                 ),
 
                 SizedBox(height: context.responsiveSize(20)),
+
+                SubmitDailyDebrief(
+                  onStart: () {
+                    AppNavigation.push(
+                      SubmitDailyDebriefScreen(),
+                      context: context,
+                    );
+
+                  },
+                ),
+
+
+                SizedBox(height: context.responsiveSize(20)),
+
 
                 Obx(
                       () => SubmitSafetyCardButton(

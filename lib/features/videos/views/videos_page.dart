@@ -6,63 +6,82 @@ import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
 import '../../video_player/models/video_source.dart';
+import '../controllers/videos_controller.dart';
+import '../models/video_model.dart';
 import 'video_player_screen.dart';
+import 'package:get/get.dart';
 class VideosPage extends StatelessWidget {
-   VideosPage({super.key});
+  VideosPage({super.key});
 
   final appAssets = AppAssertImage.instance;
 
-
   @override
   Widget build(BuildContext context) {
-    // Sample video data - replace with your actual data
-    final videos = [
-      VideoSource.asset('assets/videos/demo.mp4', thumbnailAssetPath: appAssets.thumbnailImage),
-      VideoSource.asset('assets/videos/demo.mp4', thumbnailAssetPath: appAssets.thumbnailImage),
-      VideoSource.asset('assets/videos/demo.mp4', thumbnailAssetPath: appAssets.thumbnailImage),
-      VideoSource.asset('assets/videos/demo.mp4', thumbnailAssetPath: appAssets.thumbnailImage),
-    ];
-
-    final videoTitles = [
-      'Avoiding Hazards on WIP Oil Machine',
-      'Avoiding Hazards on WIP Oil Machine',
-      'Avoiding Hazards on WIP Oil Machine',
-      'Avoiding Hazards on WIP Oil Machine',
-    ];
+    final controller = Get.put(VideosController());
 
     return Scaffold(
-      backgroundColor:  Colors.white,
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header
-
-            SizedBox(height: context.heightPercentage(1),),
+            SizedBox(height: context.heightPercentage(1)),
             _buildHeader(context),
 
-            // Video Grid
             Expanded(
-              child: Padding(
-                padding: EdgeInsets.all(context.responsiveSize(16)),
-                child: GridView.builder(
+              child: Obx(() {
+                // ── Loading ──────────────────────────────────────────────
+                if (controller.isLoading.value) {
+                  return GridView.builder(
+                    padding: EdgeInsets.all(context.responsiveSize(16)),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: context.responsiveSize(24),
+                      mainAxisSpacing: context.responsiveSize(8),
+                      childAspectRatio: 0.85,
+                    ),
+                    itemCount: 4,
+                    itemBuilder: (_, __) => _buildSkeletonCard(context),
+                  );
+                }
+
+                // ── Empty ────────────────────────────────────────────────
+                if (controller.videos.isEmpty) {
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.video_library_outlined,
+                            size: context.responsiveSize(64),
+                            color: Colors.grey.shade300),
+                        SizedBox(height: context.responsiveSize(12)),
+                        AppText(
+                          data: 'No videos available',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          color: const Color(0xFF6B6B6B),
+                          useResponsiveFontSize: true,
+                        ),
+                      ],
+                    ),
+                  );
+                }
+
+                // ── Grid ─────────────────────────────────────────────────
+                return GridView.builder(
+                  padding: EdgeInsets.all(context.responsiveSize(16)),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
                     crossAxisSpacing: context.responsiveSize(24),
                     mainAxisSpacing: context.responsiveSize(8),
                     childAspectRatio: 0.85,
                   ),
-                  itemCount: videos.length,
+                  itemCount: controller.videos.length,
                   itemBuilder: (context, index) {
-                    return _buildVideoCard(
-                      context,
-                      videoSource: videos[index],
-                      title: videoTitles[index],
-                      duration: '04:30',
-                      index: index,
-                    );
+                    final video = controller.videos[index];
+                    return _buildVideoCard(context, video: video);
                   },
-                ),
-              ),
+                );
+              }),
             ),
           ],
         ),
@@ -70,24 +89,21 @@ class VideosPage extends StatelessWidget {
     );
   }
 
+  // ── Header ─────────────────────────────────────────────────────────────────
+
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(context.responsiveSize(16)),
       color: Colors.white,
       child: Row(
         children: [
-          // Icon
-          Container(
-            child: Image.asset(
-              appAssets.bxsVideos,
-              width: context.responsiveSize(40),
-              height: context.responsiveSize(40),
-              colorBlendMode: BlendMode.srcIn,
-            ),
+          Image.asset(
+            appAssets.bxsVideos,
+            width: context.responsiveSize(40),
+            height: context.responsiveSize(40),
+            colorBlendMode: BlendMode.srcIn,
           ),
           SizedBox(width: context.responsiveSize(12)),
-
-          // Title and subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -110,18 +126,11 @@ class VideosPage extends StatelessWidget {
               ],
             ),
           ),
-
-          // Notification icon
           IconButton(
-            onPressed: () {
-              // Handle notification tap
-              AppNavigation.push( const NotificationsScreen(),context: context);
-
-            },
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: Color(0xFF1A1A1A),
-            ),
+            onPressed: () =>
+                AppNavigation.push(const NotificationsScreen(), context: context),
+            icon: const Icon(Icons.notifications_outlined,
+                color: Color(0xFF1A1A1A)),
             iconSize: context.responsiveSize(28),
           ),
         ],
@@ -129,51 +138,47 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  Widget _buildVideoCard(
-      BuildContext context, {
-        required VideoSource videoSource,
-        required String title,
-        required String duration,
-        required int index,
-      }) {
+  // ── Video card — thumbnail only, no video loaded ───────────────────────────
+
+  Widget _buildVideoCard(BuildContext context, {required VideoModel video}) {
     return GestureDetector(
-      onTap: () {
-        AppNavigation.push( VideoPlayerScreen(
-          videoSource: videoSource,
-          title: title,
-        ));
-
-      },
-      child: Container(
-
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Video thumbnail with play button and duration
-            Expanded(
+      onTap: () => Get.find<VideosController>().onVideoTap(context, video),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Thumbnail
+          Expanded(
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(context.responsiveSize(8)),
               child: Stack(
+                fit: StackFit.expand,
                 children: [
-                  // Thumbnail
-                  ClipRRect(
+                  // Thumbnail image
+                  video.thumbnail != null
+                      ? Image.network(
+                    video.thumbnail!,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (_, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        color: Colors.grey.shade200,
+                        child: const Center(
+                          child: CircularProgressIndicator(
+                            color: Color(0xFF0047AB),
+                            strokeWidth: 2,
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (_, __, ___) =>
+                        _buildThumbnailFallback(context),
+                  )
+                      : _buildThumbnailFallback(context),
 
-                    child: videoSource.thumbnailPath != null
-                        ? Image.asset(
-                      videoSource.thumbnailPath!,
-                      width: double.infinity,
-                      height: double.infinity,
-                      fit: BoxFit.cover,
-                    )
-                        : Container(
-                      color: Colors.black,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
-                  ),
-
-                  // Play button
+                  // Play button overlay
                   Center(
                     child: Container(
-                      padding: EdgeInsets.all(context.responsiveSize(16)),
+                      padding: EdgeInsets.all(context.responsiveSize(12)),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.9),
                         shape: BoxShape.circle,
@@ -181,55 +186,108 @@ class VideosPage extends StatelessWidget {
                       child: Icon(
                         Icons.play_arrow_outlined,
                         color: const Color(0xFF0047AB),
-                        size: context.responsiveSize(32),
+                        size: context.responsiveSize(28),
                       ),
                     ),
                   ),
 
-                  // Duration badge
-                  Positioned(
-                    bottom: context.responsiveSize(8),
-                    right: context.responsiveSize(8),
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: context.responsiveSize(8),
-                        vertical: context.responsiveSize(4),
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.7),
-                        borderRadius: BorderRadius.circular(context.responsiveSize(4)),
-                      ),
-                      child: AppText(
-                        data: duration,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                        useResponsiveFontSize: false,
+                  // Unavailable badge when videoUrl is null
+                  if (video.videoUrl == null)
+                    Positioned(
+                      top: context.responsiveSize(8),
+                      left: context.responsiveSize(8),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.responsiveSize(6),
+                          vertical: context.responsiveSize(3),
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.6),
+                          borderRadius:
+                          BorderRadius.circular(context.responsiveSize(4)),
+                        ),
+                        child: AppText(
+                          data: 'Unavailable',
+                          fontSize: 10,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          useResponsiveFontSize: false,
+                        ),
                       ),
                     ),
-                  ),
                 ],
               ),
             ),
+          ),
 
-            // Title
-            Padding(
-              padding: EdgeInsets.all(context.responsiveSize(12)),
-              child: AppText(
-                data: title,
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A1A),
-                useResponsiveFontSize: true,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
+          // Title
+          Padding(
+            padding: EdgeInsets.symmetric(
+              vertical: context.responsiveSize(8),
+              horizontal: context.responsiveSize(4),
             ),
-          ],
+            child: AppText(
+              data: video.title,
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF1A1A1A),
+              useResponsiveFontSize: true,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Fallback when thumbnail is null or fails to load ──────────────────────
+
+  Widget _buildThumbnailFallback(BuildContext context) {
+    return Container(
+      color: Colors.grey.shade200,
+      child: Center(
+        child: Icon(
+          Icons.video_library_outlined,
+          color: Colors.grey.shade400,
+          size: context.responsiveSize(40),
         ),
       ),
     );
   }
-}
 
+  // ── Skeleton card shown while loading ─────────────────────────────────────
+
+  Widget _buildSkeletonCard(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(context.responsiveSize(8)),
+            child: Container(color: Colors.grey.shade200),
+          ),
+        ),
+        SizedBox(height: context.responsiveSize(8)),
+        Container(
+          height: context.responsiveSize(14),
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+        SizedBox(height: context.responsiveSize(4)),
+        Container(
+          height: context.responsiveSize(14),
+          width: context.responsiveSize(80),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade200,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        ),
+      ],
+    );
+  }
+}
 // Video Player Screen (Full screen video player)

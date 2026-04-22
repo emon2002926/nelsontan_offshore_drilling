@@ -6,14 +6,9 @@ class AppBindings {
   static void init() {
     AuthBindings.signInDependencies();
     AuthBindings.signUpDependencies();
-    // BaseBinding.dependencies();
-    // HomeBinding.dependencies();
-    // NotificationBinding.dependencies();
-    // UnitsBinding.dependencies();
     AuthBindings.forgotPassDependencies();
     AuthBindings.otpVerificationDependencies();
-    // OtherAuthBindings.otpDependencies();
-    // OtherAuthBindings.resetPassDependencies();
+
   }
 
 }
