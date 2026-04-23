@@ -87,9 +87,30 @@ class SignInController extends GetxController {
       StorageService.saveToken(token);
 
       // ── Decision making using model ───────────────────────────────
+
+      // print("sadkfjgsag: ${user.approveStatus}");
+      //
+      // String status = user.approveStatus;
+      // if(status=="PENDING"){
+      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
+      // } else if(status=="APPROVED"){
+      //   AppNavigation.pushAndClear(HomePage());
+      // } else if(status=="REJECTED"){
+      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
+      // }else if(status=="INACTIVE"){
+      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
+      // }else if(status=="DELETED"){
+      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
+      // }else if(status=="NOT_SUBMITTED"){
+      //   AppNavigation.pushAndClear(ClientRigSelectScreen());
+      // }
+      //
+
+
+
       if (!user.isApproved) {
         final screen = switch (true) {
-          _ when user.isActive   =>  const HomePage( ),
+          _ when user.isActive   =>  const BasePage( ),
           _ when user.isPending   => const AccountStatusScreen(status: AccountStatus.pending),
           _ when user.isInactive  => const AccountStatusScreen(status: AccountStatus.inactive),
           _ when user.isSuspended => const AccountStatusScreen(status: AccountStatus.suspended),
@@ -104,19 +125,18 @@ class SignInController extends GetxController {
 
       // ✅ Approved — go home
       CustomSnackBar.success('Welcome back, ${user.name}!');
-      Get.offAll(() => HomePage());
+      Get.offAll(() => BasePage());
 
     } on HttpException catch (e) {
+      // Special case: redirect to OTP if email not verified
       if (e.body != null && e.body!.contains('not verified')) {
         CustomSnackBar.warning('Please verify your email to continue.');
         await Future.delayed(const Duration(milliseconds: 500));
         AppNavigation.push(OtpVerificationScreen(email: email, isFromSignUp: true));
       } else {
-        CustomSnackBar.error(e.message);
+        CustomSnackBar.error(e.message); // ← shows "Login failed. Please check your credentials."
       }
-    } catch (e) {
-      CustomSnackBar.error('Something went wrong. Please try again.');
-    } finally {
+    }finally {
       isLoading.value = false;
     }
   }
@@ -143,9 +163,6 @@ class SignInController extends GetxController {
 
     super.onClose();
   }
-
-
-
 
 
 }

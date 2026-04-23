@@ -100,7 +100,7 @@ class HomeController extends GetxController {
   }
 
   void onPlayGame(BuildContext context) {
-    context.findAncestorStateOfType<HomePageState>()?.onTabSelected(2);
+    context.findAncestorStateOfType<BasePageState>()?.onTabSelected(2);
   }
 
   void onGameSettings(BuildContext context) {

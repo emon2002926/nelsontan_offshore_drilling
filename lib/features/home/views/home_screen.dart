@@ -98,7 +98,7 @@ class HomeScreen extends StatelessWidget {
                 Obx(
                       () => SubmitSafetyCardButton(
                     onPressed: () {
-                      context.findAncestorStateOfType<HomePageState>()?.onTabSelected(1);
+                      context.findAncestorStateOfType<BasePageState>()?.onTabSelected(1);
                     },
                     isLoading: controller.isSubmittingSafetyCard.value,
                   ),

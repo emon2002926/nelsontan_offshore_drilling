@@ -7,8 +7,6 @@ import '../../../core/widgets/text/app_text.dart';
 import '../controllers/game_controller.dart';
 import 'leader_board_page.dart';
 
-
-
 class GamePage extends StatelessWidget {
   GamePage({super.key});
 

@@ -31,7 +31,7 @@ class SplashController extends GetxController {
         }
 
         if (u.isActive || u.isApproved) {
-          AppNavigation.pushAndClear(HomePage());
+          AppNavigation.pushAndClear(BasePage());
         } else if (u.isPending) {
           AppNavigation.pushAndClear(
               const AccountStatusScreen(status: AccountStatus.pending));

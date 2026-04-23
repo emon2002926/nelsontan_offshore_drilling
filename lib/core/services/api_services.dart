@@ -142,14 +142,30 @@ class ApiServices {
       AppLog.response(endpoint, decoded);
       return decoded;
     }
+
     AppLog.error(endpoint, response.body, statusCode: response.statusCode);
+
+    // ── Extract server message from your consistent error shape ──
+    String errorMessage = "Something went wrong. Please try again.";
+    if (response.body.isNotEmpty) {
+      try {
+        final decoded = jsonDecode(response.body);
+        if (decoded is Map<String, dynamic> && decoded['message'] != null) {
+          errorMessage = decoded['message'].toString();
+        }
+      } catch (_) {
+        // body wasn't valid JSON — keep the fallback message
+      }
+    }
+
     throw HttpException(
-      message: "Request failed",
+      message: errorMessage,   // ← now carries the real server message
       statusCode: response.statusCode,
       uri: url,
       body: response.body,
     );
   }
+
 }
 
 class HttpException implements Exception {

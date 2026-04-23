@@ -7,13 +7,13 @@ import 'package:nelsontan_offshore_drilling/features/videos/views/videos_page.da
 import 'core/widgets/bottom_navigation/bottom_navigation.dart';
 import 'features/safety_card/views/safety_card_screen.dart';
 
-  class HomePage extends StatefulWidget {
-    const HomePage({super.key});
+  class BasePage extends StatefulWidget {
+    const BasePage({super.key});
     @override
-    State<HomePage> createState() => HomePageState();
+    State<BasePage> createState() => BasePageState();
   }
 
-  class HomePageState extends State<HomePage> {
+  class BasePageState extends State<BasePage> {
     int currentIndex = 0;
     int lastTapTime = 0;
 

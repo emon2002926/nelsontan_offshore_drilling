@@ -83,7 +83,7 @@ class OtpVerificationController extends GetxController {
         }
 
         if (user.isApproved && user.isActive) {
-          AppNavigation.pushAndClear(HomePage());
+          AppNavigation.pushAndClear(BasePage());
           return;
         }
 
