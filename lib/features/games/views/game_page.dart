@@ -4,8 +4,8 @@ import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
 import '../../../core/constants/app_assert_image.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
-import '../../game_screen/controllers/game_controller.dart';
-import '../../game_screen/views/leader_board_page.dart';
+import '../controllers/game_controller.dart';
+import 'leader_board_page.dart';
 
 
 

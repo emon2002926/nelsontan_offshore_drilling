@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../../core/util/app_navigation.dart';
-import '../../games/views/gameplay_screen.dart';
+import '../views/gameplay_screen.dart';
 
 class GamePageController extends GetxController {
   final RxBool showInstructions = false.obs;

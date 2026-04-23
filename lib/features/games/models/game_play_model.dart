@@ -1,6 +1,6 @@
 // features/game/models/game_play_model.dart
 
-/// A single hazard spot on the rig image
+/// A single hazard spot on the rig imag
 class HazardSpot {
   final String id;
   final double xPercent; // 0.0 - 1.0 relative to image width
