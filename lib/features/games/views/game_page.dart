@@ -30,15 +30,14 @@ class GamePage extends StatelessWidget {
     );
   }
 
-  Widget _buildGameStartScreen(BuildContext context, GamePageController controller) {
+  Widget _buildGameStartScreen(
+      BuildContext context, GamePageController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
       child: Column(
         children: [
           SizedBox(height: context.responsiveSize(20)),
-
           leaderboardButton(context),
-
           const Spacer(),
 
           Container(
@@ -80,22 +79,32 @@ class GamePage extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(48)),
 
-          GestureDetector(
-            onTap: () => controller.startGame(context),
-            child: Image.asset(
+          // Play button — shows spinner while checking game type
+          Obx(() => GestureDetector(
+            onTap: controller.isStartingGame.value
+                ? null
+                : () => controller.startGame(context),
+            child: controller.isStartingGame.value
+                ? const SizedBox(
+              width: 40,
+              height: 40,
+              child: CircularProgressIndicator(
+                color: Color(0xFF0047AB),
+                strokeWidth: 3,
+              ),
+            )
+                : Image.asset(
               appAssets.playButton,
               width: context.responsiveSize(160),
               height: context.responsiveSize(56),
               fit: BoxFit.contain,
             ),
-          ),
+          )),
 
           const Spacer(),
 
           GestureDetector(
-            onTap: () {
-              controller.showInstructions.value = true;
-            },
+            onTap: () => controller.showInstructions.value = true,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -122,24 +131,20 @@ class GamePage extends StatelessWidget {
     );
   }
 
-  Widget _buildInstructionsScreen(BuildContext context, GamePageController controller) {
+  Widget _buildInstructionsScreen(
+      BuildContext context, GamePageController controller) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
       child: Column(
         children: [
           SizedBox(height: context.responsiveSize(20)),
-
           leaderboardButton(context),
-
           const Spacer(),
 
           Container(
             width: context.responsiveSize(85),
             height: context.responsiveSize(85),
-            decoration: const BoxDecoration(
-              color: Color(0xFFE6F0FF),
-              shape: BoxShape.circle,
-            ),
+            decoration: const BoxDecoration(color: Color(0xFFE6F0FF), shape: BoxShape.circle),
             child: Center(
               child: Image.asset(
                 appAssets.game,
@@ -179,20 +184,16 @@ class GamePage extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () {
-                  controller.showInstructions.value = false;
-                },
+                onTap: () => controller.showInstructions.value = false,
                 child: Container(
                   width: context.responsiveSize(60),
                   height: context.responsiveSize(60),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.responsiveSize(15)),
-                  ),
+                      borderRadius:
+                      BorderRadius.circular(context.responsiveSize(15))),
                   child: Center(
-                    child: Image.asset(
-                      appAssets.arrowBackIcon,
-                      width: context.responsiveSize(60),
-                    ),
+                    child: Image.asset(appAssets.arrowBackIcon,
+                        width: context.responsiveSize(60)),
                   ),
                 ),
               ),
@@ -203,13 +204,11 @@ class GamePage extends StatelessWidget {
                   width: context.responsiveSize(60),
                   height: context.responsiveSize(60),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(context.responsiveSize(15)),
-                  ),
+                      borderRadius:
+                      BorderRadius.circular(context.responsiveSize(15))),
                   child: Center(
-                    child: Image.asset(
-                      appAssets.arrowForwardIcon,
-                      width: context.responsiveSize(60),
-                    ),
+                    child: Image.asset(appAssets.arrowForwardIcon,
+                        width: context.responsiveSize(60)),
                   ),
                 ),
               ),
@@ -217,7 +216,6 @@ class GamePage extends StatelessWidget {
           ),
 
           const Spacer(),
-
           SizedBox(height: context.responsiveSize(40)),
         ],
       ),
@@ -229,9 +227,8 @@ class GamePage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         GestureDetector(
-          onTap: () {
-            AppNavigation.push( const LeaderboardView(),context: context);
-          },
+          onTap: () =>
+              AppNavigation.push(const LeaderboardView(), context: context),
           child: Column(
             children: [
               Container(
@@ -240,19 +237,17 @@ class GamePage extends StatelessWidget {
                     horizontal: context.responsiveSize(16)),
                 decoration: BoxDecoration(
                   color: const Color(0xFF0047AB),
-                  borderRadius: BorderRadius.circular(context.responsiveSize(12)),
+                  borderRadius:
+                  BorderRadius.circular(context.responsiveSize(12)),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.blue.withOpacity(0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 5),
-                    ),
+                        color: Colors.blue.withOpacity(0.05),
+                        blurRadius: 8,
+                        offset: const Offset(0, 5)),
                   ],
                 ),
-                child: Image.asset(
-                  appAssets.trophyIcon,
-                  width: context.responsiveSize(24),
-                ),
+                child: Image.asset(appAssets.trophyIcon,
+                    width: context.responsiveSize(24)),
               ),
               SizedBox(height: context.responsiveSize(3)),
               AppText(
