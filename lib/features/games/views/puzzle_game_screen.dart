@@ -6,6 +6,7 @@ import '../../../core/widgets/text/app_text.dart';
 import '../controllers/puzzle_game_controller.dart';
 import 'package:get/get.dart';
 
+import '../models/puzzle_model.dart';
 import '../widgets/game_score_card.dart';
 import '../widgets/game_timer_bar.dart';
 
@@ -20,14 +21,12 @@ class PuzzleGameScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Obx(() {
-          // ── Loading ────────────────────────────────────────────────────
           if (controller.isLoading.value) {
             return const Center(
               child: CircularProgressIndicator(color: Color(0xFF0047AB)),
             );
           }
 
-          // ── Submitting ─────────────────────────────────────────────────
           if (controller.gameState.value == PuzzleGameState.submitting) {
             return Center(
               child: Column(
@@ -47,12 +46,10 @@ class PuzzleGameScreen extends StatelessWidget {
             );
           }
 
-          // ── Results ────────────────────────────────────────────────────
           if (controller.gameState.value == PuzzleGameState.finished) {
             return _buildResults(context, controller);
           }
 
-          // ── Playing ────────────────────────────────────────────────────
           return _buildPuzzle(context, controller);
         }),
       ),
@@ -69,7 +66,6 @@ class PuzzleGameScreen extends StatelessWidget {
       children: [
         SizedBox(height: context.responsiveSize(12)),
 
-        // Progress label
         Obx(() => AppText(
           data: controller.puzzleProgress,
           fontSize: 13,
@@ -80,10 +76,8 @@ class PuzzleGameScreen extends StatelessWidget {
 
         SizedBox(height: context.responsiveSize(8)),
 
-        // Timer bar
         Padding(
-          padding:
-          EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
+          padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
           child: Obx(() => GameTimerBar(
             timerText: controller.timerText,
             progress: controller.timerProgress,
@@ -93,44 +87,36 @@ class PuzzleGameScreen extends StatelessWidget {
 
         SizedBox(height: context.responsiveSize(12)),
 
-        // Puzzle title
-        Padding(
-          padding:
-          EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
-          child: AppText(
-            data: 'Tap on all unsafe conditions you find',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF1A1A1A),
-            useResponsiveFontSize: true,
-            textAlign: TextAlign.center,
-          ),
+        AppText(
+          data: 'Tap on all unsafe conditions you find',
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: const Color(0xFF1A1A1A),
+          useResponsiveFontSize: true,
+          textAlign: TextAlign.center,
         ),
 
         SizedBox(height: context.responsiveSize(12)),
 
-        // ── Tappable image ─────────────────────────────────────────────
+        // ── Tappable 16:9 image ────────────────────────────────────────
         Padding(
-          padding:
-          EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
+          padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(context.responsiveSize(12)),
             child: AspectRatio(
               aspectRatio: 16 / 9,
               child: LayoutBuilder(
                 builder: (context, constraints) {
-                  final imageSize = Size(
-                      constraints.maxWidth, constraints.maxHeight);
+                  final imageSize =
+                  Size(constraints.maxWidth, constraints.maxHeight);
 
                   return GestureDetector(
-                    onTapDown: (details) => controller.onImageTapped(
-                      details.localPosition,
-                      imageSize,
-                    ),
+                    onTapDown: (details) =>
+                        controller.onImageTapped(details.localPosition, imageSize),
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        // Puzzle image
+                        // Image
                         Image.network(
                           puzzle.image,
                           fit: BoxFit.cover,
@@ -154,54 +140,46 @@ class PuzzleGameScreen extends StatelessWidget {
                           ),
                         ),
 
-                        // User tap markers
+                        // User tap markers — green for correct, red for wrong
                         Obx(() => Stack(
                           children: controller.currentTaps
                               .asMap()
                               .entries
                               .map((entry) {
                             final i    = entry.key;
-                            final mark = entry.value;
-                            final left = (mark.x / 100) *
-                                constraints.maxWidth -
-                                16;
-                            final top  = (mark.y / 100) *
-                                constraints.maxHeight -
-                                16;
+                            final tap  = entry.value;
+                            final isCorrect = tap.result == TapResult.correct;
+                            final left = (tap.x / 100) * constraints.maxWidth - 16;
+                            final top  = (tap.y / 100) * constraints.maxHeight - 16;
 
                             return Positioned(
                               left: left,
                               top: top,
                               child: GestureDetector(
-                                onLongPress: () =>
-                                    controller.removeTap(i),
+                                onLongPress: () => controller.removeTap(i),
                                 child: Container(
                                   width: 32,
                                   height: 32,
                                   decoration: BoxDecoration(
-                                    color: const Color(0xFF0047AB)
-                                        .withOpacity(0.85),
+                                    color: isCorrect
+                                        ? Colors.green.withOpacity(0.9)
+                                        : Colors.red.withOpacity(0.9),
                                     shape: BoxShape.circle,
                                     border: Border.all(
-                                        color: Colors.white,
-                                        width: 2),
+                                        color: Colors.white, width: 2),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black
-                                            .withOpacity(0.3),
+                                        color:
+                                        Colors.black.withOpacity(0.3),
                                         blurRadius: 6,
                                         offset: const Offset(0, 2),
                                       ),
                                     ],
                                   ),
-                                  child: Center(
-                                    child: AppText(
-                                      data: '${i + 1}',
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w700,
-                                      color: Colors.white,
-                                      useResponsiveFontSize: false,
-                                    ),
+                                  child: Icon(
+                                    isCorrect ? Icons.check : Icons.close,
+                                    color: Colors.white,
+                                    size: 18,
                                   ),
                                 ),
                               ),
@@ -219,20 +197,41 @@ class PuzzleGameScreen extends StatelessWidget {
 
         SizedBox(height: context.responsiveSize(16)),
 
-        // Tap count hint
+        // Live score row
         Obx(() => Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.warning_amber_rounded,
-                color: const Color(0xFFFFAA00),
-                size: context.responsiveSize(20)),
-            SizedBox(width: context.responsiveSize(8)),
+            Icon(Icons.check_circle_outline,
+                color: Colors.green, size: context.responsiveSize(18)),
+            SizedBox(width: context.responsiveSize(4)),
             AppText(
-              data:
-              'Hazards marked: ${controller.currentTaps.length}  •  Long-press a marker to remove it',
+              data: '${controller.currentCorrectCount} correct',
               fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: const Color(0xFF1A1A1A),
+              fontWeight: FontWeight.w600,
+              color: Colors.green.shade700,
+              useResponsiveFontSize: true,
+            ),
+            SizedBox(width: context.responsiveSize(16)),
+            Icon(Icons.cancel_outlined,
+                color: Colors.red, size: context.responsiveSize(18)),
+            SizedBox(width: context.responsiveSize(4)),
+            AppText(
+              data: '${controller.currentWrongCount} wrong',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: Colors.red.shade700,
+              useResponsiveFontSize: true,
+            ),
+            SizedBox(width: context.responsiveSize(16)),
+            Icon(Icons.info_outline,
+                color: const Color(0xFF9E9E9E),
+                size: context.responsiveSize(16)),
+            SizedBox(width: context.responsiveSize(4)),
+            AppText(
+              data: 'Long-press to remove',
+              fontSize: 11,
+              fontWeight: FontWeight.w400,
+              color: const Color(0xFF9E9E9E),
               useResponsiveFontSize: true,
             ),
           ],
@@ -242,14 +241,13 @@ class PuzzleGameScreen extends StatelessWidget {
 
         // Next / Done button
         Padding(
-          padding:
-          EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
+          padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
           child: GestureDetector(
             onTap: controller.onNext,
             child: Container(
               width: double.infinity,
-              padding: EdgeInsets.symmetric(
-                  vertical: context.responsiveSize(14)),
+              padding:
+              EdgeInsets.symmetric(vertical: context.responsiveSize(14)),
               decoration: BoxDecoration(
                 color: const Color(0xFF0047AB),
                 borderRadius:
@@ -275,13 +273,12 @@ class PuzzleGameScreen extends StatelessWidget {
 
   // ── Results screen ────────────────────────────────────────────────────────
 
-  Widget _buildResults(
-      BuildContext context, PuzzleGameController controller) {
+  Widget _buildResults(BuildContext context, PuzzleGameController controller) {
     final result = controller.gameResult.value;
+    if (result == null) return const SizedBox.shrink();
 
     return Padding(
-      padding: EdgeInsets.symmetric(
-          horizontal: context.responsiveSize(24)),
+      padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -313,62 +310,35 @@ class PuzzleGameScreen extends StatelessWidget {
 
           // Score card
           GameScoreCard(
-            score: result?.score ?? 0,
-            total: controller.puzzles.length,
+            score: result.score,
+            total: result.totalPossibleScore,
           ),
 
           SizedBox(height: context.responsiveSize(16)),
 
-          // Per-puzzle breakdown
-          ...controller.puzzles.asMap().entries.map((entry) {
-            final puzzle = entry.value;
-            final taps   = controller.collectedTaps[puzzle.id] ?? [];
-
-            return Padding(
-              padding:
-              EdgeInsets.only(bottom: context.responsiveSize(8)),
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: context.responsiveSize(16),
-                  vertical: context.responsiveSize(12),
-                ),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF8F9FB),
-                  borderRadius:
-                  BorderRadius.circular(context.responsiveSize(12)),
-                  border: Border.all(
-                      color: const Color(0xFFF0F0F0), width: 1),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.image_search_outlined,
-                        color: const Color(0xFF0047AB),
-                        size: context.responsiveSize(22)),
-                    SizedBox(width: context.responsiveSize(12)),
-                    Expanded(
-                      child: AppText(
-                        data: puzzle.title,
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: const Color(0xFF1A1A1A),
-                        useResponsiveFontSize: true,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                    SizedBox(width: context.responsiveSize(8)),
-                    AppText(
-                      data: '${taps.length} taps',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w700,
-                      color: const Color(0xFF0047AB),
-                      useResponsiveFontSize: true,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }),
+          // Stats row
+          Container(
+            padding: EdgeInsets.all(context.responsiveSize(16)),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF8F9FB),
+              borderRadius: BorderRadius.circular(context.responsiveSize(12)),
+              border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _statItem(context, '✅', 'Correct',
+                    '${result.totalCorrect}', Colors.green.shade700),
+                _statItem(context, '❌', 'Wrong',
+                    '${result.totalWrong}', Colors.red.shade700),
+                _statItem(context, '🎯', 'Missed',
+                    '${result.totalMissed}', Colors.orange.shade700),
+                _statItem(context, '📊', 'Score',
+                    '${result.percentage.toStringAsFixed(0)}%',
+                    const Color(0xFF0047AB)),
+              ],
+            ),
+          ),
 
           SizedBox(height: context.responsiveSize(32)),
 
@@ -389,18 +359,38 @@ class PuzzleGameScreen extends StatelessWidget {
     );
   }
 
-  // ── Exit dialog ───────────────────────────────────────────────────────────
+  Widget _statItem(BuildContext context, String emoji, String label,
+      String value, Color color) {
+    return Column(
+      children: [
+        Text(emoji, style: TextStyle(fontSize: context.responsiveFontSize(20))),
+        SizedBox(height: context.responsiveSize(4)),
+        AppText(
+          data: value,
+          fontSize: 18,
+          fontWeight: FontWeight.w800,
+          color: color,
+          useResponsiveFontSize: true,
+        ),
+        AppText(
+          data: label,
+          fontSize: 11,
+          fontWeight: FontWeight.w400,
+          color: const Color(0xFF9E9E9E),
+          useResponsiveFontSize: true,
+        ),
+      ],
+    );
+  }
 
-  void _showExitDialog(
-      BuildContext context, PuzzleGameController controller) {
+  void _showExitDialog(BuildContext context, PuzzleGameController controller) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16)),
+        shape:
+        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: const Text('Exit Game?'),
-        content:
-        const Text('Your progress will be lost. Are you sure?'),
+        content: const Text('Your progress will be lost. Are you sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),

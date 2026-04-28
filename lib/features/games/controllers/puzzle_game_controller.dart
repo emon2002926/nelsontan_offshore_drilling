@@ -16,24 +16,24 @@ class PuzzleGameController extends GetxController {
   final ApiServices _api = Get.find<ApiServices>();
 
   // ─── Game data ────────────────────────────────────────────────────────────
-  final RxList<PuzzleModel>   puzzles   = <PuzzleModel>[].obs;
-  final RxBool                isLoading = true.obs;
-  final Rx<PuzzleGameState>   gameState = PuzzleGameState.loading.obs;
+  final RxList<PuzzleModel> puzzles   = <PuzzleModel>[].obs;
+  final RxBool              isLoading = true.obs;
+  final Rx<PuzzleGameState> gameState = PuzzleGameState.loading.obs;
 
   // ─── Progress ─────────────────────────────────────────────────────────────
   final RxInt currentIndex  = 0.obs;
   final RxInt timeRemaining = 60.obs;
   Timer? _timer;
 
-  // ─── User taps for current puzzle — {x%, y%} ─────────────────────────────
-  final RxList<PuzzleMark> currentTaps = <PuzzleMark>[].obs;
+  // ─── User taps for current puzzle ─────────────────────────────────────────
+  // Stores each tap with its hit result (correct/wrong)
+  final RxList<UserTap> currentTaps = <UserTap>[].obs;
 
-  // ─── Collected taps per puzzle — submitted all at once at the end ─────────
-  // puzzleId → list of user taps
-  final Map<int, List<PuzzleMark>> _collectedTaps = {};
+  // ─── Per-puzzle score tracking ────────────────────────────────────────────
+  // puzzleId → { correct, wrong }
+  final Map<int, ({int correct, int wrong})> _puzzleScores = {};
 
-  // Public getter so the results screen can read collected taps
-  Map<int, List<PuzzleMark>> get collectedTaps => _collectedTaps;
+  Map<int, ({int correct, int wrong})> get puzzleScores => _puzzleScores;
 
   // ─── Result from server ───────────────────────────────────────────────────
   final Rx<PuzzleResultModel?> gameResult = Rx<PuzzleResultModel?>(null);
@@ -60,6 +60,12 @@ class PuzzleGameController extends GetxController {
   String get puzzleProgress =>
       'Puzzle ${currentIndex.value + 1} of ${puzzles.length}';
 
+  int get currentCorrectCount =>
+      currentTaps.where((t) => t.result == TapResult.correct).length;
+
+  int get currentWrongCount =>
+      currentTaps.where((t) => t.result == TapResult.wrong).length;
+
   @override
   void onInit() {
     super.onInit();
@@ -76,14 +82,14 @@ class PuzzleGameController extends GetxController {
 
     isLoading.value = true;
     try {
-      final raw = await _api.get(
+      final raw  = await _api.get(
         '/game',
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      final data     = raw['data'] as Map<String, dynamic>;
-      final rawList  = data['puzzles'] as List<dynamic>? ?? [];
-      final loaded   = rawList
+      final data    = raw['data'] as Map<String, dynamic>;
+      final rawList = data['puzzles'] as List<dynamic>? ?? [];
+      final loaded  = rawList
           .map((e) => PuzzleModel.fromJson(e as Map<String, dynamic>))
           .toList();
 
@@ -128,16 +134,17 @@ class PuzzleGameController extends GetxController {
 
   void _onTimeUp() {
     _timer?.cancel();
-    // Save whatever taps the user made before time ran out
-    _saveTapsForCurrentPuzzle();
-    // Don't auto advance — show Done button so user sees time is up
-    // Force hasAnswered state by stopping timer (UI checks timer == 0)
+    _saveScoreForCurrentPuzzle();
+    // Don't auto-advance — user taps Next/Done
   }
 
-  void _saveTapsForCurrentPuzzle() {
+  void _saveScoreForCurrentPuzzle() {
     final p = currentPuzzle;
     if (p == null) return;
-    _collectedTaps[p.id] = List.from(currentTaps);
+    _puzzleScores[p.id] = (
+    correct: currentCorrectCount,
+    wrong: currentWrongCount,
+    );
   }
 
   // ─── User taps on image ───────────────────────────────────────────────────
@@ -145,23 +152,32 @@ class PuzzleGameController extends GetxController {
     if (gameState.value != PuzzleGameState.playing) return;
     if (timeRemaining.value == 0) return;
 
-    // Convert tap to percentage
-    final xPercent = (localPosition.dx / imageSize.width) * 100;
-    final yPercent = (localPosition.dy / imageSize.height) * 100;
+    final tapX = (localPosition.dx / imageSize.width) * 100;
+    final tapY = (localPosition.dy / imageSize.height) * 100;
 
-    currentTaps.add(PuzzleMark(x: xPercent, y: yPercent));
+    // Check if tap hits any hazard mark using ellipse formula
+    final puzzle = currentPuzzle;
+    if (puzzle == null) return;
+
+    final hitMark = puzzle.marks.any((mark) => mark.containsTap(tapX, tapY));
+
+    currentTaps.add(UserTap(
+      x: tapX,
+      y: tapY,
+      result: hitMark ? TapResult.correct : TapResult.wrong,
+    ));
   }
 
-  // Remove a tap if user long-presses a marker
+  // Remove a tap (long-press)
   void removeTap(int index) {
     if (index < currentTaps.length) {
       currentTaps.removeAt(index);
     }
   }
 
-  // ─── Next / Done button ───────────────────────────────────────────────────
+  // ─── Next / Done ──────────────────────────────────────────────────────────
   void onNext() {
-    _saveTapsForCurrentPuzzle();
+    _saveScoreForCurrentPuzzle();
 
     if (isLastPuzzle) {
       _submitAnswers();
@@ -172,7 +188,7 @@ class PuzzleGameController extends GetxController {
     }
   }
 
-  // ─── Submit all taps to server ────────────────────────────────────────────
+  // ─── Submit ───────────────────────────────────────────────────────────────
   Future<void> _submitAnswers() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
@@ -183,10 +199,11 @@ class PuzzleGameController extends GetxController {
     gameState.value = PuzzleGameState.submitting;
 
     try {
-      final items = _collectedTaps.entries
+      final items = _puzzleScores.entries
           .map((e) => PuzzleSubmitItem(
         puzzleId: e.key,
-        marks: e.value,
+        correct: e.value.correct,
+        wrong: e.value.wrong,
       ))
           .toList();
 
@@ -198,7 +215,6 @@ class PuzzleGameController extends GetxController {
         body: body,
       );
 
-      // TODO: update PuzzleResultModel.fromJson when real response is known
       gameResult.value = PuzzleResultModel.fromJson(
         raw['data'] as Map<String, dynamic>,
       );

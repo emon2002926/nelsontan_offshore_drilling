@@ -1,12 +1,13 @@
-// ── GET /game puzzle data ─────────────────────────────────────────────────────
 
 import 'dart:convert';
+
+// ── GET /game puzzle data ─────────────────────────────────────────────────────
 
 class PuzzleModel {
   final int id;
   final String image;
   final String title;
-  final List<PuzzleMark> marks; // correct hazard positions from server
+  final List<PuzzleMark> marks;
   final int time;
 
   PuzzleModel({
@@ -18,10 +19,15 @@ class PuzzleModel {
   });
 
   factory PuzzleModel.fromJson(Map<String, dynamic> json) {
-    // marks comes as a JSON string — needs decoding
+    // marks is now a direct JSON array (no longer a string)
     final rawMarks = json['marks'];
     List<PuzzleMark> parsedMarks = [];
-    if (rawMarks is String) {
+    if (rawMarks is List) {
+      parsedMarks = rawMarks
+          .map((e) => PuzzleMark.fromJson(e as Map<String, dynamic>))
+          .toList();
+    } else if (rawMarks is String) {
+      // fallback for old API format
       final decoded = jsonDecode(rawMarks) as List<dynamic>;
       parsedMarks = decoded
           .map((e) => PuzzleMark.fromJson(e as Map<String, dynamic>))
@@ -39,20 +45,47 @@ class PuzzleModel {
 }
 
 class PuzzleMark {
-  final double x; // percentage 0-100
-  final double y; // percentage 0-100
+  final double x;       // percentage 0-100
+  final double y;       // percentage 0-100
+  final double radiusX; // hit zone width in percentage
+  final double radiusY; // hit zone height in percentage
 
-  PuzzleMark({required this.x, required this.y});
+  PuzzleMark({
+    required this.x,
+    required this.y,
+    required this.radiusX,
+    required this.radiusY,
+  });
 
   factory PuzzleMark.fromJson(Map<String, dynamic> json) => PuzzleMark(
-    x: (json['x'] as num).toDouble(),
-    y: (json['y'] as num).toDouble(),
+    x:       (json['x'] as num).toDouble(),
+    y:       (json['y'] as num).toDouble(),
+    radiusX: (json['radiusX'] as num?)?.toDouble() ?? 5.0,
+    radiusY: (json['radiusY'] as num?)?.toDouble() ?? 5.0,
   );
 
-  Map<String, dynamic> toJson() => {'x': x, 'y': y};
+  /// Check if a user tap (in percentage coords) falls within this mark's ellipse
+  bool containsTap(double tapX, double tapY) {
+    // Ellipse equation: (dx/radiusX)² + (dy/radiusY)² <= 1
+    final dx = (tapX - x) / radiusX;
+    final dy = (tapY - y) / radiusY;
+    return (dx * dx + dy * dy) <= 1.0;
+  }
 }
 
-// ── POST /game/puzzle-submit request ─────────────────────────────────────────
+// ── User tap result ───────────────────────────────────────────────────────────
+
+enum TapResult { correct, wrong }
+
+class UserTap {
+  final double x;
+  final double y;
+  final TapResult result;
+
+  UserTap({required this.x, required this.y, required this.result});
+}
+
+// ── POST /game/puzzle-submit ──────────────────────────────────────────────────
 
 class PuzzleSubmitRequest {
   final List<PuzzleSubmitItem> puzzles;
@@ -66,33 +99,51 @@ class PuzzleSubmitRequest {
 
 class PuzzleSubmitItem {
   final int puzzleId;
-  final List<PuzzleMark> marks; // user's tap coordinates
+  final int correct; // how many taps hit a hazard
+  final int wrong;   // how many taps missed
 
-  PuzzleSubmitItem({required this.puzzleId, required this.marks});
+  PuzzleSubmitItem({
+    required this.puzzleId,
+    required this.correct,
+    required this.wrong,
+  });
 
   Map<String, dynamic> toJson() => {
     'puzzleId': puzzleId,
-    'marks': marks.map((m) => m.toJson()).toList(),
+    'currect': correct, // API uses this spelling
+    'worng': wrong,     // API uses this spelling
   };
 }
 
-// ── POST /game/puzzle-submit response (placeholder — update when API is ready) ─
+// ── POST /game/puzzle-submit response ─────────────────────────────────────────
 
 class PuzzleResultModel {
-  final int score;
+  final double percentage;
   final int totalPuzzles;
-  final String message;
+  final int totalCorrect;
+  final int totalWrong;
+  final int totalMissed;
+  final int score;
+  final int totalPossibleScore;
 
   PuzzleResultModel({
-    required this.score,
+    required this.percentage,
     required this.totalPuzzles,
-    required this.message,
+    required this.totalCorrect,
+    required this.totalWrong,
+    required this.totalMissed,
+    required this.score,
+    required this.totalPossibleScore,
   });
 
   factory PuzzleResultModel.fromJson(Map<String, dynamic> json) =>
       PuzzleResultModel(
-        score: json['score'] as int? ?? 0,
-        totalPuzzles: json['totalPuzzles'] as int? ?? 0,
-        message: json['message'] as String? ?? '',
+        percentage:        (json['percentage'] as num?)?.toDouble() ?? 0,
+        totalPuzzles:      json['totalPuzzles'] as int? ?? 0,
+        totalCorrect:      json['totalCorrect'] as int? ?? 0,
+        totalWrong:        json['totalWrong'] as int? ?? 0,
+        totalMissed:       json['totalMissed'] as int? ?? 0,
+        score:             json['score'] as int? ?? 0,
+        totalPossibleScore: json['totalPossibleScore'] as int? ?? 0,
       );
 }
