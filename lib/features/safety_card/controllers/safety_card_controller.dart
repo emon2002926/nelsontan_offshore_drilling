@@ -1,4 +1,3 @@
-// features/safety_card/presentation/controllers/safety_card_controller.dart
 import 'dart:io';
 
 import 'package:flutter/material.dart';

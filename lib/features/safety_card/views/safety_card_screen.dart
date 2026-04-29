@@ -22,7 +22,8 @@ class SafetyCardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SafetyCardController());
+    // final controller = Get.put(SafetyCardController());
+    final controller = Get.find<SafetyCardController>();
 
     return Scaffold(
       backgroundColor: Colors.white,

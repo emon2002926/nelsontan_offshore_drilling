@@ -1,7 +1,6 @@
 
 import 'dart:convert';
 
-// ── GET /game puzzle data ─────────────────────────────────────────────────────
 
 class PuzzleModel {
   final int id;
@@ -115,7 +114,6 @@ class PuzzleSubmitItem {
   };
 }
 
-// ── POST /game/puzzle-submit response ─────────────────────────────────────────
 
 class PuzzleResultModel {
   final double percentage;

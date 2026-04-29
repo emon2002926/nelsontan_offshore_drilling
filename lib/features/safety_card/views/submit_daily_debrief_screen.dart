@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/constants/app_assert_image.dart';
 import '../../../core/constants/app_colors.dart';
 import 'package:get/get.dart';
-
 import '../../../core/dropdown/searchable_multi_select_dropdown.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
@@ -21,7 +19,8 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(DailyDebriefController());
+    // final controller = Get.put(DailyDebriefController());
+    final controller = Get.find<DailyDebriefController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
