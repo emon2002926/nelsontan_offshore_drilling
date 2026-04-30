@@ -77,7 +77,8 @@ class PuzzleGameScreen extends StatelessWidget {
         SizedBox(height: context.responsiveSize(8)),
 
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
+          padding:
+          EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
           child: Obx(() => GameTimerBar(
             timerText: controller.timerText,
             progress: controller.timerProgress,
@@ -87,20 +88,68 @@ class PuzzleGameScreen extends StatelessWidget {
 
         SizedBox(height: context.responsiveSize(12)),
 
-        AppText(
-          data: 'Tap on all unsafe conditions you find',
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: const Color(0xFF1A1A1A),
-          useResponsiveFontSize: true,
-          textAlign: TextAlign.center,
+        // Instruction + remaining taps pill
+        Padding(
+          padding:
+          EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
+          child: Obx(() {
+            final remaining = controller.remainingTaps;
+            final exhausted = controller.tapsExhausted;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AppText(
+                  data: exhausted
+                      ? 'No taps remaining'
+                      : 'Tap on all unsafe conditions you find',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: exhausted
+                      ? Colors.red.shade600
+                      : const Color(0xFF1A1A1A),
+                  useResponsiveFontSize: true,
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(width: context.responsiveSize(8)),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.responsiveSize(10),
+                    vertical: context.responsiveSize(3),
+                  ),
+                  decoration: BoxDecoration(
+                    color: exhausted
+                        ? Colors.red.shade50
+                        : const Color(0xFFE6ECF5),
+                    borderRadius:
+                    BorderRadius.circular(context.responsiveSize(20)),
+                    border: Border.all(
+                      color: exhausted
+                          ? Colors.red.shade200
+                          : const Color(0xFF0047AB),
+                      width: 1,
+                    ),
+                  ),
+                  child: AppText(
+                    data: '$remaining left',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: exhausted
+                        ? Colors.red.shade600
+                        : const Color(0xFF0047AB),
+                    useResponsiveFontSize: false,
+                  ),
+                ),
+              ],
+            );
+          }),
         ),
 
         SizedBox(height: context.responsiveSize(12)),
 
         // ── Tappable 16:9 image ────────────────────────────────────────
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
+          padding:
+          EdgeInsets.symmetric(horizontal: context.responsiveSize(16)),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(context.responsiveSize(12)),
             child: AspectRatio(
@@ -110,85 +159,108 @@ class PuzzleGameScreen extends StatelessWidget {
                   final imageSize =
                   Size(constraints.maxWidth, constraints.maxHeight);
 
-                  return GestureDetector(
-                    onTapDown: (details) =>
-                        controller.onImageTapped(details.localPosition, imageSize),
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        // Image
-                        Image.network(
-                          puzzle.image,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (_, child, progress) {
-                            if (progress == null) return child;
-                            return Container(
-                              color: const Color(0xFFE8F4FC),
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                    color: Color(0xFF0047AB)),
-                              ),
-                            );
-                          },
-                          errorBuilder: (_, __, ___) => Container(
-                            color: const Color(0xFFE8F4FC),
-                            child: Center(
-                              child: Icon(Icons.image,
-                                  size: context.responsiveSize(48),
-                                  color: Colors.grey),
-                            ),
-                          ),
-                        ),
+                  return Obx(() {
+                    // When taps exhausted — disable GestureDetector
+                    final canTap = !controller.tapsExhausted &&
+                        controller.timeRemaining.value > 0;
 
-                        // User tap markers — green for correct, red for wrong
-                        Obx(() => Stack(
-                          children: controller.currentTaps
-                              .asMap()
-                              .entries
-                              .map((entry) {
-                            final i    = entry.key;
-                            final tap  = entry.value;
-                            final isCorrect = tap.result == TapResult.correct;
-                            final left = (tap.x / 100) * constraints.maxWidth - 16;
-                            final top  = (tap.y / 100) * constraints.maxHeight - 16;
-
-                            return Positioned(
-                              left: left,
-                              top: top,
-                              child: GestureDetector(
-                                onLongPress: () => controller.removeTap(i),
-                                child: Container(
-                                  width: 32,
-                                  height: 32,
-                                  decoration: BoxDecoration(
-                                    color: isCorrect
-                                        ? Colors.green.withOpacity(0.9)
-                                        : Colors.red.withOpacity(0.9),
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                        color: Colors.white, width: 2),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color:
-                                        Colors.black.withOpacity(0.3),
-                                        blurRadius: 6,
-                                        offset: const Offset(0, 2),
-                                      ),
-                                    ],
+                    return GestureDetector(
+                      onTapDown: canTap
+                          ? (details) => controller.onImageTapped(
+                        details.localPosition,
+                        imageSize,
+                      )
+                          : null,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          // Image — slight dim when exhausted
+                          Opacity(
+                            opacity: controller.tapsExhausted ? 0.75 : 1.0,
+                            child: Image.network(
+                              puzzle.image,
+                              fit: BoxFit.cover,
+                              loadingBuilder: (_, child, progress) {
+                                if (progress == null) return child;
+                                return Container(
+                                  color: const Color(0xFFE8F4FC),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(
+                                        color: Color(0xFF0047AB)),
                                   ),
-                                  child: Icon(
-                                    isCorrect ? Icons.check : Icons.close,
-                                    color: Colors.white,
-                                    size: 18,
-                                  ),
+                                );
+                              },
+                              errorBuilder: (_, __, ___) => Container(
+                                color: const Color(0xFFE8F4FC),
+                                child: Center(
+                                  child: Icon(Icons.image,
+                                      size: context.responsiveSize(48),
+                                      color: Colors.grey),
                                 ),
                               ),
-                            );
-                          }).toList(),
-                        )),
-                      ],
-                    ),
-                  );
+                            ),
+                          ),
+
+                          // Tap markers
+                          Obx(() => Stack(
+                            children: controller.currentTaps
+                                .asMap()
+                                .entries
+                                .map((entry) {
+                              final i   = entry.key;
+                              final tap = entry.value;
+                              final isCorrect =
+                                  tap.result == TapResult.correct;
+                              final left = (tap.x / 100) *
+                                  constraints.maxWidth -
+                                  16;
+                              final top = (tap.y / 100) *
+                                  constraints.maxHeight -
+                                  16;
+
+                              return Positioned(
+                                left: left,
+                                top: top,
+                                child: GestureDetector(
+                                  // Only wrong taps can be removed
+                                  onLongPress: isCorrect
+                                      ? null
+                                      : () => controller.removeTap(i),
+                                  child: Container(
+                                    width: 32,
+                                    height: 32,
+                                    decoration: BoxDecoration(
+                                      color: isCorrect
+                                          ? Colors.green.withOpacity(0.9)
+                                          : Colors.red.withOpacity(0.9),
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                          color: Colors.white, width: 2),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black
+                                              .withOpacity(0.3),
+                                          blurRadius: 6,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                      ],
+                                    ),
+                                    child: Icon(
+                                      isCorrect
+                                          ? Icons.check
+                                          : Icons.close,
+                                      color: Colors.white,
+                                      size: 18,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          )),
+                        ],
+                      ),
+                    );
+                  });
                 },
               ),
             ),
@@ -228,7 +300,7 @@ class PuzzleGameScreen extends StatelessWidget {
                 size: context.responsiveSize(16)),
             SizedBox(width: context.responsiveSize(4)),
             AppText(
-              data: 'Long-press to remove',
+              data: 'Long-press ❌ to remove',
               fontSize: 11,
               fontWeight: FontWeight.w400,
               color: const Color(0xFF9E9E9E),
@@ -241,13 +313,14 @@ class PuzzleGameScreen extends StatelessWidget {
 
         // Next / Done button
         Padding(
-          padding: EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
+          padding:
+          EdgeInsets.symmetric(horizontal: context.responsiveSize(24)),
           child: GestureDetector(
             onTap: controller.onNext,
             child: Container(
               width: double.infinity,
-              padding:
-              EdgeInsets.symmetric(vertical: context.responsiveSize(14)),
+              padding: EdgeInsets.symmetric(
+                  vertical: context.responsiveSize(14)),
               decoration: BoxDecoration(
                 color: const Color(0xFF0047AB),
                 borderRadius:
@@ -308,7 +381,6 @@ class PuzzleGameScreen extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(24)),
 
-          // Score card
           GameScoreCard(
             score: result.score,
             total: result.totalPossibleScore,
@@ -316,13 +388,14 @@ class PuzzleGameScreen extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(16)),
 
-          // Stats row
           Container(
             padding: EdgeInsets.all(context.responsiveSize(16)),
             decoration: BoxDecoration(
               color: const Color(0xFFF8F9FB),
-              borderRadius: BorderRadius.circular(context.responsiveSize(12)),
-              border: Border.all(color: const Color(0xFFF0F0F0), width: 1),
+              borderRadius:
+              BorderRadius.circular(context.responsiveSize(12)),
+              border: Border.all(
+                  color: const Color(0xFFF0F0F0), width: 1),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -363,7 +436,9 @@ class PuzzleGameScreen extends StatelessWidget {
       String value, Color color) {
     return Column(
       children: [
-        Text(emoji, style: TextStyle(fontSize: context.responsiveFontSize(20))),
+        Text(emoji,
+            style:
+            TextStyle(fontSize: context.responsiveFontSize(20))),
         SizedBox(height: context.responsiveSize(4)),
         AppText(
           data: value,
@@ -383,14 +458,16 @@ class PuzzleGameScreen extends StatelessWidget {
     );
   }
 
-  void _showExitDialog(BuildContext context, PuzzleGameController controller) {
+  void _showExitDialog(
+      BuildContext context, PuzzleGameController controller) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        shape:
-        RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16)),
         title: const Text('Exit Game?'),
-        content: const Text('Your progress will be lost. Are you sure?'),
+        content:
+        const Text('Your progress will be lost. Are you sure?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),

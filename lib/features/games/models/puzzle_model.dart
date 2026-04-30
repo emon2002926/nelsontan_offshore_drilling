@@ -1,6 +1,7 @@
 
 import 'dart:convert';
 
+import 'dart:convert';
 
 class PuzzleModel {
   final int id;
@@ -8,6 +9,7 @@ class PuzzleModel {
   final String title;
   final List<PuzzleMark> marks;
   final int time;
+  final int marksLength; // max taps user is allowed
 
   PuzzleModel({
     required this.id,
@@ -15,10 +17,10 @@ class PuzzleModel {
     required this.title,
     required this.marks,
     required this.time,
+    required this.marksLength,
   });
 
   factory PuzzleModel.fromJson(Map<String, dynamic> json) {
-    // marks is now a direct JSON array (no longer a string)
     final rawMarks = json['marks'];
     List<PuzzleMark> parsedMarks = [];
     if (rawMarks is List) {
@@ -26,7 +28,6 @@ class PuzzleModel {
           .map((e) => PuzzleMark.fromJson(e as Map<String, dynamic>))
           .toList();
     } else if (rawMarks is String) {
-      // fallback for old API format
       final decoded = jsonDecode(rawMarks) as List<dynamic>;
       parsedMarks = decoded
           .map((e) => PuzzleMark.fromJson(e as Map<String, dynamic>))
@@ -39,15 +40,17 @@ class PuzzleModel {
       title: json['title'] as String,
       marks: parsedMarks,
       time: json['time'] as int? ?? 60,
+      // fallback to marks.length if marksLength not present
+      marksLength: json['marksLength'] as int? ?? parsedMarks.length,
     );
   }
 }
 
 class PuzzleMark {
-  final double x;       // percentage 0-100
-  final double y;       // percentage 0-100
-  final double radiusX; // hit zone width in percentage
-  final double radiusY; // hit zone height in percentage
+  final double x;
+  final double y;
+  final double radiusX;
+  final double radiusY;
 
   PuzzleMark({
     required this.x,
@@ -63,16 +66,12 @@ class PuzzleMark {
     radiusY: (json['radiusY'] as num?)?.toDouble() ?? 5.0,
   );
 
-  /// Check if a user tap (in percentage coords) falls within this mark's ellipse
   bool containsTap(double tapX, double tapY) {
-    // Ellipse equation: (dx/radiusX)² + (dy/radiusY)² <= 1
     final dx = (tapX - x) / radiusX;
     final dy = (tapY - y) / radiusY;
     return (dx * dx + dy * dy) <= 1.0;
   }
 }
-
-// ── User tap result ───────────────────────────────────────────────────────────
 
 enum TapResult { correct, wrong }
 
@@ -83,8 +82,6 @@ class UserTap {
 
   UserTap({required this.x, required this.y, required this.result});
 }
-
-// ── POST /game/puzzle-submit ──────────────────────────────────────────────────
 
 class PuzzleSubmitRequest {
   final List<PuzzleSubmitItem> puzzles;
@@ -98,8 +95,8 @@ class PuzzleSubmitRequest {
 
 class PuzzleSubmitItem {
   final int puzzleId;
-  final int correct; // how many taps hit a hazard
-  final int wrong;   // how many taps missed
+  final int correct;
+  final int wrong;
 
   PuzzleSubmitItem({
     required this.puzzleId,
@@ -109,11 +106,10 @@ class PuzzleSubmitItem {
 
   Map<String, dynamic> toJson() => {
     'puzzleId': puzzleId,
-    'currect': correct, // API uses this spelling
-    'worng': wrong,     // API uses this spelling
+    'currect': correct,
+    'worng': wrong,
   };
 }
-
 
 class PuzzleResultModel {
   final double percentage;
@@ -136,12 +132,12 @@ class PuzzleResultModel {
 
   factory PuzzleResultModel.fromJson(Map<String, dynamic> json) =>
       PuzzleResultModel(
-        percentage:        (json['percentage'] as num?)?.toDouble() ?? 0,
-        totalPuzzles:      json['totalPuzzles'] as int? ?? 0,
-        totalCorrect:      json['totalCorrect'] as int? ?? 0,
-        totalWrong:        json['totalWrong'] as int? ?? 0,
-        totalMissed:       json['totalMissed'] as int? ?? 0,
-        score:             json['score'] as int? ?? 0,
+        percentage:         (json['percentage'] as num?)?.toDouble() ?? 0,
+        totalPuzzles:       json['totalPuzzles'] as int? ?? 0,
+        totalCorrect:       json['totalCorrect'] as int? ?? 0,
+        totalWrong:         json['totalWrong'] as int? ?? 0,
+        totalMissed:        json['totalMissed'] as int? ?? 0,
+        score:              json['score'] as int? ?? 0,
         totalPossibleScore: json['totalPossibleScore'] as int? ?? 0,
       );
 }

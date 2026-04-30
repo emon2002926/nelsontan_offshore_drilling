@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
-
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-
 import '../../../core/services/api_services.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
@@ -26,13 +24,13 @@ class PuzzleGameController extends GetxController {
   Timer? _timer;
 
   // ─── User taps for current puzzle ─────────────────────────────────────────
-  // Stores each tap with its hit result (correct/wrong)
   final RxList<UserTap> currentTaps = <UserTap>[].obs;
 
-  // ─── Per-puzzle score tracking ────────────────────────────────────────────
-  // puzzleId → { correct, wrong }
-  final Map<int, ({int correct, int wrong})> _puzzleScores = {};
+  // ─── Indices of marks already correctly found — prevents re-tapping ───────
+  final RxSet<int> foundMarkIndices = <int>{}.obs;
 
+  // ─── Per-puzzle score tracking ────────────────────────────────────────────
+  final Map<int, ({int correct, int wrong})> _puzzleScores = {};
   Map<int, ({int correct, int wrong})> get puzzleScores => _puzzleScores;
 
   // ─── Result from server ───────────────────────────────────────────────────
@@ -65,6 +63,22 @@ class PuzzleGameController extends GetxController {
 
   int get currentWrongCount =>
       currentTaps.where((t) => t.result == TapResult.wrong).length;
+
+  // Remaining taps user can make (= marksLength - total taps so far)
+  int get remainingTaps {
+    final limit = currentPuzzle?.marksLength ?? 0;
+    return (limit - currentTaps.length).clamp(0, limit);
+  }
+
+  // True when user has used all allowed taps
+  bool get tapsExhausted => remainingTaps == 0;
+
+  // True when all marks have been correctly found
+  bool get allMarksFound {
+    final puzzle = currentPuzzle;
+    if (puzzle == null) return false;
+    return foundMarkIndices.length >= puzzle.marks.length;
+  }
 
   @override
   void onInit() {
@@ -116,6 +130,7 @@ class PuzzleGameController extends GetxController {
 
     timeRemaining.value = p.time;
     currentTaps.clear();
+    foundMarkIndices.clear();
     gameState.value = PuzzleGameState.playing;
 
     _startTimer();
@@ -135,7 +150,6 @@ class PuzzleGameController extends GetxController {
   void _onTimeUp() {
     _timer?.cancel();
     _saveScoreForCurrentPuzzle();
-    // Don't auto-advance — user taps Next/Done
   }
 
   void _saveScoreForCurrentPuzzle() {
@@ -147,30 +161,59 @@ class PuzzleGameController extends GetxController {
     );
   }
 
+  // Fixed exclusion radius for wrong taps (in percentage units)
+  static const double _wrongTapRadius = 5.0;
+
   // ─── User taps on image ───────────────────────────────────────────────────
   void onImageTapped(Offset localPosition, Size imageSize) {
     if (gameState.value != PuzzleGameState.playing) return;
     if (timeRemaining.value == 0) return;
+    if (tapsExhausted) return;
 
     final tapX = (localPosition.dx / imageSize.width) * 100;
     final tapY = (localPosition.dy / imageSize.height) * 100;
 
-    // Check if tap hits any hazard mark using ellipse formula
     final puzzle = currentPuzzle;
     if (puzzle == null) return;
 
-    final hitMark = puzzle.marks.any((mark) => mark.containsTap(tapX, tapY));
+    // Block if this tap falls within any already-claimed zone
+    // Correct taps use their server radius; wrong taps use fixed radius
+    final alreadyClaimed = currentTaps.any((t) {
+      final rx = _wrongTapRadius;
+      final ry = _wrongTapRadius;
+      final dx = (tapX - t.x) / rx;
+      final dy = (tapY - t.y) / ry;
+      return (dx * dx + dy * dy) <= 1.0;
+    });
+
+    if (alreadyClaimed) return; // silent ignore — zone already tapped
+
+    // Find which correct mark was hit — skip already-found marks
+    int? hitMarkIndex;
+    for (int i = 0; i < puzzle.marks.length; i++) {
+      if (foundMarkIndices.contains(i)) continue;
+      if (puzzle.marks[i].containsTap(tapX, tapY)) {
+        hitMarkIndex = i;
+        break;
+      }
+    }
+
+    final isCorrect = hitMarkIndex != null;
+    if (isCorrect) foundMarkIndices.add(hitMarkIndex!);
 
     currentTaps.add(UserTap(
       x: tapX,
       y: tapY,
-      result: hitMark ? TapResult.correct : TapResult.wrong,
+      result: isCorrect ? TapResult.correct : TapResult.wrong,
     ));
   }
 
-  // Remove a tap (long-press)
+  // Only wrong taps can be removed — and only when taps not exhausted
   void removeTap(int index) {
-    if (index < currentTaps.length) {
+    if (index >= currentTaps.length) return;
+    if (tapsExhausted) return;
+    final tap = currentTaps[index];
+    if (tap.result == TapResult.wrong) {
       currentTaps.removeAt(index);
     }
   }

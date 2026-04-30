@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
+import 'package:nelsontan_offshore_drilling/core/widgets/text/app_text.dart';
 import '../../../core/util/screen_size.dart';
 import '../controllers/leader_bord_controller.dart';
 
@@ -41,7 +42,7 @@ class LeaderboardView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = Get.put(LeaderboardController());
+    final c = Get.find<LeaderboardController>();
 
     return Scaffold(
       backgroundColor: _kBackground,
@@ -165,25 +166,21 @@ class LeaderboardView extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Text(
-                p['name'],
+              AppText(
+                data: p['name'],
                 textAlign: TextAlign.center,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
                   fontSize: pos == 1 ? 15 : 12,
                   fontWeight: FontWeight.w700,
                   color: _kTextPrimary,
-                ),
               ),
               const SizedBox(height: 2),
-              Text(
-                '${p['totalScore']}',
-                style: TextStyle(
+              AppText(
+                data:'${p['totalScore']}',
                   fontSize: pos == 1 ? 22 : 16,
                   fontWeight: FontWeight.w800,
                   color: scoreCol,
-                ),
               ),
               const SizedBox(height: 12),
             ],
@@ -279,14 +276,12 @@ class LeaderboardView extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               const Expanded(
-                child: Text(
-                  'Weekly Champions',
-                  style: TextStyle(
+                child: AppText(
+                  data: 'Weekly Champions',
                     fontSize: 17,
                     fontWeight: FontWeight.w800,
                     color: _kTextPrimary,
-                    letterSpacing: -0.3,
-                  ),
+                    // letterSpacing: -0.3,
                 ),
               ),
               Obx(() => Container(
@@ -298,13 +293,11 @@ class LeaderboardView extends StatelessWidget {
                   border:
                   Border.all(color: const Color(0xFFE0E0E0)),
                 ),
-                child: Text(
-                  'Week ${c.currentWeek.value}',
-                  style: const TextStyle(
+                child: AppText(
+                  data:'Week ${c.currentWeek.value}',
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: _kTextSecondary,
-                  ),
                 ),
               )),
             ],
@@ -355,13 +348,11 @@ class LeaderboardView extends StatelessWidget {
               ],
             ),
             child: Center(
-              child: Text(
-                '$rank',
-                style: const TextStyle(
+              child: AppText(
+                data:'$rank',
                   color: Colors.white,
                   fontWeight: FontWeight.w800,
                   fontSize: 15,
-                ),
               ),
             ),
           ),
@@ -372,22 +363,18 @@ class LeaderboardView extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  p['name'],
-                  style: const TextStyle(
+                AppText(
+                  data:  p['name'],
                     fontSize: 14,
                     fontWeight: FontWeight.w700,
                     color: _kTextPrimary,
-                  ),
                 ),
                 const SizedBox(height: 1),
-                Text(
+                AppText(data:
                   '${p['hazards']} hazards found',
-                  style: const TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w500,
                     color: _kTextSecondary,
-                  ),
                 ),
               ],
             ),
@@ -397,21 +384,17 @@ class LeaderboardView extends StatelessWidget {
           Column(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
+              AppText(data:
                 '${p['weeklyScore']}',
-                style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w800,
                   color: sc,
-                ),
               ),
-              const Text(
+              const AppText(data:
                 'pts',
-                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
                   color: _kTextSecondary,
-                ),
               ),
             ],
           ),

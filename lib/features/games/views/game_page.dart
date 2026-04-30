@@ -14,7 +14,9 @@ class GamePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(GamePageController());
+    // final controller = Get.put(GamePageController());
+    final controller = Get.find<GamePageController>();
+
 
     return Scaffold(
       backgroundColor: Colors.white,

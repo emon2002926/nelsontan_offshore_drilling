@@ -15,7 +15,7 @@ class GameplayScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(GamePlayController());
+    final controller = Get.find<GamePlayController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
