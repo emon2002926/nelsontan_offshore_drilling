@@ -14,8 +14,6 @@ import 'package:get/get_navigation/src/extension_navigation.dart';
         }) {
       final ctx = Get.context;
       if (ctx == null) {
-        // fallback when no context is available (e.g., tests)
-        print('Snackbar: $message');
         return;
       }
 

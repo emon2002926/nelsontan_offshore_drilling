@@ -12,8 +12,8 @@ void main() async{
 
   await GetStorage.init();
   AppBindings.init();
-  Get.put(ApiServices(baseUrl: 'http://10.10.7.108:8000/api/v1'));
-  // Get.put(ApiServices(baseUrl: 'https://safe.dsrt321.online/api/v1'));
+  // Get.put(ApiServices(baseUrl: 'http://10.10.7.108:8000/api/v1'));
+  Get.put(ApiServices(baseUrl: 'https://safe.dsrt321.online/api/v1'));
   Get.put(SplashController());
 
 

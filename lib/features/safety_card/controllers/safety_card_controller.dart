@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
@@ -31,48 +33,131 @@ class SafetyCardController extends GetxController {
   final RxBool isLoadingDropdowns       = false.obs;
 
   // ── Selected values (hold the model, not just a string) ─────────────────
-  final Rx<CardTypeModel?> selectedCardType   = Rx<CardTypeModel?>(null);
-  final Rx<AreaModel?>     selectedArea       = Rx<AreaModel?>(null);
+  final Rx<CardTypeModel?> selectedCardType  = Rx<CardTypeModel?>(null);
+  final Rx<AreaModel?>     selectedArea      = Rx<AreaModel?>(null);
   final RxList<HazardModel> selectedHazards  = <HazardModel>[].obs;
 
   // ── Other fields ─────────────────────────────────────────────────────────
-  final Rx<String?>  selectedRiskSeverity = Rx<String?>('Medium');
-  final Rx<String?>  uploadedPhotoPath    = Rx<String?>(null);
-  final RxBool actionTaken              = false.obs;
-  final RxBool immediateActionRequired  = false.obs;
-  final RxBool submitAnonymously        = false.obs;
-  final RxBool isSubmitting             = false.obs;
+  final Rx<String?>  selectedRiskSeverity  = Rx<String?>('Medium');
+  final Rx<String?>  uploadedPhotoPath     = Rx<String?>(null);
+  final RxBool actionTaken                 = false.obs;
+  final RxBool immediateActionRequired     = false.obs;
+  final RxBool submitAnonymously           = false.obs;
+  final RxBool isSubmitting                = false.obs;
 
   final List<String> riskSeverities = ['Low', 'Medium', 'High'];
 
-  // Hazard categories still shown as chips (icon + label mapped from API name)
-  // We keep the icon mapping local; label comes from HazardModel.name
-  static const Map<String, String> _hazardIcons = {
-    'default': '⚠️',
-    'fall': '🪜',
-    'chemical': '🧪',
-    'struck': '💥',
-    'electrical': '⚡',
-    'fire': '🔥',
-  };
+  // ── Speech-to-Text ────────────────────────────────────────────────────────
+  final SpeechToText _speech           = SpeechToText();
+  final RxBool       isListening       = false.obs;
+  final RxBool       isSpeechAvailable = false.obs;
+  bool               _speechInitialized = false; // prevents re-init on every tap
+
+  // Snapshot of text before a listening session starts — so new words
+  // are appended rather than overwriting what the user already typed.
+  String _textBeforeListening = '';
+
+  // ── Helpers ───────────────────────────────────────────────────────────────
 
   String hazardIcon(String name) {
     final lower = name.toLowerCase();
-    if (lower.contains('fall'))       return '🪜';
-    if (lower.contains('chemical'))   return '🧪';
-    if (lower.contains('struck'))     return '💥';
-    if (lower.contains('electric'))   return '⚡';
-    if (lower.contains('fire'))       return '🔥';
+    if (lower.contains('fall'))     return '🪜';
+    if (lower.contains('chemical')) return '🧪';
+    if (lower.contains('struck'))   return '💥';
+    if (lower.contains('electric')) return '⚡';
+    if (lower.contains('fire'))     return '🔥';
     return '⚠️';
   }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
     super.onInit();
+    // ✅ No _initSpeech() here — permission is requested only on first mic tap
     fetchDropdowns();
   }
 
-  // ── GET /card-submission/type-hazard-area ────────────────────────────────
+  @override
+  void onClose() {
+    _speech.stop();
+    descriptionController.dispose();
+    descriptionFocus.dispose();
+    super.onClose();
+  }
+
+  // ── Speech: lazy init (called only when user taps the mic) ───────────────
+
+  /// Initializes speech recognition the first time it's needed.
+  /// Returns true if available. Subsequent calls return the cached result.
+  Future<bool> _ensureSpeechInitialized() async {
+    if (_speechInitialized) return isSpeechAvailable.value;
+
+    isSpeechAvailable.value = await _speech.initialize(
+      onError: (error) {
+        isListening.value = false;
+        CustomSnackBar.error('Speech error: ${error.errorMsg}');
+      },
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          isListening.value = false;
+        }
+      },
+    );
+
+    _speechInitialized = true;
+    return isSpeechAvailable.value;
+  }
+
+  /// Toggles listening on/off. Permission prompt fires here on first call.
+  Future<void> toggleListening() async {
+    // ── Stop if already listening ─────────────────────────────────────────
+    if (isListening.value) {
+      await _speech.stop();
+      isListening.value = false;
+      return;
+    }
+
+    // ── Init + permission on first tap only ───────────────────────────────
+    final available = await _ensureSpeechInitialized();
+    if (!available) {
+      CustomSnackBar.error('Speech recognition not available on this device');
+      return;
+    }
+
+    // ── Start listening ───────────────────────────────────────────────────
+    _textBeforeListening = descriptionController.text;
+    isListening.value    = true;
+
+    await _speech.listen(
+      onResult: (SpeechRecognitionResult result) {
+        final newWords = result.recognizedWords;
+        if (newWords.isNotEmpty) {
+          descriptionController.text = _textBeforeListening.isEmpty
+              ? newWords
+              : '$_textBeforeListening $newWords';
+
+          // Keep cursor at end while transcribing
+          descriptionController.selection = TextSelection.fromPosition(
+            TextPosition(offset: descriptionController.text.length),
+          );
+        }
+        // Lock in the transcribed text as the new baseline on final result
+        if (result.finalResult) {
+          _textBeforeListening = descriptionController.text;
+        }
+      },
+      listenFor:      const Duration(seconds: 60),
+      pauseFor:       const Duration(seconds: 4),
+      partialResults: true,
+      localeId:       'en_US',
+      cancelOnError:  true,
+      listenMode:     ListenMode.confirmation,
+    );
+  }
+
+  // ── GET /card-submission/type-hazard-area ─────────────────────────────────
+
   Future<void> fetchDropdowns() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
@@ -107,7 +192,8 @@ class SafetyCardController extends GetxController {
     }
   }
 
-  // ── POST /card-submission/create  (multipart/form-data) ─────────────────
+  // ── POST /card-submission/create (multipart/form-data) ───────────────────
+
   Future<void> submitSafetyCard(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
 
@@ -133,11 +219,10 @@ class SafetyCardController extends GetxController {
 
     isSubmitting.value = true;
     try {
-      // Build form-data fields matching the API keys in the screenshot
       final fields = <String, String>{
         'cardTypeId':        selectedCardType.value!.id.toString(),
         'areaId':            selectedArea.value!.id.toString(),
-        'hazardId':          selectedHazards.first.id.toString(), // single hazard per API
+        'hazardId':          selectedHazards.first.id.toString(),
         'description':       descriptionController.text.trim(),
         'riskSeverity':      (selectedRiskSeverity.value ?? 'Medium').toUpperCase(),
         'actionTaken':       actionTaken.value.toString(),
@@ -159,7 +244,6 @@ class SafetyCardController extends GetxController {
 
       CustomSnackBar.success('Safety card submitted successfully!');
       await Future.delayed(const Duration(milliseconds: 500));
-      // AppNavigation.pop(context);
       resetForm();
     } on HttpException catch (e) {
       CustomSnackBar.error(e.message);
@@ -170,7 +254,8 @@ class SafetyCardController extends GetxController {
     }
   }
 
-  // Validators
+  // ── Validators ────────────────────────────────────────────────────────────
+
   String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Please describe what you observed';
@@ -181,14 +266,15 @@ class SafetyCardController extends GetxController {
     return null;
   }
 
-  // Image picker
+  // ── Image picker ──────────────────────────────────────────────────────────
+
   Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
       final picker = ImagePicker();
       final XFile? image = await picker.pickImage(
-        source: source,
-        maxWidth: 1920,
-        maxHeight: 1080,
+        source:       source,
+        maxWidth:     1920,
+        maxHeight:    1080,
         imageQuality: 85,
       );
       if (image != null) {
@@ -223,8 +309,7 @@ class SafetyCardController extends GetxController {
                 },
               ),
               ListTile(
-                leading:
-                const Icon(Icons.photo_library, color: Color(0xFF0047AB)),
+                leading: const Icon(Icons.photo_library, color: Color(0xFF0047AB)),
                 title: const Text('Choose from Gallery'),
                 onTap: () {
                   Navigator.pop(context);
@@ -248,23 +333,17 @@ class SafetyCardController extends GetxController {
     );
   }
 
+  // ── Reset ─────────────────────────────────────────────────────────────────
+
   void resetForm() {
     descriptionController.clear();
-    selectedCardType.value =
-    cardTypes.isNotEmpty ? cardTypes.first : null;
-    selectedArea.value    = null;
+    selectedCardType.value        = cardTypes.isNotEmpty ? cardTypes.first : null;
+    selectedArea.value            = null;
     selectedHazards.clear();
-    selectedRiskSeverity.value  = 'Medium';
-    uploadedPhotoPath.value     = null;
-    actionTaken.value           = false;
+    selectedRiskSeverity.value    = 'Medium';
+    uploadedPhotoPath.value       = null;
+    actionTaken.value             = false;
     immediateActionRequired.value = false;
-    submitAnonymously.value     = false;
-  }
-
-  @override
-  void onClose() {
-    descriptionController.dispose();
-    descriptionFocus.dispose();
-    super.onClose();
+    submitAnonymously.value       = false;
   }
 }

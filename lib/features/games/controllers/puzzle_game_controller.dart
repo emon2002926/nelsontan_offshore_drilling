@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import '../../../core/services/api_services.dart';
@@ -17,6 +18,21 @@ class PuzzleGameController extends GetxController {
   final RxList<PuzzleModel> puzzles   = <PuzzleModel>[].obs;
   final RxBool              isLoading = true.obs;
   final Rx<PuzzleGameState> gameState = PuzzleGameState.loading.obs;
+
+
+  // ─── Audio ────────────────────────────────────────────────────────────────
+  final AudioPlayer _audioPlayer = AudioPlayer();
+
+  Future<void> _playCorrectSound() async {
+    await _audioPlayer.stop();
+    await _audioPlayer.play(AssetSource('audio/correct.mp3'));
+  }
+
+  Future<void> _playWrongSound() async {
+    await _audioPlayer.stop();
+    await _audioPlayer.play(AssetSource('audio/wrong.mp3'));
+  }
+
 
   // ─── Progress ─────────────────────────────────────────────────────────────
   final RxInt currentIndex  = 0.obs;
@@ -176,19 +192,16 @@ class PuzzleGameController extends GetxController {
     final puzzle = currentPuzzle;
     if (puzzle == null) return;
 
-    // Block if this tap falls within any already-claimed zone
-    // Correct taps use their server radius; wrong taps use fixed radius
     final alreadyClaimed = currentTaps.any((t) {
-      final rx = _wrongTapRadius;
-      final ry = _wrongTapRadius;
+      const rx = _wrongTapRadius;
+      const ry = _wrongTapRadius;
       final dx = (tapX - t.x) / rx;
       final dy = (tapY - t.y) / ry;
       return (dx * dx + dy * dy) <= 1.0;
     });
 
-    if (alreadyClaimed) return; // silent ignore — zone already tapped
+    if (alreadyClaimed) return;
 
-    // Find which correct mark was hit — skip already-found marks
     int? hitMarkIndex;
     for (int i = 0; i < puzzle.marks.length; i++) {
       if (foundMarkIndices.contains(i)) continue;
@@ -199,7 +212,12 @@ class PuzzleGameController extends GetxController {
     }
 
     final isCorrect = hitMarkIndex != null;
-    if (isCorrect) foundMarkIndices.add(hitMarkIndex!);
+    if (isCorrect) {
+      foundMarkIndices.add(hitMarkIndex!);
+      _playCorrectSound(); // ✅ correct sound
+    } else {
+      _playWrongSound();   // ❌ wrong sound
+    }
 
     currentTaps.add(UserTap(
       x: tapX,
@@ -207,7 +225,6 @@ class PuzzleGameController extends GetxController {
       result: isCorrect ? TapResult.correct : TapResult.wrong,
     ));
   }
-
   // Only wrong taps can be removed — and only when taps not exhausted
   void removeTap(int index) {
     if (index >= currentTaps.length) return;
@@ -282,6 +299,7 @@ class PuzzleGameController extends GetxController {
   @override
   void onClose() {
     _timer?.cancel();
+    _audioPlayer.dispose(); // ← add this
     super.onClose();
   }
 }

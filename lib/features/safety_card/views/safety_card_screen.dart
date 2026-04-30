@@ -14,6 +14,10 @@ import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../controllers/safety_card_controller.dart';
 
+import 'dart:io';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
 class SafetyCardScreen extends StatelessWidget {
   SafetyCardScreen({super.key});
 
@@ -22,7 +26,6 @@ class SafetyCardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final controller = Get.put(SafetyCardController());
     final controller = Get.find<SafetyCardController>();
 
     return Scaffold(
@@ -42,7 +45,7 @@ class SafetyCardScreen extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ── Header ───────────────────────────────────────────
+                    // ── Header ──────────────────────────────────────────
                     Row(
                       children: [
                         Image.asset(
@@ -88,7 +91,7 @@ class SafetyCardScreen extends StatelessWidget {
 
                     SizedBox(height: context.responsiveSize(24)),
 
-                    // ── Card Type Dropdown (from API) ─────────────────────
+                    // ── Card Type ────────────────────────────────────────
                     _buildLabel(context, 'Card Type'),
                     SizedBox(height: context.responsiveSize(8)),
                     Obx(() {
@@ -98,28 +101,23 @@ class SafetyCardScreen extends StatelessWidget {
                       return SearchableMultiSelectDropdown(
                         hint: 'Select card type',
                         icon: '✋',
-                        items: controller.cardTypes
-                            .map((e) => e.name)
-                            .toList(),
+                        items: controller.cardTypes.map((e) => e.name).toList(),
                         selectedItems: controller.selectedCardType.value != null
                             ? [controller.selectedCardType.value!.name]
                             : [],
                         multiSelect: false,
                         onChanged: (items) {
-                          if (items.isNotEmpty) {
-                            controller.selectedCardType.value =
-                                controller.cardTypes.firstWhere(
-                                        (e) => e.name == items.first);
-                          } else {
-                            controller.selectedCardType.value = null;
-                          }
+                          controller.selectedCardType.value = items.isNotEmpty
+                              ? controller.cardTypes
+                              .firstWhere((e) => e.name == items.first)
+                              : null;
                         },
                       );
                     }),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Area Dropdown (from API) ──────────────────────────
+                    // ── Area of Observation ──────────────────────────────
                     _buildLabel(context, 'Area of Observation'),
                     SizedBox(height: context.responsiveSize(8)),
                     Obx(() {
@@ -129,28 +127,23 @@ class SafetyCardScreen extends StatelessWidget {
                       return SearchableMultiSelectDropdown(
                         hint: 'Select area',
                         icon: '📍',
-                        items: controller.areas
-                            .map((e) => e.name)
-                            .toList(),
+                        items: controller.areas.map((e) => e.name).toList(),
                         selectedItems: controller.selectedArea.value != null
                             ? [controller.selectedArea.value!.name]
                             : [],
                         multiSelect: false,
                         onChanged: (items) {
-                          if (items.isNotEmpty) {
-                            controller.selectedArea.value =
-                                controller.areas.firstWhere(
-                                        (e) => e.name == items.first);
-                          } else {
-                            controller.selectedArea.value = null;
-                          }
+                          controller.selectedArea.value = items.isNotEmpty
+                              ? controller.areas
+                              .firstWhere((e) => e.name == items.first)
+                              : null;
                         },
                       );
                     }),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Hazard Categories (from API) ──────────────────────
+                    // ── Hazard Categories ────────────────────────────────
                     _buildLabel(context, 'Hazard Categories'),
                     SizedBox(height: context.responsiveSize(12)),
                     Obx(() => _buildHazardCategories(context, controller)),
@@ -164,21 +157,21 @@ class SafetyCardScreen extends StatelessWidget {
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Risk Severity ────────────────────────────────────
+                    // ── Risk Severity ─────────────────────────────────────
                     _buildLabel(context, 'Risk Severity'),
                     SizedBox(height: context.responsiveSize(12)),
                     Obx(() => _buildRiskSeverity(context, controller)),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Photo / Video Evidence ───────────────────────────
+                    // ── Photo / Video Evidence ────────────────────────────
                     _buildLabel(context, 'Photo / Video Evidence'),
                     SizedBox(height: context.responsiveSize(12)),
                     Obx(() => _buildPhotoUpload(context, controller)),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Toggle Options ───────────────────────────────────
+                    // ── Toggle Options ────────────────────────────────────
                     _buildToggleOptions(context, controller),
 
                     SizedBox(height: context.responsiveSize(24)),
@@ -190,12 +183,12 @@ class SafetyCardScreen extends StatelessWidget {
                           flex: 2,
                           child: AppButton(
                             buttonText: 'Reset',
-                            onPressed: controller.resetForm,
-                            fillColor: const Color(0xffE6ECF5),
-                            textColor: const Color(0xFF0047AB),
+                            onPressed:  controller.resetForm,
+                            fillColor:  const Color(0xffE6ECF5),
+                            textColor:  const Color(0xFF0047AB),
                             borderColor: const Color(0xFF0047AB),
                             borderWidth: 1.5,
-                            fontSize: 16,
+                            fontSize:   16,
                             fontWeight: FontWeight.w600,
                             buttonHeight: context.heightPercentage(6),
                             borderRadius: 25,
@@ -206,16 +199,15 @@ class SafetyCardScreen extends StatelessWidget {
                           flex: 2,
                           child: Obx(
                                 () => AppButton(
-                              buttonText: 'Submit Card',
-                              onPressed: () =>
-                                  controller.submitSafetyCard(context),
-                              fillColor: const Color(0xFF0047AB),
-                              textColor: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
+                              buttonText:   'Submit Card',
+                              onPressed:    () => controller.submitSafetyCard(context),
+                              fillColor:    const Color(0xFF0047AB),
+                              textColor:    Colors.white,
+                              fontSize:     16,
+                              fontWeight:   FontWeight.w600,
                               buttonHeight: context.heightPercentage(6),
-                              isLoading: controller.isSubmitting.value,
-                              loadingText: 'Submitting...',
+                              isLoading:    controller.isSubmitting.value,
+                              loadingText:  'Submitting...',
                               borderRadius: 25,
                             ),
                           ),
@@ -233,10 +225,10 @@ class SafetyCardScreen extends StatelessWidget {
             Obx(
                   () => controller.isSubmitting.value
                   ? AppButton.buildLoadingOverlay(
-                isLoading: controller.isSubmitting,
-                loadingMessage: 'Submitting safety card...',
+                isLoading:       controller.isSubmitting,
+                loadingMessage:  'Submitting safety card...',
                 backgroundColor: Colors.black,
-                cardColor: Colors.white,
+                cardColor:       Colors.white,
               )
                   : const SizedBox.shrink(),
             ),
@@ -246,14 +238,14 @@ class SafetyCardScreen extends StatelessWidget {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  // ── Helpers ───────────────────────────────────────────────────────────
 
   Widget _buildLabel(BuildContext context, String text) {
     return AppText(
-      data: text,
-      fontSize: 16,
-      fontWeight: FontWeight.w600,
-      color: AppColors.instance.normalTextColor,
+      data:                text,
+      fontSize:            16,
+      fontWeight:          FontWeight.w600,
+      color:               AppColors.instance.normalTextColor,
       useResponsiveFontSize: true,
     );
   }
@@ -262,13 +254,12 @@ class SafetyCardScreen extends StatelessWidget {
     return Container(
       height: context.responsiveSize(52),
       decoration: BoxDecoration(
-        color: Colors.grey.shade200,
+        color:        Colors.grey.shade200,
         borderRadius: BorderRadius.circular(context.responsiveSize(8)),
       ),
     );
   }
 
-  // Hazard chips built from API HazardModel list
   Widget _buildHazardCategories(
       BuildContext context, SafetyCardController controller) {
     if (controller.isLoadingDropdowns.value) {
@@ -293,7 +284,7 @@ class SafetyCardScreen extends StatelessWidget {
                 duration: const Duration(milliseconds: 150),
                 padding: EdgeInsets.symmetric(
                   horizontal: context.responsiveSize(16),
-                  vertical:  context.responsiveSize(4),
+                  vertical:   context.responsiveSize(4),
                 ),
                 decoration: BoxDecoration(
                   color: isSelected
@@ -312,14 +303,14 @@ class SafetyCardScreen extends StatelessWidget {
                   children: [
                     Text(
                       controller.hazardIcon(hazard.name),
-                      style: TextStyle(
-                          fontSize: context.responsiveFontSize(18)),
+                      style:
+                      TextStyle(fontSize: context.responsiveFontSize(18)),
                     ),
                     SizedBox(width: context.responsiveSize(8)),
                     AppText(
-                      data: hazard.name,
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
+                      data:                hazard.name,
+                      fontSize:            14,
+                      fontWeight:          FontWeight.w500,
                       color: isSelected
                           ? Colors.white
                           : const Color(0xFF1A1A1A),
@@ -335,66 +326,123 @@ class SafetyCardScreen extends StatelessWidget {
     );
   }
 
+  // ── Description field with live mic button ────────────────────────────
   Widget _buildDescriptionField(
       BuildContext context, SafetyCardController controller) {
-    return Container(
-      height: context.responsiveSize(120),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(context.responsiveSize(8)),
-        border: Border.all(color: const Color(0xffCBD5E1), width: 1.5),
-      ),
-      child: Stack(
+    return Obx(() {
+      final isListening = controller.isListening.value;
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          TextFormField(
-            controller: controller.descriptionController,
-            focusNode: controller.descriptionFocus,
-            maxLines: null,
-            expands: true,
-            textAlignVertical: TextAlignVertical.top,
-            validator: controller.validateDescription,
-            style: TextStyle(
-              fontSize: context.responsiveFontSize(14),
-              color: const Color(0xFF1A1A1A),
-            ),
-            decoration: InputDecoration(
-              hintText: 'Describe what you observed in detail...',
-              hintStyle: TextStyle(
-                fontSize: context.responsiveFontSize(14),
-                color: appColor.hintTextColor,
+          // Text area
+          Container(
+            height: context.responsiveSize(120),
+            decoration: BoxDecoration(
+              color:        Colors.white,
+              borderRadius: BorderRadius.circular(context.responsiveSize(8)),
+              border: Border.all(
+                // Border turns blue while recording
+                color: isListening
+                    ? const Color(0xFF0047AB)
+                    : const Color(0xffCBD5E1),
+                width: isListening ? 2.0 : 1.5,
               ),
-              contentPadding: EdgeInsets.all(context.responsiveSize(16)),
-              border: InputBorder.none,
             ),
-          ),
-          Positioned(
-            bottom: context.responsiveSize(12),
-            right:  context.responsiveSize(12),
-            child: GestureDetector(
-              onTap: () => CustomSnackBar.info('Voice input coming soon!'),
-              child: Container(
-                padding: EdgeInsets.all(context.responsiveSize(8)),
-                decoration: const BoxDecoration(
-                  color: Color(0xFF0047AB),
-                  shape: BoxShape.circle,
+            child: Stack(
+              children: [
+                TextFormField(
+                  controller:       controller.descriptionController,
+                  focusNode:        controller.descriptionFocus,
+                  maxLines:         null,
+                  expands:          true,
+                  textAlignVertical: TextAlignVertical.top,
+                  validator:        controller.validateDescription,
+                  style: TextStyle(
+                    fontSize: context.responsiveFontSize(14),
+                    color:    const Color(0xFF1A1A1A),
+                  ),
+                  decoration: InputDecoration(
+                    hintText: isListening
+                        ? 'Listening…'
+                        : 'Describe what you observed in detail...',
+                    hintStyle: TextStyle(
+                      fontSize: context.responsiveFontSize(14),
+                      color: isListening
+                          ? const Color(0xFF0047AB)
+                          : appColor.hintTextColor,
+                    ),
+                    contentPadding:
+                    EdgeInsets.all(context.responsiveSize(16)),
+                    border: InputBorder.none,
+                  ),
                 ),
-                child: Icon(Icons.mic_none,
-                    color: Colors.white,
-                    size: context.responsiveSize(20)),
-              ),
+
+                // ── Mic button (bottom-right, matches screenshot) ────────
+                Positioned(
+                  bottom: context.responsiveSize(10),
+                  right:  context.responsiveSize(10),
+                  child: GestureDetector(
+                    onTap: controller.toggleListening,
+                    child: AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      width:  context.responsiveSize(36),
+                      height: context.responsiveSize(36),
+                      decoration: BoxDecoration(
+                        // Red while recording, brand-blue otherwise
+                        color: isListening
+                            ? Colors.red
+                            : const Color(0xFF0047AB),
+                        shape: BoxShape.circle,
+                        boxShadow: isListening
+                            ? [
+                          BoxShadow(
+                            color: Colors.red.withOpacity(0.35),
+                            blurRadius:   8,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                            : [],
+                      ),
+                      child: Icon(
+                        isListening ? Icons.mic : Icons.mic_none,
+                        color: Colors.white,
+                        size:  context.responsiveSize(18),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
+
+          // ── "Listening…" status row shown below the field ────────────
+          if (isListening) ...[
+            SizedBox(height: context.responsiveSize(6)),
+            Row(
+              children: [
+                _PulsingDot(size: context.responsiveSize(8)),
+                SizedBox(width: context.responsiveSize(6)),
+                AppText(
+                  data:                'Listening… tap mic to stop',
+                  fontSize:            12,
+                  fontWeight:          FontWeight.w400,
+                  color:               const Color(0xFF0047AB),
+                  useResponsiveFontSize: true,
+                ),
+              ],
+            ),
+          ],
         ],
-      ),
-    );
+      );
+    });
   }
 
   Widget _buildRiskSeverity(
       BuildContext context, SafetyCardController controller) {
     return Row(
       children: controller.riskSeverities.map((severity) {
-        final isSelected =
-            controller.selectedRiskSeverity.value == severity;
+        final isSelected = controller.selectedRiskSeverity.value == severity;
         return Expanded(
           child: Padding(
             padding: EdgeInsets.only(
@@ -410,9 +458,8 @@ class SafetyCardScreen extends StatelessWidget {
                 padding: EdgeInsets.symmetric(
                     vertical: context.responsiveSize(8)),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius:
-                  BorderRadius.circular(context.responsiveSize(6)),
+                  color:        Colors.white,
+                  borderRadius: BorderRadius.circular(context.responsiveSize(6)),
                   border: Border.all(
                     color: isSelected
                         ? const Color(0xFF0047AB)
@@ -451,8 +498,8 @@ class SafetyCardScreen extends StatelessWidget {
                     ),
                     SizedBox(width: context.responsiveSize(8)),
                     AppText(
-                      data: severity,
-                      fontSize: 15,
+                      data:       severity,
+                      fontSize:   15,
                       fontWeight: FontWeight.w500,
                       color: isSelected
                           ? const Color(0xFF0047AB)
@@ -475,19 +522,18 @@ class SafetyCardScreen extends StatelessWidget {
       onTap: () => controller.showPhotoOptions(context),
       child: CustomPaint(
         painter: DashedBorderPainter(
-          color: const Color(0xffCBD5E1),
-          strokeWidth: 1.5,
-          dashWidth:   context.responsiveSize(5),
-          dashSpace:   context.responsiveSize(3),
+          color:        const Color(0xffCBD5E1),
+          strokeWidth:  1.5,
+          dashWidth:    context.responsiveSize(5),
+          dashSpace:    context.responsiveSize(3),
           borderRadius: context.responsiveSize(12),
         ),
         child: Container(
           width: double.infinity,
           padding: EdgeInsets.all(context.responsiveSize(32)),
           decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius:
-            BorderRadius.circular(context.responsiveSize(12)),
+            color:        Colors.white,
+            borderRadius: BorderRadius.circular(context.responsiveSize(12)),
           ),
           child: controller.uploadedPhotoPath.value != null
               ? Column(
@@ -498,16 +544,16 @@ class SafetyCardScreen extends StatelessWidget {
                 child: Image.file(
                   File(controller.uploadedPhotoPath.value!),
                   height: context.responsiveSize(150),
-                  width: double.infinity,
-                  fit: BoxFit.cover,
+                  width:  double.infinity,
+                  fit:    BoxFit.cover,
                 ),
               ),
               SizedBox(height: context.responsiveSize(12)),
               AppText(
-                data: 'Tap to change photo',
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF6B6B6B),
+                data:                'Tap to change photo',
+                fontSize:            13,
+                fontWeight:          FontWeight.w400,
+                color:               const Color(0xFF6B6B6B),
                 useResponsiveFontSize: true,
               ),
             ],
@@ -515,22 +561,22 @@ class SafetyCardScreen extends StatelessWidget {
               : Column(
             children: [
               Icon(Icons.cloud_upload_outlined,
-                  size: context.responsiveSize(48),
+                  size:  context.responsiveSize(48),
                   color: const Color(0xFF0047AB)),
               SizedBox(height: context.responsiveSize(12)),
               AppText(
-                data: 'Tap to capture or upload',
-                fontSize: 15,
-                fontWeight: FontWeight.w500,
-                color: const Color(0xFF1A1A1A),
+                data:                'Tap to capture or upload',
+                fontSize:            15,
+                fontWeight:          FontWeight.w500,
+                color:               const Color(0xFF1A1A1A),
                 useResponsiveFontSize: true,
               ),
               SizedBox(height: context.responsiveSize(4)),
               AppText(
-                data: 'JPG, PNG, MP4 (max 10MB)',
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-                color: const Color(0xFF9E9E9E),
+                data:                'JPG, PNG, MP4 (max 10MB)',
+                fontSize:            13,
+                fontWeight:          FontWeight.w400,
+                color:               const Color(0xFF9E9E9E),
                 useResponsiveFontSize: true,
               ),
             ],
@@ -545,37 +591,37 @@ class SafetyCardScreen extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(context.responsiveSize(16)),
       decoration: BoxDecoration(
-        color: const Color(0xFFE6ECF5),
+        color:        const Color(0xFFE6ECF5),
         borderRadius: BorderRadius.circular(context.responsiveSize(12)),
       ),
       child: Column(
         children: [
           _buildToggleRow(
             context,
-            title: 'Action Taken',
-            subtitle: 'Was corrective action taken on the spot?',
-            value: controller.actionTaken,
-            activeColor: const Color(0xFF0047AB),
+            title:         'Action Taken',
+            subtitle:      'Was corrective action taken on the spot?',
+            value:         controller.actionTaken,
+            activeColor:   const Color(0xFF0047AB),
             inactiveColor: Colors.red,
           ),
           Divider(
               height: context.responsiveSize(24),
-              color: const Color(0xFFE0E0E0)),
+              color:  const Color(0xFFE0E0E0)),
           _buildToggleRow(
             context,
-            title: 'Immediate Action Required',
-            subtitle: 'Does this require urgent attention from HSE?',
-            value: controller.immediateActionRequired,
+            title:       'Immediate Action Required',
+            subtitle:    'Does this require urgent attention from HSE?',
+            value:       controller.immediateActionRequired,
             activeColor: const Color(0xFF0047AB),
           ),
           Divider(
               height: context.responsiveSize(24),
-              color: const Color(0xFFE0E0E0)),
+              color:  const Color(0xFFE0E0E0)),
           _buildToggleRow(
             context,
-            title: 'Submit Anonymously',
-            subtitle: 'Your identity will be hidden from reports',
-            value: controller.submitAnonymously,
+            title:       'Submit Anonymously',
+            subtitle:    'Your identity will be hidden from reports',
+            value:       controller.submitAnonymously,
             activeColor: const Color(0xFF0047AB),
           ),
         ],
@@ -588,7 +634,7 @@ class SafetyCardScreen extends StatelessWidget {
         required String title,
         required String subtitle,
         required RxBool value,
-        required Color activeColor,
+        required Color  activeColor,
         Color inactiveColor = const Color(0xFFB0C4DE),
       }) {
     return Obx(
@@ -599,18 +645,18 @@ class SafetyCardScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 AppText(
-                  data: title,
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: const Color(0xFF1A1A1A),
+                  data:                title,
+                  fontSize:            15,
+                  fontWeight:          FontWeight.w600,
+                  color:               const Color(0xFF1A1A1A),
                   useResponsiveFontSize: true,
                 ),
                 SizedBox(height: context.responsiveSize(4)),
                 AppText(
-                  data: subtitle,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w400,
-                  color: const Color(0xFF6B6B6B),
+                  data:                subtitle,
+                  fontSize:            13,
+                  fontWeight:          FontWeight.w400,
+                  color:               const Color(0xFF6B6B6B),
                   useResponsiveFontSize: true,
                 ),
               ],
@@ -624,31 +670,30 @@ class SafetyCardScreen extends StatelessWidget {
               width:  context.responsiveSize(56),
               height: context.responsiveSize(32),
               decoration: BoxDecoration(
-                color: value.value ? activeColor : inactiveColor,
-                borderRadius:
-                BorderRadius.circular(context.responsiveSize(16)),
+                color:        value.value ? activeColor : inactiveColor,
+                borderRadius: BorderRadius.circular(context.responsiveSize(16)),
               ),
               child: Stack(
                 children: [
                   AnimatedPositioned(
                     duration: const Duration(milliseconds: 200),
-                    left:  value.value ? null : context.responsiveSize(32),
-                    right: value.value ? context.responsiveSize(32) : null,
-                    top: 0,
+                    left:   value.value ? null : context.responsiveSize(32),
+                    right:  value.value ? context.responsiveSize(32) : null,
+                    top:    0,
                     bottom: 0,
                     child: Center(
                       child: AppText(
-                        data: value.value ? 'Yes' : 'No',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
+                        data:                 value.value ? 'Yes' : 'No',
+                        fontSize:             10,
+                        fontWeight:           FontWeight.w600,
+                        color:                Colors.white,
                         useResponsiveFontSize: false,
                       ),
                     ),
                   ),
                   AnimatedAlign(
-                    duration: const Duration(milliseconds: 200),
-                    curve: Curves.easeInOut,
+                    duration:  const Duration(milliseconds: 200),
+                    curve:     Curves.easeInOut,
                     alignment: value.value
                         ? Alignment.centerRight
                         : Alignment.centerLeft,
@@ -662,9 +707,9 @@ class SafetyCardScreen extends StatelessWidget {
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.1),
+                            color:      Colors.black.withOpacity(0.1),
                             blurRadius: 4,
-                            offset: const Offset(0, 2),
+                            offset:     const Offset(0, 2),
                           ),
                         ],
                       ),
@@ -675,6 +720,54 @@ class SafetyCardScreen extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ── Pulsing dot widget shown next to "Listening…" status ─────────────────
+class _PulsingDot extends StatefulWidget {
+  final double size;
+  const _PulsingDot({required this.size});
+
+  @override
+  State<_PulsingDot> createState() => _PulsingDotState();
+}
+
+class _PulsingDotState extends State<_PulsingDot>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _ctrl;
+  late Animation<double>    _anim;
+
+  @override
+  void initState() {
+    super.initState();
+    _ctrl = AnimationController(
+      vsync:    this,
+      duration: const Duration(milliseconds: 800),
+    )..repeat(reverse: true);
+    _anim = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _anim,
+      child: Container(
+        width:  widget.size,
+        height: widget.size,
+        decoration: const BoxDecoration(
+          color: Colors.red,
+          shape: BoxShape.circle,
+        ),
       ),
     );
   }

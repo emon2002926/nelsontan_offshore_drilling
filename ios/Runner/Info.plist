@@ -45,5 +45,10 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<key>NSSpeechRecognitionUsageDescription</key>
+    <string>This app uses speech recognition to fill in safety observations.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>This app needs microphone access for voice input.</string>
 </dict>
 </plist>
