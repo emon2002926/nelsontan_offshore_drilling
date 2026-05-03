@@ -40,20 +40,11 @@ class HomeScreen extends StatelessWidget {
                 // Reactive video — switches to network URL once API data loads
                 Obx(() {
                   final video = controller.appHome.value?.videos;
-                  final video2 = "http://10.10.7.76:8050/static/uploads/5a254dda-22c1-4742-b2a2-fbec0b5c5eb7.mp4";
-                  // final video2 = "https://safe.dsrt321.online/videos/media-1776572925830-37914511.mp4";
                   return AppVideoPlayer(
-                    key: ValueKey(video?.videoUrl ?? 'local'),
+                    key: ValueKey(video?.videoUrl ?? 'no-video'),
                     videoSource: video?.videoUrl != null
-                        ? VideoSource.network(
-                      video2
-                      // video!.videoUrl,
-                      // thumbnailNetworkPath: video.thumbnail,
-                    )
-                        : VideoSource.asset(
-                      'assets/videos/demo.mp4',
-                      thumbnailAssetPath: appAssets.thumbnailImage,
-                    ),
+                        ? VideoSource.network(video!.videoUrl)
+                        : null, // <-- just pass null, widget handles the rest
                     width: context.widthPercentage(100),
                     height: context.heightPercentage(23),
                     borderRadius: 16,

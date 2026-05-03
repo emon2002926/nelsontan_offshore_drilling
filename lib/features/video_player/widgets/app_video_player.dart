@@ -5,63 +5,86 @@ import 'package:video_player/video_player.dart';
 import '../controllers/video_player_controller.dart';
 import '../models/video_source.dart';
 
-class AppVideoPlayer extends StatelessWidget {
-  final VideoSource videoSource;
+class AppVideoPlayer extends StatefulWidget {
+  final VideoSource? videoSource;
   final double? width;
   final double? height;
   final double borderRadius;
   final bool autoPlay;
   final bool showThumbnail;
   final String? tag;
+  final Widget? placeholder;
 
   const AppVideoPlayer({
     super.key,
-    required this.videoSource,
+    this.videoSource,
     this.width,
     this.height,
     this.borderRadius = 16,
     this.autoPlay = false,
     this.showThumbnail = true,
     this.tag,
+    this.placeholder,
   });
 
   @override
+  State<AppVideoPlayer> createState() => _AppVideoPlayerState();
+}
+
+class _AppVideoPlayerState extends State<AppVideoPlayer> {
+  bool _showNoVideo = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.videoSource == null) {
+      // Wait a moment before revealing "no video" UI
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted) setState(() => _showNoVideo = true);
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    // ── No video source ─────────────────────────────────────────────────────
+    if (widget.videoSource == null) {
+      return _showNoVideo ? _buildPlaceholder() : _buildLoadingState();
+    }
+
     final controller = Get.put(
       AppVideoPlayerController(),
-      tag: tag ?? videoSource.path,
+      tag: widget.tag ?? widget.videoSource!.path,
     );
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!controller.isInitialized.value) {
-        controller.initializeVideo(videoSource).then((_) {
-          if (autoPlay) controller.togglePlayPause();
+        controller.initializeVideo(widget.videoSource!).then((_) {
+          if (widget.autoPlay) controller.togglePlayPause();
         });
       }
     });
 
     return ClipRRect(
-      borderRadius: BorderRadius.circular(borderRadius),
+      borderRadius: BorderRadius.circular(widget.borderRadius),
       child: Container(
-        width: width,
-        height: height,
+        width: widget.width,
+        height: widget.height,
         color: Colors.black,
         child: Obx(() {
-          // ── Thumbnail ──────────────────────────────────────────────────
-          if (showThumbnail &&
+          // ── Thumbnail ────────────────────────────────────────────────────
+          if (widget.showThumbnail &&
               !controller.hasStartedPlaying.value &&
-              videoSource.thumbnailPath != null) {
+              widget.videoSource!.thumbnailPath != null) {
             return _buildThumbnail(controller);
           }
 
-          // ── Loading ────────────────────────────────────────────────────
+          // ── Loading ──────────────────────────────────────────────────────
           if (controller.isLoading.value) {
-            return const Center(
-              child: CircularProgressIndicator(color: Colors.white),
-            );
+            return _buildLoadingState();
           }
 
-          // ── Player ─────────────────────────────────────────────────────
+          // ── Player ───────────────────────────────────────────────────────
           if (controller.isInitialized.value &&
               controller.videoController != null) {
             return GestureDetector(
@@ -69,7 +92,6 @@ class AppVideoPlayer extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  // Video frame
                   Center(
                     child: AspectRatio(
                       aspectRatio:
@@ -77,8 +99,6 @@ class AppVideoPlayer extends StatelessWidget {
                       child: VideoPlayer(controller.videoController!),
                     ),
                   ),
-
-                  // Controls — visible when paused OR showControls is true
                   Obx(() {
                     final visible = controller.showControls.value ||
                         !controller.isPlaying.value;
@@ -95,6 +115,75 @@ class AppVideoPlayer extends StatelessWidget {
 
           return const SizedBox();
         }),
+      ),
+    );
+  }
+
+  // ── Loading state ─────────────────────────────────────────────────────────
+
+  Widget _buildLoadingState() {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(widget.borderRadius),
+      child: Container(
+        width: widget.width,
+        height: widget.height,
+        color: Colors.grey.shade900,
+        child: const Center(
+          child: SizedBox(
+            width: 120,
+            child: LinearProgressIndicator(
+              color: Colors.white,
+              backgroundColor: Colors.white24,
+              minHeight: 3,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ── Placeholder (no video) ────────────────────────────────────────────────
+
+  Widget _buildPlaceholder() {
+    if (widget.placeholder != null) return widget.placeholder!;
+
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: ClipRRect(
+        key: const ValueKey('no_video'),
+        borderRadius: BorderRadius.circular(widget.borderRadius),
+        child: Container(
+          width: widget.width,
+          height: widget.height,
+          color: Colors.grey.shade900,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.videocam_off_rounded,
+                color: Colors.white.withOpacity(0.5),
+                size: 40,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'No video available',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.6),
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Please check back later',
+                style: TextStyle(
+                  color: Colors.white.withOpacity(0.35),
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -120,15 +209,15 @@ class AppVideoPlayer extends StatelessWidget {
   }
 
   Widget _buildThumbnailImage() {
-    if (videoSource.thumbnailPath == null) {
+    if (widget.videoSource!.thumbnailPath == null) {
       return const Center(
         child: Icon(Icons.video_library, color: Colors.white, size: 50),
       );
     }
-    switch (videoSource.thumbnailType) {
+    switch (widget.videoSource!.thumbnailType) {
       case VideoSourceType.asset:
         return Image.asset(
-          videoSource.thumbnailPath!,
+          widget.videoSource!.thumbnailPath!,
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const Center(
             child: Icon(Icons.broken_image, color: Colors.white, size: 50),
@@ -136,7 +225,7 @@ class AppVideoPlayer extends StatelessWidget {
         );
       case VideoSourceType.network:
         return Image.network(
-          videoSource.thumbnailPath!,
+          widget.videoSource!.thumbnailPath!,
           fit: BoxFit.cover,
           loadingBuilder: (_, child, progress) {
             if (progress == null) return child;
@@ -156,7 +245,7 @@ class AppVideoPlayer extends StatelessWidget {
         );
       case VideoSourceType.file:
         return Image.file(
-          File(videoSource.thumbnailPath!),
+          File(widget.videoSource!.thumbnailPath!),
           fit: BoxFit.cover,
           errorBuilder: (_, __, ___) => const Center(
             child: Icon(Icons.broken_image, color: Colors.white, size: 50),
@@ -188,7 +277,6 @@ class AppVideoPlayer extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // ── Top: mute button ───────────────────────────────────────────
           Padding(
             padding: const EdgeInsets.only(top: 8, right: 10),
             child: Align(
@@ -203,10 +291,7 @@ class AppVideoPlayer extends StatelessWidget {
               ),
             ),
           ),
-
           const Spacer(),
-
-          // ── Centre: skip−5 | play/pause | skip+5 ──────────────────────
           Obx(
                 () => Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -235,10 +320,7 @@ class AppVideoPlayer extends StatelessWidget {
               ],
             ),
           ),
-
           const SizedBox(height: 8),
-
-          // ── Bottom: slider + time labels ───────────────────────────────
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
             child: Obx(() {
@@ -293,7 +375,6 @@ class AppVideoPlayer extends StatelessWidget {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
-  /// White circle button (play/pause centre)
   Widget _circleButton({required IconData icon, double size = 36}) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -305,7 +386,6 @@ class AppVideoPlayer extends StatelessWidget {
     );
   }
 
-  /// Translucent circle icon button (skip, mute)
   Widget _iconButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -324,8 +404,6 @@ class AppVideoPlayer extends StatelessWidget {
     );
   }
 }
-
-
 
 
 /*
