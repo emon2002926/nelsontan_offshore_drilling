@@ -233,9 +233,9 @@ class GameplayScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(optionEmojis[i],
-                    style:
-                    TextStyle(fontSize: context.responsiveFontSize(18))),
+                // Text(optionEmojis[i],
+                //     style:
+                //     TextStyle(fontSize: context.responsiveFontSize(18))),
                 SizedBox(width: context.responsiveSize(8)),
                 Flexible(
                   child: AppText(

@@ -388,30 +388,30 @@ class PuzzleGameScreen extends StatelessWidget {
 
           SizedBox(height: context.responsiveSize(16)),
 
-          Container(
-            padding: EdgeInsets.all(context.responsiveSize(16)),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8F9FB),
-              borderRadius:
-              BorderRadius.circular(context.responsiveSize(12)),
-              border: Border.all(
-                  color: const Color(0xFFF0F0F0), width: 1),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _statItem(context, '✅', 'Correct',
-                    '${result.totalCorrect}', Colors.green.shade700),
-                _statItem(context, '❌', 'Wrong',
-                    '${result.totalWrong}', Colors.red.shade700),
-                _statItem(context, '🎯', 'Missed',
-                    '${result.totalMissed}', Colors.orange.shade700),
-                _statItem(context, '📊', 'Score',
-                    '${result.percentage.toStringAsFixed(0)}%',
-                    const Color(0xFF0047AB)),
-              ],
-            ),
-          ),
+          // Container(
+          //   padding: EdgeInsets.all(context.responsiveSize(16)),
+          //   decoration: BoxDecoration(
+          //     color: const Color(0xFFF8F9FB),
+          //     borderRadius:
+          //     BorderRadius.circular(context.responsiveSize(12)),
+          //     border: Border.all(
+          //         color: const Color(0xFFF0F0F0), width: 1),
+          //   ),
+          //   child: Row(
+          //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+          //     children: [
+          //       _statItem(context, '✅', 'Correct',
+          //           '${result.totalCorrect}', Colors.green.shade700),
+          //       _statItem(context, '❌', 'Wrong',
+          //           '${result.totalWrong}', Colors.red.shade700),
+          //       _statItem(context, '🎯', 'Missed',
+          //           '${result.totalMissed}', Colors.orange.shade700),
+          //       _statItem(context, '📊', 'Score',
+          //           '${result.percentage.toStringAsFixed(0)}%',
+          //           const Color(0xFF0047AB)),
+          //     ],
+          //   ),
+          // ),
 
           SizedBox(height: context.responsiveSize(32)),
 
