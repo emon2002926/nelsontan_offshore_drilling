@@ -1,4 +1,3 @@
-// ── GET /card-submission/type-hazard-area ────────────────────────────────────
 
 class CardTypeHazardAreaModel {
   final List<AreaModel> areas;

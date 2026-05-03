@@ -1,8 +1,10 @@
 // features/notifications/presentation/notifications_screen.dart
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
+import '../../../core/widgets/app_bar/build_app_bar.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../controllers/notifications_controller.dart';
 import '../models/notification_model.dart';
@@ -12,25 +14,20 @@ class NotificationsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(NotificationsController());
+    // final controller = Get.put(NotificationsController());
+    final controller = Get.find<NotificationsController>();
+    // controller.fetchNotifications();
+
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xFF1A1A1A)),
-          onPressed: () => AppNavigation.pop(context),
-        ),
-        title: AppText(
-          data: 'Notifications',
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: const Color(0xFF1A1A1A),
-          useResponsiveFontSize: true,
-        ),
-        centerTitle: true,
+      appBar: BuildAppBar(
+        backgroundColor: Colors.transparent,
+        titleSize: 20,
+        fontWeight: FontWeight.w700,
+        backButtonIcon: CupertinoIcons.back,
+        title: "Notifications",
+        titleColor: const Color(0xFF1A1A1A),
       ),
       body: Obx(() {
         if (controller.isLoading.value) {

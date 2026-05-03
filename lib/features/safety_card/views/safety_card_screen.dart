@@ -18,6 +18,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../services/connectivity_service.dart';
+import '../services/sync_service.dart';
+
 class SafetyCardScreen extends StatelessWidget {
   SafetyCardScreen({super.key});
 
@@ -27,6 +30,8 @@ class SafetyCardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<SafetyCardController>();
+    // final controller = Get.put(SafetyCardController());
+    // controller.fetchDropdowns();
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -88,6 +93,40 @@ class SafetyCardScreen extends StatelessWidget {
                         ),
                       ],
                     ),
+
+
+                    // ── Connectivity / sync banner ───────────────────────────────────────
+                    Obx(() {
+                      final connectivity = Get.find<ConnectivityService>();
+                      final sync         = Get.find<SyncService>();
+
+                      if (sync.isSyncing.value) {
+                        return _buildBanner(
+                          context,
+                          color:   const Color(0xFF0047AB),
+                          icon:    Icons.sync,
+                          message: 'Syncing ${sync.pendingCount.value} pending card(s)…',
+                        );
+                      }
+                      if (!connectivity.isOnline.value && sync.pendingCount.value > 0) {
+                        return _buildBanner(
+                          context,
+                          color:   const Color(0xFFF59E0B),
+                          icon:    Icons.cloud_off,
+                          message: 'Offline — ${sync.pendingCount.value} card(s) queued to sync',
+                        );
+                      }
+                      if (!connectivity.isOnline.value) {
+                        return _buildBanner(
+                          context,
+                          color:   const Color(0xFFF59E0B),
+                          icon:    Icons.cloud_off,
+                          message: 'You\'re offline. Submissions will be saved locally.',
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                    SizedBox(height: context.responsiveSize(12)),
 
                     SizedBox(height: context.responsiveSize(24)),
 
@@ -239,6 +278,41 @@ class SafetyCardScreen extends StatelessWidget {
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────
+
+  Widget _buildBanner(
+      BuildContext context, {
+        required Color  color,
+        required IconData icon,
+        required String message,
+      }) {
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.symmetric(
+        horizontal: context.responsiveSize(12),
+        vertical:   context.responsiveSize(10),
+      ),
+      decoration: BoxDecoration(
+        color:        color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(context.responsiveSize(8)),
+        border:       Border.all(color: color.withOpacity(0.4)),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: context.responsiveSize(18)),
+          SizedBox(width: context.responsiveSize(8)),
+          Expanded(
+            child: AppText(
+              data:                message,
+              fontSize:            13,
+              fontWeight:          FontWeight.w500,
+              color:               color,
+              useResponsiveFontSize: true,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   Widget _buildLabel(BuildContext context, String text) {
     return AppText(
@@ -725,7 +799,6 @@ class SafetyCardScreen extends StatelessWidget {
   }
 }
 
-// ── Pulsing dot widget shown next to "Listening…" status ─────────────────
 class _PulsingDot extends StatefulWidget {
   final double size;
   const _PulsingDot({required this.size});

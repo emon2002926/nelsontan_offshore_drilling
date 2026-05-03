@@ -1,80 +1,69 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
-
 import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../auth/views/signin_screen.dart';
+import '../models/cached_dropdown_model.dart';
+import '../models/pending_submission_model.dart';
 import '../models/safety_card_model.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+
+import '../services/connectivity_service.dart';
+import '../services/hive_boxes.dart';
+import '../services/sync_service.dart';
 
 class SafetyCardController extends GetxController {
-  final ApiServices _api = Get.find<ApiServices>();
+  final ApiServices         _api          = Get.find<ApiServices>();
+  final ConnectivityService _connectivity = Get.find<ConnectivityService>();
+  final SyncService         _syncService  = Get.find<SyncService>();
 
-  // Form key
-  final formKey = GlobalKey<FormState>();
-
-  // Text Controllers
+  // ── Form ──────────────────────────────────────────────────────────────
+  final formKey               = GlobalKey<FormState>();
   final descriptionController = TextEditingController();
+  final descriptionFocus      = FocusNode();
 
-  // Focus Nodes
-  final descriptionFocus = FocusNode();
+  // ── Dropdown data ─────────────────────────────────────────────────────
+  final RxList<CardTypeModel>  cardTypes        = <CardTypeModel>[].obs;
+  final RxList<AreaModel>      areas            = <AreaModel>[].obs;
+  final RxList<HazardModel>    hazards          = <HazardModel>[].obs;
+  final RxBool                 isLoadingDropdowns = false.obs;
+  final Rx<DateTime?>          dropdownCachedAt = Rx<DateTime?>(null);
 
-  // ── API-driven dropdown data ─────────────────────────────────────────────
-  final RxList<CardTypeModel> cardTypes = <CardTypeModel>[].obs;
-  final RxList<AreaModel> areas         = <AreaModel>[].obs;
-  final RxList<HazardModel> hazards     = <HazardModel>[].obs;
-  final RxBool isLoadingDropdowns       = false.obs;
+  // ── Selections ────────────────────────────────────────────────────────
+  final Rx<CardTypeModel?>   selectedCardType    = Rx<CardTypeModel?>(null);
+  final Rx<AreaModel?>       selectedArea        = Rx<AreaModel?>(null);
+  final RxList<HazardModel>  selectedHazards     = <HazardModel>[].obs;
+  final Rx<String?>          selectedRiskSeverity = Rx<String?>('Medium');
+  final Rx<String?>          uploadedPhotoPath    = Rx<String?>(null);
 
-  // ── Selected values (hold the model, not just a string) ─────────────────
-  final Rx<CardTypeModel?> selectedCardType  = Rx<CardTypeModel?>(null);
-  final Rx<AreaModel?>     selectedArea      = Rx<AreaModel?>(null);
-  final RxList<HazardModel> selectedHazards  = <HazardModel>[].obs;
-
-  // ── Other fields ─────────────────────────────────────────────────────────
-  final Rx<String?>  selectedRiskSeverity  = Rx<String?>('Medium');
-  final Rx<String?>  uploadedPhotoPath     = Rx<String?>(null);
-  final RxBool actionTaken                 = false.obs;
-  final RxBool immediateActionRequired     = false.obs;
-  final RxBool submitAnonymously           = false.obs;
-  final RxBool isSubmitting                = false.obs;
+  // ── Toggles ───────────────────────────────────────────────────────────
+  final RxBool actionTaken             = false.obs;
+  final RxBool immediateActionRequired = false.obs;
+  final RxBool submitAnonymously       = false.obs;
+  final RxBool isSubmitting            = false.obs;
 
   final List<String> riskSeverities = ['Low', 'Medium', 'High'];
 
-  // ── Speech-to-Text ────────────────────────────────────────────────────────
+  // ── Speech ────────────────────────────────────────────────────────────
   final SpeechToText _speech           = SpeechToText();
   final RxBool       isListening       = false.obs;
   final RxBool       isSpeechAvailable = false.obs;
-  bool               _speechInitialized = false; // prevents re-init on every tap
+  bool               _speechInitialized = false;
+  String             _textBeforeListening = '';
 
-  // Snapshot of text before a listening session starts — so new words
-  // are appended rather than overwriting what the user already typed.
-  String _textBeforeListening = '';
-
-  // ── Helpers ───────────────────────────────────────────────────────────────
-
-  String hazardIcon(String name) {
-    final lower = name.toLowerCase();
-    if (lower.contains('fall'))     return '🪜';
-    if (lower.contains('chemical')) return '🧪';
-    if (lower.contains('struck'))   return '💥';
-    if (lower.contains('electric')) return '⚡';
-    if (lower.contains('fire'))     return '🔥';
-    return '⚠️';
-  }
-
-  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  // ── Lifecycle ─────────────────────────────────────────────────────────
 
   @override
   void onInit() {
     super.onInit();
-    // ✅ No _initSpeech() here — permission is requested only on first mic tap
     fetchDropdowns();
   }
 
@@ -86,113 +75,83 @@ class SafetyCardController extends GetxController {
     super.onClose();
   }
 
-  // ── Speech: lazy init (called only when user taps the mic) ───────────────
 
-  /// Initializes speech recognition the first time it's needed.
-  /// Returns true if available. Subsequent calls return the cached result.
-  Future<bool> _ensureSpeechInitialized() async {
-    if (_speechInitialized) return isSpeechAvailable.value;
-
-    isSpeechAvailable.value = await _speech.initialize(
-      onError: (error) {
-        isListening.value = false;
-        CustomSnackBar.error('Speech error: ${error.errorMsg}');
-      },
-      onStatus: (status) {
-        if (status == 'done' || status == 'notListening') {
-          isListening.value = false;
-        }
-      },
-    );
-
-    _speechInitialized = true;
-    return isSpeechAvailable.value;
-  }
-
-  /// Toggles listening on/off. Permission prompt fires here on first call.
-  Future<void> toggleListening() async {
-    // ── Stop if already listening ─────────────────────────────────────────
-    if (isListening.value) {
-      await _speech.stop();
-      isListening.value = false;
-      return;
-    }
-
-    // ── Init + permission on first tap only ───────────────────────────────
-    final available = await _ensureSpeechInitialized();
-    if (!available) {
-      CustomSnackBar.error('Speech recognition not available on this device');
-      return;
-    }
-
-    // ── Start listening ───────────────────────────────────────────────────
-    _textBeforeListening = descriptionController.text;
-    isListening.value    = true;
-
-    await _speech.listen(
-      onResult: (SpeechRecognitionResult result) {
-        final newWords = result.recognizedWords;
-        if (newWords.isNotEmpty) {
-          descriptionController.text = _textBeforeListening.isEmpty
-              ? newWords
-              : '$_textBeforeListening $newWords';
-
-          // Keep cursor at end while transcribing
-          descriptionController.selection = TextSelection.fromPosition(
-            TextPosition(offset: descriptionController.text.length),
-          );
-        }
-        // Lock in the transcribed text as the new baseline on final result
-        if (result.finalResult) {
-          _textBeforeListening = descriptionController.text;
-        }
-      },
-      listenFor:      const Duration(seconds: 60),
-      pauseFor:       const Duration(seconds: 4),
-      partialResults: true,
-      localeId:       'en_US',
-      cancelOnError:  true,
-      listenMode:     ListenMode.confirmation,
-    );
-  }
-
-  // ── GET /card-submission/type-hazard-area ─────────────────────────────────
-
+// ── fetchDropdowns — simplified ───────────────────────────────────────
   Future<void> fetchDropdowns() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
-      CustomSnackBar.error('Session expired. Please sign in again.');
       AppNavigation.pushAndClear(const SignInScreen());
       return;
     }
 
-    isLoadingDropdowns.value = true;
-    try {
-      final raw = await _api.get(
-        '/card-submission/type-hazard-area',
-        headers: {'Authorization': 'Bearer $token'},
-      );
+    if (_connectivity.isOnline.value) {
+      // ── Online: fetch from API, save to Hive, done ──────────────────
+      isLoadingDropdowns.value = true;
+      try {
+        final raw = await _api.get(
+          '/card-submission/type-hazard-area',
+          headers: {'Authorization': 'Bearer $token'},
+        );
 
-      final data = CardTypeHazardAreaModel.fromJson(
-        raw['data'] as Map<String, dynamic>,
-      );
+        final data = CardTypeHazardAreaModel.fromJson(
+          raw['data'] as Map<String, dynamic>,
+        );
 
-      cardTypes.assignAll(data.cardTypes);
-      areas.assignAll(data.areas);
-      hazards.assignAll(data.hazards);
+        cardTypes.assignAll(data.cardTypes);
+        areas.assignAll(data.areas);
+        hazards.assignAll(data.hazards);
 
-      // Default first card type selected
-      if (cardTypes.isNotEmpty) selectedCardType.value = cardTypes.first;
-    } on HttpException catch (e) {
-      CustomSnackBar.error(e.message);
-    } catch (e) {
-      CustomSnackBar.error('Failed to load form data. Please try again.');
-    } finally {
-      isLoadingDropdowns.value = false;
+        if (cardTypes.isNotEmpty) selectedCardType.value = cardTypes.first;
+
+        // Silently cache for offline use
+        await _saveDropdownsToCache(data);
+
+      } on HttpException catch (e) {
+        CustomSnackBar.error(e.message);
+      } catch (e) {
+        CustomSnackBar.error('Failed to load form data. Please try again.');
+      } finally {
+        isLoadingDropdowns.value = false;
+      }
+
+    } else {
+      // ── Offline: load from Hive silently, no banners, no popups ────
+      _loadDropdownsFromCache();
     }
   }
 
-  // ── POST /card-submission/create (multipart/form-data) ───────────────────
+
+
+  void _loadDropdownsFromCache() {
+    final cached = HiveBoxes.dropdownBox.get(HiveBoxes.dropdownCacheKey);
+    if (cached == null) return;
+
+    cardTypes.assignAll(
+      cached.cardTypes.map((e) => CardTypeModel.fromJson(Map<String, dynamic>.from(e))).toList(),
+    );
+    areas.assignAll(
+      cached.areas.map((e) => AreaModel.fromJson(Map<String, dynamic>.from(e))).toList(),
+    );
+    hazards.assignAll(
+      cached.hazards.map((e) => HazardModel.fromJson(Map<String, dynamic>.from(e))).toList(),
+    );
+
+    if (cardTypes.isNotEmpty) selectedCardType.value = cardTypes.first;
+    dropdownCachedAt.value = cached.cachedAt;
+  }
+
+  Future<void> _saveDropdownsToCache(CardTypeHazardAreaModel data) async {
+    final entry = CachedDropdownModel(
+      areas:      data.areas.map((e) => {'id': e.id, 'name': e.name, 'color': e.color}).toList(),
+      cardTypes:  data.cardTypes.map((e) => {'id': e.id, 'name': e.name}).toList(),
+      hazards:    data.hazards.map((e) => {'id': e.id, 'name': e.name}).toList(),
+      cachedAt:   DateTime.now(),
+    );
+    await HiveBoxes.dropdownBox.put(HiveBoxes.dropdownCacheKey, entry);
+    dropdownCachedAt.value = entry.cachedAt;
+  }
+
+  // ── Submit — online posts directly, offline saves to Hive ────────────
 
   Future<void> submitSafetyCard(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
@@ -212,12 +171,29 @@ class SafetyCardController extends GetxController {
 
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
-      CustomSnackBar.error('Session expired. Please sign in again.');
       AppNavigation.pushAndClear(const SignInScreen());
       return;
     }
 
     isSubmitting.value = true;
+    try {
+      if (_connectivity.isOnline.value) {
+        // ── Online: submit normally, also drain any pending queue ──────
+        await _submitOnline(token);
+        _drainPendingQueue(token); // fire and forget, no await
+      } else {
+        // ── Offline: save to Hive silently ─────────────────────────────
+        await _saveToHive();
+      }
+    } finally {
+      isSubmitting.value = false;
+    }
+  }
+
+
+
+
+  Future<void> _submitOnline(String token) async {
     try {
       final fields = <String, String>{
         'cardTypeId':        selectedCardType.value!.id.toString(),
@@ -245,16 +221,173 @@ class SafetyCardController extends GetxController {
       CustomSnackBar.success('Safety card submitted successfully!');
       await Future.delayed(const Duration(milliseconds: 500));
       resetForm();
+
     } on HttpException catch (e) {
       CustomSnackBar.error(e.message);
     } catch (e) {
-      CustomSnackBar.error('Failed to submit safety card. Please try again.');
-    } finally {
-      isSubmitting.value = false;
+      CustomSnackBar.error('Failed to submit. Please try again.');
     }
   }
 
-  // ── Validators ────────────────────────────────────────────────────────────
+
+  Future<void> _saveToHive() async {
+    try {
+      String? savedImagePath;
+      if (uploadedPhotoPath.value != null) {
+        savedImagePath = await _copyImageToDocuments(uploadedPhotoPath.value!);
+      }
+
+      final submission = PendingSubmissionModel(
+        localId:           const Uuid().v4(),
+        cardTypeId:        selectedCardType.value!.id,
+        areaId:            selectedArea.value!.id,
+        hazardIds:         selectedHazards.map((h) => h.id).toList(),
+        description:       descriptionController.text.trim(),
+        riskSeverity:      (selectedRiskSeverity.value ?? 'Medium').toUpperCase(),
+        actionTaken:       actionTaken.value,
+        immediateAction:   immediateActionRequired.value,
+        submitAnonymously: submitAnonymously.value,
+        localImagePath:    savedImagePath,
+        createdAt:         DateTime.now(),
+      );
+
+      await HiveBoxes.pendingBox.put(submission.localId, submission);
+
+      CustomSnackBar.success('Safety card submitted successfully!');
+      await Future.delayed(const Duration(milliseconds: 500));
+      resetForm();
+
+    } catch (e) {
+      CustomSnackBar.error('Failed to save. Please try again.');
+    }
+  }
+
+
+  Future<void> _drainPendingQueue(String token) async {
+    final pending = HiveBoxes.pendingBox.values.toList()
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    for (final submission in pending) {
+      try {
+        final fields = <String, String>{
+          'cardTypeId':        submission.cardTypeId.toString(),
+          'areaId':            submission.areaId.toString(),
+          'hazardId':          submission.hazardIds.first.toString(),
+          'description':       submission.description,
+          'riskSeverity':      submission.riskSeverity,
+          'actionTaken':       submission.actionTaken.toString(),
+          'immediateAction':   submission.immediateAction.toString(),
+          'submitAnonymously': submission.submitAnonymously.toString(),
+        };
+
+        final imageFile = submission.localImagePath != null
+            ? File(submission.localImagePath!)
+            : null;
+
+        await _api.postFormData(
+          '/card-submission/create',
+          headers: {'Authorization': 'Bearer $token'},
+          fields: fields,
+          imageFile: imageFile,
+          imageFieldName: 'media',
+        );
+
+        await submission.delete(); // success → remove from Hive
+
+      } catch (_) {
+        // Silent fail — will retry next time user is online
+      }
+    }
+  }
+
+
+
+
+
+
+
+  /// Copies picked image from temp cache → app documents so it survives
+  /// cache clears and long offline periods on the rig.
+  Future<String> _copyImageToDocuments(String tempPath) async {
+    final docsDir  = await getApplicationDocumentsDirectory();
+    final fileName = 'safety_${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final destPath = '${docsDir.path}/$fileName';
+    await File(tempPath).copy(destPath);
+    return destPath;
+  }
+
+
+  Future<bool> _ensureSpeechInitialized() async {
+    if (_speechInitialized) return isSpeechAvailable.value;
+
+    isSpeechAvailable.value = await _speech.initialize(
+      onError: (error) {
+        isListening.value = false;
+        CustomSnackBar.error('Speech error: ${error.errorMsg}');
+      },
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          isListening.value = false;
+        }
+      },
+    );
+
+    _speechInitialized = true;
+    return isSpeechAvailable.value;
+  }
+
+  Future<void> toggleListening() async {
+    if (isListening.value) {
+      await _speech.stop();
+      isListening.value = false;
+      return;
+    }
+
+    final available = await _ensureSpeechInitialized();
+    if (!available) {
+      CustomSnackBar.error('Speech recognition not available on this device');
+      return;
+    }
+
+    _textBeforeListening = descriptionController.text;
+    isListening.value    = true;
+
+    await _speech.listen(
+      onResult: (SpeechRecognitionResult result) {
+        final newWords = result.recognizedWords;
+        if (newWords.isNotEmpty) {
+          descriptionController.text = _textBeforeListening.isEmpty
+              ? newWords
+              : '$_textBeforeListening $newWords';
+
+          descriptionController.selection = TextSelection.fromPosition(
+            TextPosition(offset: descriptionController.text.length),
+          );
+        }
+        if (result.finalResult) {
+          _textBeforeListening = descriptionController.text;
+        }
+      },
+      listenFor:      const Duration(seconds: 60),
+      pauseFor:       const Duration(seconds: 4),
+      partialResults: true,
+      localeId:       'en_US',
+      cancelOnError:  true,
+      listenMode:     ListenMode.confirmation,
+    );
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────────────
+
+  String hazardIcon(String name) {
+    final lower = name.toLowerCase();
+    if (lower.contains('fall'))     return '🪜';
+    if (lower.contains('chemical')) return '🧪';
+    if (lower.contains('struck'))   return '💥';
+    if (lower.contains('electric')) return '⚡';
+    if (lower.contains('fire'))     return '🔥';
+    return '⚠️';
+  }
 
   String? validateDescription(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -266,12 +399,9 @@ class SafetyCardController extends GetxController {
     return null;
   }
 
-  // ── Image picker ──────────────────────────────────────────────────────────
-
   Future<void> pickImage(BuildContext context, ImageSource source) async {
     try {
-      final picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
+      final XFile? image = await ImagePicker().pickImage(
         source:       source,
         maxWidth:     1920,
         maxHeight:    1080,
@@ -332,8 +462,6 @@ class SafetyCardController extends GetxController {
       ),
     );
   }
-
-  // ── Reset ─────────────────────────────────────────────────────────────────
 
   void resetForm() {
     descriptionController.clear();

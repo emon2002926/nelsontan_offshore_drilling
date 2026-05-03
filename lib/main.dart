@@ -5,6 +5,9 @@ import 'package:get_storage/get_storage.dart';
 import 'core/bindings/app_bindings.dart';
 import 'core/services/api_services.dart';
 import 'core/util/app_navigation.dart';
+import 'features/safety_card/services/connectivity_service.dart';
+import 'features/safety_card/services/hive_boxes.dart';
+import 'features/safety_card/services/sync_service.dart';
 import 'features/splash/controller/splash_controller.dart';
 import 'features/splash/views/splash_screen.dart';
 void main() async{
@@ -15,6 +18,15 @@ void main() async{
   // Get.put(ApiServices(baseUrl: 'http://10.10.7.108:8000/api/v1'));
   Get.put(ApiServices(baseUrl: 'https://safe.dsrt321.online/api/v1'));
   Get.put(SplashController());
+
+  await HiveBoxes.init();
+
+  // open boxes
+  final connectivity = ConnectivityService();
+  await connectivity.init();
+  Get.put(connectivity, permanent: true);
+
+  Get.put(SyncService(), permanent: true);
 
 
   SystemChrome.setPreferredOrientations([
