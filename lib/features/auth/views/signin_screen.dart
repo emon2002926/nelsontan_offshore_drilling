@@ -163,7 +163,6 @@ class SignInScreen extends StatelessWidget {
               isLoading: controller.isLoading,
               loadingMessage: 'Signing you in...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),

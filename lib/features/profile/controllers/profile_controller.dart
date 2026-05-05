@@ -52,21 +52,16 @@ class ProfileController extends GetxController {
   final positionController = TextEditingController();
   final phoneController    = TextEditingController();
 
-  // ── Observables ─────────────────────────────────────────────────────────────
   final isLoadingProfile = false.obs;
   final isUpdating       = false.obs;
   final profileImageUrl  = Rxn<String>();
   final pickedImage      = Rxn<File>();
 
-  // ── Box shorthand ──────────────────────────────────────────────────────────
-  // HiveBoxes.init() already ran in main() → box is guaranteed open here.
-  Box<ProfileHiveModel> get _box => HiveBoxes.profileBox;
 
-  // ── Auth ───────────────────────────────────────────────────────────────────
+  Box<ProfileHiveModel> get _box => HiveBoxes.profileBox;
   String? get _token => StorageService.accessToken;
   Map<String, String> get _authHeader => {"Authorization": "Bearer $_token"};
 
-  // ── Lifecycle ────────────────────────────────────────────────────────────────
 
   @override
   void onInit() {
@@ -84,37 +79,26 @@ class ProfileController extends GetxController {
     super.onClose();
   }
 
-  // ── Init ───────────────────────────────────────────────────────────────────
 
   Future<void> _init() async {
-    // Box is already open — synchronous read, no await needed
     final cached = _box.get(HiveBoxes.profileCacheKey);
-
     if (cached != null) {
-      // Has local data → fill UI instantly, no spinner
       _populateFields(cached.toDomain());
     }
-
     if (_connectivity.isOnline.value) {
-      // Online → fetch fresh from API (will also update cache)
       await fetchProfile();
     }
-    // Offline + no cache → fields stay empty, nothing shown
-
-    // Auto-refresh the moment device reconnects
     _connectivity.onConnected.listen((_) => fetchProfile());
   }
 
-  // ── Cache helpers ──────────────────────────────────────────────────────────
+
 
   bool get _hasCachedData => _box.containsKey(HiveBoxes.profileCacheKey);
-
   Future<void> _saveToCache(ProfileModel model) =>
       _box.put(HiveBoxes.profileCacheKey, ProfileHiveModel.fromDomain(model));
-
   Future<void> _clearCache() => _box.delete(HiveBoxes.profileCacheKey);
 
-  // ── Field helpers ──────────────────────────────────────────────────────────
+
 
   void _populateFields(ProfileModel model) {
     nameController.text     = model.name;
@@ -139,29 +123,22 @@ class ProfileController extends GetxController {
     "phone":        phoneController.text.trim(),
   };
 
-  // ── API ────────────────────────────────────────────────────────────────────
 
   Future<void> fetchProfile() async {
     final hadCache = _hasCachedData;
-
-    // Show full-screen spinner only when there's nothing cached yet
     if (!hadCache) isLoadingProfile.value = true;
-
     try {
       final raw      = await _api.get('/user/profile', headers: _authHeader);
       final response = ProfileResponseModel.fromJson(raw);
-
       if (response.success && response.data != null) {
         final model = response.data!;
         _populateFields(model);
-        await _saveToCache(model); // ✅ persist fresh data to Hive
+        await _saveToCache(model);
       }
     } on HttpException catch (e) {
       if (!hadCache) CustomSnackBar.error(e.message);
     } catch (e) {
       debugPrint('[ProfileController] fetchProfile error: $e');
-      // Has cache → silent fail, user sees last known data
-      // No cache  → show error snackbar
       if (!hadCache) CustomSnackBar.error('Failed to load profile. Please try again.');
     } finally {
       isLoadingProfile.value = false;
@@ -178,7 +155,6 @@ class ProfileController extends GetxController {
 
   Future<void> saveProfile() async {
     if (!_isFormValid) return;
-
     isUpdating.value = true;
     try {
       await _api.putFormData(
@@ -190,7 +166,7 @@ class ProfileController extends GetxController {
       );
 
       CustomSnackBar.success('Profile updated successfully!');
-      await fetchProfile(); // re-fetch → also updates cache
+      await fetchProfile();
     } on HttpException catch (e) {
       CustomSnackBar.error(e.message);
     } catch (e) {
@@ -202,7 +178,7 @@ class ProfileController extends GetxController {
   }
 
   Future<void> logout() async {
-    await _clearCache(); // wipe profile on logout
+    await _clearCache();
     await StorageService.logout();
     AppNavigation.pushAndClear(OnboardingScreen());
   }

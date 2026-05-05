@@ -146,7 +146,6 @@ class ResetPasswordScreen extends StatelessWidget {
               isLoading: controller.isLoading,
               loadingMessage: 'Updating your password...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),

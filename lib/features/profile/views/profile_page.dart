@@ -60,7 +60,6 @@ class ProfilePage extends StatelessWidget {
               isLoading: controller.isUpdating,
               loadingMessage: 'Updating your profile...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),
@@ -68,7 +67,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ── Display widgets ────────────────────────────────────────────────────────
 
   Widget _buildNameDisplay(ProfileController controller) =>
       ValueListenableBuilder<TextEditingValue>(
@@ -98,7 +96,7 @@ class ProfilePage extends StatelessWidget {
         ),
       );
 
-  // ── Form fields ────────────────────────────────────────────────────────────
+
 
   List<Widget> _buildFormFields(
       BuildContext context, ProfileController controller) {

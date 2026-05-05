@@ -166,70 +166,54 @@ import '../text/app_text.dart';
       return screenWidth * (size / 375);
     }
 
-    /// Static method to show full-screen loading overlay (Soul-gate style)
     static Widget buildLoadingOverlay({
       required RxBool isLoading,
       required String loadingMessage,
       Color? backgroundColor,
-      Color? cardColor,
     }) {
       return Obx(
             () => isLoading.value
             ? Container(
-          color: (backgroundColor ?? Colors.black).withOpacity(0.5),
+          color: (backgroundColor ?? Colors.black).withOpacity(0.45),
           child: Center(
             child: Builder(
               builder: (context) {
-                // Use local helper function for static method
-                double getResponsiveSize(double size) {
-                  final screenWidth = MediaQuery.of(context).size.width;
-                  return screenWidth * (size / 375);
-                }
+                double rs(double size) =>
+                    MediaQuery.of(context).size.width * (size / 375);
 
-                return Container(
-                  padding: EdgeInsets.all(getResponsiveSize(24)),
-                  margin: EdgeInsets.symmetric(
-                    horizontal: getResponsiveSize(40),
-                  ),
-                  decoration: BoxDecoration(
-                    color: cardColor ?? const Color(0xFFF5F5DC),
-                    borderRadius: BorderRadius.circular(
-                      getResponsiveSize(16),
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 20,
-                        offset: const Offset(0, 10),
+                return Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      height: rs(72),
+                      width: rs(72),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
                       ),
-                    ],
-                  ),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      SizedBox(
-                        height: getResponsiveSize(40),
-                        width: getResponsiveSize(40),
-                        child: const CircularProgressIndicator(
-                          valueColor: AlwaysStoppedAnimation(
-                            Color(0xFF9B7EBD),
+                      child: Padding(
+                        padding: EdgeInsets.all(rs(18)),
+                        child: CircularProgressIndicator(
+                          valueColor: const AlwaysStoppedAnimation(
+                            Color(0xFF0047AB),
                           ),
-                          strokeWidth: 3,
+                          strokeWidth: 2.5,
+                          strokeCap: StrokeCap.round,
                         ),
                       ),
-                      SizedBox(height: getResponsiveSize(20)),
-                      Text(
-                        loadingMessage,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: getResponsiveSize(16),
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF4A4A4A),
-                          letterSpacing: 0.5,
-                        ),
+                    ),
+                    SizedBox(height: rs(14)),
+                    Text(
+                      loadingMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: rs(13),
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white,
+                        letterSpacing: 0.3,
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 );
               },
             ),

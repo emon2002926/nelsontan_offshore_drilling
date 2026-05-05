@@ -231,7 +231,6 @@ class OtpVerificationScreen extends StatelessWidget {
               isLoading: controller.isLoading,
               loadingMessage: 'Verifying your code...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),

@@ -13,7 +13,7 @@ import '../services/connectivity_service.dart';
 import '../services/hive_boxes.dart';
 
 class DailyDebriefController extends GetxController {
-  final ApiServices         _api          = Get.find<ApiServices>();
+  final ApiServices   _api  = Get.find<ApiServices>();
   final ConnectivityService _connectivity = Get.find<ConnectivityService>();
 
   final formKey = GlobalKey<FormState>();

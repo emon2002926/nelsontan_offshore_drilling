@@ -213,7 +213,6 @@ class SignUpScreen extends StatelessWidget {
               isLoading: controller.isLoading,
               loadingMessage: 'Creating your account...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),

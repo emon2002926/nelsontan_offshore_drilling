@@ -1,4 +1,3 @@
-// lib/features/video_player/controllers/video_player_controller.dart
 
 import 'dart:io';
 
@@ -43,14 +42,12 @@ class AppVideoPlayerController extends GetxController {
 
       await videoController!.initialize();
 
-      // Read duration immediately after initialize — works for most formats
       final initialDuration = videoController!.value.duration;
       if (initialDuration > Duration.zero) {
         totalDuration.value = initialDuration;
       }
 
-      // Listener keeps updating duration in case it arrives late
-      // (common with some HTTP servers / containers)
+
       videoController!.addListener(_videoListener);
 
       isInitialized.value = true;
@@ -68,7 +65,6 @@ class AppVideoPlayerController extends GetxController {
     currentPosition.value = value.position;
     isPlaying.value       = value.isPlaying;
 
-    // Always update duration from listener — some servers report it late
     if (value.duration > Duration.zero &&
         value.duration != totalDuration.value) {
       totalDuration.value = value.duration;

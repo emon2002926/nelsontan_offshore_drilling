@@ -35,11 +35,9 @@ class VideoPlayerScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ── Header ──────────────────────────────────────────────
             SizedBox(height: context.heightPercentage(1),),
 
             _buildHeader(context),
-            // ── Video thumbnail / player ────────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: ClipRRect(
@@ -60,7 +58,6 @@ class VideoPlayerScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // ── Video title & description ───────────────────────────
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
@@ -86,7 +83,6 @@ class VideoPlayerScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            // ── Inline playback controls ────────────────────────────
             _InlinePlayerControls(videoSource: videoSource),
           ],
         ),
@@ -153,10 +149,6 @@ class VideoPlayerScreen extends StatelessWidget {
   }
 
 }
-
-// ---------------------------------------------------------------------------
-// Inline controls bar (play button + slider + duration) shown below the video
-// ---------------------------------------------------------------------------
 class _InlinePlayerControls extends StatelessWidget {
   final VideoSource videoSource;
 
@@ -220,13 +212,11 @@ class _InlinePlayerControls extends StatelessWidget {
             const SizedBox(width: 4),
 
             // Duration label
-            Text(
-              controller.formatDuration(duration),
-              style: const TextStyle(
+            AppText(
+              data: controller.formatDuration(duration),
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF0057B8),
-              ),
             ),
           ],
         );

@@ -231,7 +231,6 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
                 isLoading: controller.isSubmitting,
                 loadingMessage: 'Submitting debrief...',
                 backgroundColor: Colors.black,
-                cardColor: Colors.white,
               )
                   : const SizedBox.shrink(),
             ),

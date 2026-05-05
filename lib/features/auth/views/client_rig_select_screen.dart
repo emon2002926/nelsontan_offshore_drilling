@@ -129,7 +129,6 @@ class ClientRigSelectScreen extends StatelessWidget {
               isLoading: controller.isSubmitting,
               loadingMessage: 'Submitting your request...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),

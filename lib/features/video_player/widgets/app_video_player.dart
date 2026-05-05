@@ -46,6 +46,22 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
   }
 
   @override
+  void dispose() {
+    final tag = widget.tag ?? widget.videoSource?.path;
+    if (tag != null) {
+      try {
+        final controller = Get.find<AppVideoPlayerController>(tag: tag);
+        if (controller.isPlaying.value) {
+          controller.togglePlayPause(); // only toggle if actually playing
+        }
+      } catch (_) {}
+      Get.delete<AppVideoPlayerController>(tag: tag);
+    }
+    super.dispose();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     // ── No video source ─────────────────────────────────────────────────────
     if (widget.videoSource == null) {

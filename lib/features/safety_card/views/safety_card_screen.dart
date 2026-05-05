@@ -267,7 +267,6 @@ class SafetyCardScreen extends StatelessWidget {
                 isLoading:       controller.isSubmitting,
                 loadingMessage:  'Submitting safety card...',
                 backgroundColor: Colors.black,
-                cardColor:       Colors.white,
               )
                   : const SizedBox.shrink(),
             ),

@@ -114,7 +114,6 @@ class ForgetPasswordScreen extends StatelessWidget {
               isLoading: controller.isLoading,
               loadingMessage: 'Sending reset link...',
               backgroundColor: Colors.black,
-              cardColor: Colors.white,
             ),
           ],
         ),
