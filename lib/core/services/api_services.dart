@@ -20,8 +20,6 @@ class ApiServices {
     "Content-Type": "application/json",
   };
 
-  // ── MIME helper ──────────────────────────────────────────────────────────
-  // Returns [type, subtype] e.g. ['image', 'jpeg'] or ['video', 'mp4']
   List<String> _mimeType(String extension) {
     switch (extension.toLowerCase()) {
       case 'jpg':
@@ -159,7 +157,7 @@ class ApiServices {
     }
 
     throw HttpException(
-      message: errorMessage,   // ← now carries the real server message
+      message: errorMessage,
       statusCode: response.statusCode,
       uri: url,
       body: response.body,

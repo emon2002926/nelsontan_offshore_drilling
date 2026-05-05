@@ -19,7 +19,6 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // final controller = Get.put(DailyDebriefController());
     final controller = Get.find<DailyDebriefController>();
 
     return Scaffold(
