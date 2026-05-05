@@ -52,7 +52,7 @@ class AppTextField extends StatelessWidget {
     this.inputTextColor,
     this.hintTextColor,
     this.useResponsiveSize = true,
-    this.elevation = 8,
+    this.elevation = 4,
     this.shadowColor,
     this.customBorderRadius,
   });

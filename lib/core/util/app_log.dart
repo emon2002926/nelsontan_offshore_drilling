@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 
+import '../widgets/snakbar/custom_snackbar.dart';
+
 
 class AppLog {
   AppLog._();
@@ -26,7 +28,28 @@ class AppLog {
     }());
   }
 
-  static void error(String endpoint, dynamic error, {int? statusCode}) {
+  static void error(String endpoint, dynamic error, {int? statusCode, bool showSnackBar = true}) {
+    // Extract a clean message from the error body
+    String? snackMessage;
+
+    if (error is String) {
+      try {
+        final decoded = jsonDecode(error);
+        snackMessage = decoded['message'] as String?;
+      } catch (_) {
+        snackMessage = error; // plain string fallback
+      }
+    } else if (error is Map) {
+      snackMessage = error['message'] as String?;
+    }
+
+    snackMessage ??= 'Something went wrong. Please try again.';
+
+    // Show snackbar automatically
+    if (showSnackBar) {
+      CustomSnackBar.error(snackMessage);
+    }
+
     assert(() {
       debugPrint('┌─────────────────────────────────────────');
       debugPrint('│ ❌ ERROR ← $endpoint');

@@ -1,4 +1,3 @@
-// sign_in_response_model.dart
 
 class SignInResponseModel {
   final bool success;

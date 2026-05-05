@@ -18,30 +18,25 @@ class DailyDebriefController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
 
-  // ── Text Controllers ───────────────────────────────────────────────────
   final whatHappenedController   = TextEditingController();
   final whatWorkedWellController = TextEditingController();
   final whatImprovedController   = TextEditingController();
 
-  // ── Focus Nodes ────────────────────────────────────────────────────────
   final whatHappenedFocus   = FocusNode();
   final whatWorkedWellFocus = FocusNode();
   final whatImprovedFocus   = FocusNode();
 
-  // ── Dropdown data ──────────────────────────────────────────────────────
+  // Dropdown data
   final RxList<ActivityModel>    activities   = <ActivityModel>[].obs;
   final RxList<DebriefTypeModel> debriefTypes = <DebriefTypeModel>[].obs;
   final RxBool isLoadingDropdowns = false.obs;
 
-  // ── Selected values ────────────────────────────────────────────────────
   final Rx<ActivityModel?>    selectedActivity    = Rx<ActivityModel?>(null);
   final Rx<DebriefTypeModel?> selectedDebriefType = Rx<DebriefTypeModel?>(null);
 
-  // ── Toggles ────────────────────────────────────────────────────────────
   final RxBool submitAnonymously = false.obs;
   final RxBool isSubmitting      = false.obs;
 
-  // ── Lifecycle ──────────────────────────────────────────────────────────
 
   @override
   void onInit() {
@@ -60,7 +55,6 @@ class DailyDebriefController extends GetxController {
     super.onClose();
   }
 
-  // ── Dropdowns — cache first, API when online ───────────────────────────
 
   Future<void> fetchDropdowns() async {
     final token = StorageService.accessToken;

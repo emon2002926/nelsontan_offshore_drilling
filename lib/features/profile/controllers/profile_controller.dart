@@ -2,138 +2,76 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_services.dart';
+import '../../../core/services/local_cache_service.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/form_validator.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../auth/models/sign_in_response_model.dart';
 import '../../onboarding/views/onboarding_screen.dart';
-// ── Controller ────────────────────────────────────────────────────────────────
+import '../../safety_card/services/connectivity_service.dart';
+import '../../safety_card/services/hive_boxes.dart';
+import '../data/models/profile_hive_model.dart';
+import '../data/models/profile_model.dart';
+import 'dart:io';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+
+/// ─────────────────────────────────────────────────────────────────────────────
+/// ProfileController  –  with offline-first Hive caching
+///
+/// Strategy
+/// ─────────
+///  1. onInit → open the Hive box (fast, local).
+///  2. If cached data exists → populate UI immediately (no loading spinner).
+///  3. Always call the API in the background.
+///  4. When the API responds → update UI + overwrite the cache.
+///  5. If the API fails AND there is no cache → show an error.
+///  6. If the API fails BUT cache exists → silently keep showing cached data.
+/// ─────────────────────────────────────────────────────────────────────────────
+import 'dart:io';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'dart:io';
+import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
-  final ApiServices _api = Get.find<ApiServices>();
+  final ApiServices         _api          = Get.find<ApiServices>();
+  final ConnectivityService _connectivity = Get.find<ConnectivityService>();
 
+  // ── Text controllers ────────────────────────────────────────────────────────
   final nameController     = TextEditingController();
   final emailController    = TextEditingController();
   final companyController  = TextEditingController();
   final positionController = TextEditingController();
   final phoneController    = TextEditingController();
 
-  final isLoadingProfile = true.obs;
+  // ── Observables ─────────────────────────────────────────────────────────────
+  final isLoadingProfile = false.obs;
   final isUpdating       = false.obs;
   final profileImageUrl  = Rxn<String>();
   final pickedImage      = Rxn<File>();
 
+  // ── Box shorthand ──────────────────────────────────────────────────────────
+  // HiveBoxes.init() already ran in main() → box is guaranteed open here.
+  Box<ProfileHiveModel> get _box => HiveBoxes.profileBox;
+
+  // ── Auth ───────────────────────────────────────────────────────────────────
+  String? get _token => StorageService.accessToken;
+  Map<String, String> get _authHeader => {"Authorization": "Bearer $_token"};
+
+  // ── Lifecycle ────────────────────────────────────────────────────────────────
+
   @override
   void onInit() {
     super.onInit();
-    fetchProfile();
-  }
-
-  // ── GET /user/profile ─────────────────────────────────────────────────────
-  Future<void> fetchProfile() async {
-    isLoadingProfile.value = true;
-    try {
-      final token = StorageService.accessToken;
-      final raw   = await _api.get(
-        '/user/profile',
-        headers: {"Authorization": "Bearer $token"},
-      );
-
-      final user = UserModel.fromJson(raw["data"]);
-
-      nameController.text     = user.name;
-      emailController.text    = user.email;
-      companyController.text  = user.entryCompany;
-      positionController.text = user.position;
-      phoneController.text    = user.phone;
-      profileImageUrl.value   = user.profile;
-
-      // Keep storage in sync with latest profile
-      await StorageService.saveUser(user);
-
-    } on HttpException catch (e) {
-      CustomSnackBar.error(e.message);
-    } catch (e) {
-      CustomSnackBar.error('Failed to load profile. Please try again.');
-    } finally {
-      isLoadingProfile.value = false;
-    }
-  }
-
-  // ── Image picker ──────────────────────────────────────────────────────────
-  Future<void> changeProfilePhoto() async {
-    final picker = ImagePicker();
-    final picked = await picker.pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 80,
-    );
-    if (picked != null) {
-      pickedImage.value = File(picked.path);
-    }
-  }
-
-  // ── PUT /user/update  (form-data) ─────────────────────────────────────────
-  Future<void> saveProfile() async {
-    final name     = nameController.text.trim();
-    final company  = companyController.text.trim();
-    final position = positionController.text.trim();
-    final phone    = phoneController.text.trim();
-
-    final isValid = FormValidator.validateAll([
-      FormFieldEntry(value: name,     errorMessage: 'Name is required'),
-      FormFieldEntry(value: company,  errorMessage: 'Company name is required'),
-      FormFieldEntry(value: position, errorMessage: 'Position is required'),
-      FormFieldEntry(value: phone,    errorMessage: 'Phone number is required'),
-    ]);
-    if (!isValid) return;
-
-    isUpdating.value = true;
-    try {
-      final token  = StorageService.accessToken;
-      final fields = {
-        "name":          name,
-        "entryCompany":  company,
-        "position":      position,
-        "phone":         phone,
-      };
-
-      if (pickedImage.value != null) {
-        // Has new image → multipart
-        await _api.putFormData(
-          '/user/update',
-          headers: {"Authorization": "Bearer $token"},
-          fields: fields,
-          imageFile: pickedImage.value,
-          imageFieldName: "image",
-        );
-      } else {
-        // No image change → regular form-data with text fields only
-        await _api.putFormData(
-          '/user/update',
-          headers: {"Authorization": "Bearer $token"},
-          fields: fields,
-        );
-      }
-
-      CustomSnackBar.success('Profile updated successfully!');
-      await fetchProfile(); // refresh with latest data
-
-    } on HttpException catch (e) {
-      CustomSnackBar.error(e.message);
-    } catch (e) {
-      CustomSnackBar.error('Failed to update profile. Please try again.');
-    } finally {
-      isUpdating.value = false;
-    }
-  }
-
-  Future<void> logout() async {
-    await StorageService.logout();
-    AppNavigation.pushAndClear(OnboardingScreen());
+    _init();
   }
 
   @override
@@ -144,5 +82,128 @@ class ProfileController extends GetxController {
     positionController.dispose();
     phoneController.dispose();
     super.onClose();
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+
+  Future<void> _init() async {
+    // Box is already open — synchronous read, no await needed
+    final cached = _box.get(HiveBoxes.profileCacheKey);
+
+    if (cached != null) {
+      // Has local data → fill UI instantly, no spinner
+      _populateFields(cached.toDomain());
+    }
+
+    if (_connectivity.isOnline.value) {
+      // Online → fetch fresh from API (will also update cache)
+      await fetchProfile();
+    }
+    // Offline + no cache → fields stay empty, nothing shown
+
+    // Auto-refresh the moment device reconnects
+    _connectivity.onConnected.listen((_) => fetchProfile());
+  }
+
+  // ── Cache helpers ──────────────────────────────────────────────────────────
+
+  bool get _hasCachedData => _box.containsKey(HiveBoxes.profileCacheKey);
+
+  Future<void> _saveToCache(ProfileModel model) =>
+      _box.put(HiveBoxes.profileCacheKey, ProfileHiveModel.fromDomain(model));
+
+  Future<void> _clearCache() => _box.delete(HiveBoxes.profileCacheKey);
+
+  // ── Field helpers ──────────────────────────────────────────────────────────
+
+  void _populateFields(ProfileModel model) {
+    nameController.text     = model.name;
+    emailController.text    = model.email;
+    companyController.text  = model.entryCompany;
+    positionController.text = model.position;
+    phoneController.text    = model.phone;
+    profileImageUrl.value   = model.profile;
+  }
+
+  bool get _isFormValid => FormValidator.validateAll([
+    FormFieldEntry(value: nameController.text.trim(),     errorMessage: 'Name is required'),
+    FormFieldEntry(value: companyController.text.trim(),  errorMessage: 'Company name is required'),
+    FormFieldEntry(value: positionController.text.trim(), errorMessage: 'Position is required'),
+    FormFieldEntry(value: phoneController.text.trim(),    errorMessage: 'Phone number is required'),
+  ]);
+
+  Map<String, String> get _formFields => {
+    "name":         nameController.text.trim(),
+    "entryCompany": companyController.text.trim(),
+    "position":     positionController.text.trim(),
+    "phone":        phoneController.text.trim(),
+  };
+
+  // ── API ────────────────────────────────────────────────────────────────────
+
+  Future<void> fetchProfile() async {
+    final hadCache = _hasCachedData;
+
+    // Show full-screen spinner only when there's nothing cached yet
+    if (!hadCache) isLoadingProfile.value = true;
+
+    try {
+      final raw      = await _api.get('/user/profile', headers: _authHeader);
+      final response = ProfileResponseModel.fromJson(raw);
+
+      if (response.success && response.data != null) {
+        final model = response.data!;
+        _populateFields(model);
+        await _saveToCache(model); // ✅ persist fresh data to Hive
+      }
+    } on HttpException catch (e) {
+      if (!hadCache) CustomSnackBar.error(e.message);
+    } catch (e) {
+      debugPrint('[ProfileController] fetchProfile error: $e');
+      // Has cache → silent fail, user sees last known data
+      // No cache  → show error snackbar
+      if (!hadCache) CustomSnackBar.error('Failed to load profile. Please try again.');
+    } finally {
+      isLoadingProfile.value = false;
+    }
+  }
+
+  Future<void> changeProfilePhoto() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (picked != null) pickedImage.value = File(picked.path);
+  }
+
+  Future<void> saveProfile() async {
+    if (!_isFormValid) return;
+
+    isUpdating.value = true;
+    try {
+      await _api.putFormData(
+        '/user/update',
+        headers: _authHeader,
+        fields: _formFields,
+        imageFile: pickedImage.value,
+        imageFieldName: "image",
+      );
+
+      CustomSnackBar.success('Profile updated successfully!');
+      await fetchProfile(); // re-fetch → also updates cache
+    } on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
+    } catch (e) {
+      debugPrint('[ProfileController] saveProfile error: $e');
+      CustomSnackBar.error('Failed to update profile. Please try again.');
+    } finally {
+      isUpdating.value = false;
+    }
+  }
+
+  Future<void> logout() async {
+    await _clearCache(); // wipe profile on logout
+    await StorageService.logout();
+    AppNavigation.pushAndClear(OnboardingScreen());
   }
 }

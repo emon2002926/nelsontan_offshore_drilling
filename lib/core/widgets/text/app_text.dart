@@ -2,10 +2,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-
-// for .tr if you're using GetX
-
   class AppText extends StatelessWidget {
     const AppText({
       super.key,
@@ -44,7 +40,6 @@ import 'package:google_fonts/google_fonts.dart';
 
     @override
     Widget build(BuildContext context) {
-      // Calculate responsive font size
       final responsiveFontSize = useResponsiveFontSize && fontSize != null
           ? _getResponsiveFontSize(context, fontSize!)
           : fontSize;

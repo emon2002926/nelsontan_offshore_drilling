@@ -1,4 +1,3 @@
-// sign_in_controller.dart
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,23 +21,18 @@ class SignInController extends GetxController {
   final ApiServices _api = Get.find<ApiServices>();
 
 
-  // Focus Nodes
   final emailFocus = FocusNode();
   final passwordFocus = FocusNode();
 
-  // Observable states
   final isPasswordVisible = false.obs;
   final isLoading = false.obs;
 
-  // Form key
   final formKey = GlobalKey<FormState>();
 
-  // Toggle password visibility
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  // Validators
   String? validateEmail(String? value) {
     if (value == null || value.isEmpty) {
       return 'Please enter your email';
@@ -84,9 +78,10 @@ class SignInController extends GetxController {
       final token = response.data!.token;
       final user  = response.data!.user;
 
-      StorageService.saveToken(token);
 
-      // ── Decision making using model ───────────────────────────────
+      StorageService.saveToken(token);
+      await StorageService.saveUser(user);
+
 
       // print("sadkfjgsag: ${user.approveStatus}");
       //
@@ -128,13 +123,12 @@ class SignInController extends GetxController {
       Get.offAll(() => BasePage());
 
     } on HttpException catch (e) {
-      // Special case: redirect to OTP if email not verified
       if (e.body != null && e.body!.contains('not verified')) {
         CustomSnackBar.warning('Please verify your email to continue.');
         await Future.delayed(const Duration(milliseconds: 500));
         AppNavigation.push(OtpVerificationScreen(email: email, isFromSignUp: true));
       } else {
-        CustomSnackBar.error(e.message); // ← shows "Login failed. Please check your credentials."
+        CustomSnackBar.error(e.message);
       }
     }finally {
       isLoading.value = false;
@@ -145,7 +139,6 @@ class SignInController extends GetxController {
     AppNavigation.push( SignUpScreen());
   }
 
-  // Navigate to Forget Password
   void navigateToForgetPassword(BuildContext context) {
 
     AppNavigation.push( ForgetPasswordScreen());

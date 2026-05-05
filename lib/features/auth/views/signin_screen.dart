@@ -17,10 +17,10 @@ class SignInScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      appBar: BuildAppBar(
-        useCircularBackButton: true,
-        showBackButton: false,
-      ),
+      // appBar: BuildAppBar(
+      //   useCircularBackButton: true,
+      //   showBackButton: false,
+      // ),
       body: SafeArea(
         child: Stack(
           children: [
