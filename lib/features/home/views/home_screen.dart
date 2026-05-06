@@ -24,7 +24,6 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<HomeController>();
-    // final dailyDebriefController = Get.find<DailyDebriefController>();
 
 
     return Scaffold(

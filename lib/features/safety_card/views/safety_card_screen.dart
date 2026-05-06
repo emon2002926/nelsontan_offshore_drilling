@@ -30,8 +30,7 @@ class SafetyCardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<SafetyCardController>();
-    // final controller = Get.put(SafetyCardController());
-    // controller.fetchDropdowns();
+
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -95,7 +94,6 @@ class SafetyCardScreen extends StatelessWidget {
                     ),
 
 
-                    // ── Connectivity / sync banner ───────────────────────────────────────
                     Obx(() {
                       final connectivity = Get.find<ConnectivityService>();
                       final sync         = Get.find<SyncService>();
@@ -130,7 +128,6 @@ class SafetyCardScreen extends StatelessWidget {
 
                     SizedBox(height: context.responsiveSize(24)),
 
-                    // ── Card Type ────────────────────────────────────────
                     _buildLabel(context, 'Card Type'),
                     SizedBox(height: context.responsiveSize(8)),
                     Obx(() {
@@ -156,7 +153,6 @@ class SafetyCardScreen extends StatelessWidget {
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Area of Observation ──────────────────────────────
                     _buildLabel(context, 'Area of Observation'),
                     SizedBox(height: context.responsiveSize(8)),
                     Obx(() {
@@ -182,40 +178,35 @@ class SafetyCardScreen extends StatelessWidget {
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Hazard Categories ────────────────────────────────
+
                     _buildLabel(context, 'Hazard Categories'),
                     SizedBox(height: context.responsiveSize(12)),
                     Obx(() => _buildHazardCategories(context, controller)),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Description ──────────────────────────────────────
                     _buildLabel(context, 'Description'),
                     SizedBox(height: context.responsiveSize(8)),
                     _buildDescriptionField(context, controller),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Risk Severity ─────────────────────────────────────
                     _buildLabel(context, 'Risk Severity'),
                     SizedBox(height: context.responsiveSize(12)),
                     Obx(() => _buildRiskSeverity(context, controller)),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Photo / Video Evidence ────────────────────────────
                     _buildLabel(context, 'Photo / Video Evidence'),
                     SizedBox(height: context.responsiveSize(12)),
                     Obx(() => _buildPhotoUpload(context, controller)),
 
                     SizedBox(height: context.responsiveSize(20)),
 
-                    // ── Toggle Options ────────────────────────────────────
                     _buildToggleOptions(context, controller),
 
                     SizedBox(height: context.responsiveSize(24)),
 
-                    // ── Buttons ──────────────────────────────────────────
                     Row(
                       children: [
                         Expanded(
@@ -260,7 +251,6 @@ class SafetyCardScreen extends StatelessWidget {
               ),
             ),
 
-            // ── Loading Overlay ──────────────────────────────────────────
             Obx(
                   () => controller.isSubmitting.value
                   ? AppButton.buildLoadingOverlay(
@@ -276,7 +266,7 @@ class SafetyCardScreen extends StatelessWidget {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────
+
 
   Widget _buildBanner(
       BuildContext context, {
@@ -399,7 +389,6 @@ class SafetyCardScreen extends StatelessWidget {
     );
   }
 
-  // ── Description field with live mic button ────────────────────────────
   Widget _buildDescriptionField(
       BuildContext context, SafetyCardController controller) {
     return Obx(() {
@@ -451,7 +440,6 @@ class SafetyCardScreen extends StatelessWidget {
                   ),
                 ),
 
-                // ── Mic button (bottom-right, matches screenshot) ────────
                 Positioned(
                   bottom: context.responsiveSize(10),
                   right:  context.responsiveSize(10),
@@ -489,7 +477,6 @@ class SafetyCardScreen extends StatelessWidget {
             ),
           ),
 
-          // ── "Listening…" status row shown below the field ────────────
           if (isListening) ...[
             SizedBox(height: context.responsiveSize(6)),
             Row(

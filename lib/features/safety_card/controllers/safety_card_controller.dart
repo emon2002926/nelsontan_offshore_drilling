@@ -25,26 +25,24 @@ class SafetyCardController extends GetxController {
   final ConnectivityService _connectivity = Get.find<ConnectivityService>();
   final SyncService         _syncService  = Get.find<SyncService>();
 
-  // ── Form ──────────────────────────────────────────────────────────────
   final formKey               = GlobalKey<FormState>();
   final descriptionController = TextEditingController();
   final descriptionFocus      = FocusNode();
 
-  // ── Dropdown data ─────────────────────────────────────────────────────
   final RxList<CardTypeModel>  cardTypes        = <CardTypeModel>[].obs;
   final RxList<AreaModel>      areas            = <AreaModel>[].obs;
   final RxList<HazardModel>    hazards          = <HazardModel>[].obs;
   final RxBool                 isLoadingDropdowns = false.obs;
   final Rx<DateTime?>          dropdownCachedAt = Rx<DateTime?>(null);
 
-  // ── Selections ────────────────────────────────────────────────────────
+
   final Rx<CardTypeModel?>   selectedCardType    = Rx<CardTypeModel?>(null);
   final Rx<AreaModel?>       selectedArea        = Rx<AreaModel?>(null);
   final RxList<HazardModel>  selectedHazards     = <HazardModel>[].obs;
   final Rx<String?>          selectedRiskSeverity = Rx<String?>('Medium');
   final Rx<String?>          uploadedPhotoPath    = Rx<String?>(null);
 
-  // ── Toggles ───────────────────────────────────────────────────────────
+
   final RxBool actionTaken             = false.obs;
   final RxBool immediateActionRequired = false.obs;
   final RxBool submitAnonymously       = false.obs;
@@ -52,18 +50,20 @@ class SafetyCardController extends GetxController {
 
   final List<String> riskSeverities = ['Low', 'Medium', 'High'];
 
-  // ── Speech ────────────────────────────────────────────────────────────
   final SpeechToText _speech           = SpeechToText();
   final RxBool       isListening       = false.obs;
   final RxBool       isSpeechAvailable = false.obs;
   bool               _speechInitialized = false;
   String             _textBeforeListening = '';
 
-  // ── Lifecycle ─────────────────────────────────────────────────────────
+
+  final RxBool canSubmitToday = true.obs;
+  final RxBool isCheckingSubmission = true.obs;
 
   @override
   void onInit() {
     super.onInit();
+    checkSubmissionStatus();
     fetchDropdowns();
   }
 
@@ -75,8 +75,27 @@ class SafetyCardController extends GetxController {
     super.onClose();
   }
 
+  Future<void> checkSubmissionStatus() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      AppNavigation.pushAndClear(const SignInScreen());
+      return;
+    }
 
-// ── fetchDropdowns — simplified ───────────────────────────────────────
+    try {
+      isCheckingSubmission.value = true;
+      final raw = await _api.get(
+        '/card-submission/check',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      canSubmitToday.value = raw['success'] == true;
+    } catch (e) {
+      canSubmitToday.value = true; // fail open — don't block on network error
+    } finally {
+      isCheckingSubmission.value = false;
+    }
+  }
+
   Future<void> fetchDropdowns() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
@@ -85,7 +104,6 @@ class SafetyCardController extends GetxController {
     }
 
     if (_connectivity.isOnline.value) {
-      // ── Online: fetch from API, save to Hive, done ──────────────────
       isLoadingDropdowns.value = true;
       try {
         final raw = await _api.get(
@@ -115,7 +133,6 @@ class SafetyCardController extends GetxController {
       }
 
     } else {
-      // ── Offline: load from Hive silently, no banners, no popups ────
       _loadDropdownsFromCache();
     }
   }
@@ -151,7 +168,6 @@ class SafetyCardController extends GetxController {
     dropdownCachedAt.value = entry.cachedAt;
   }
 
-  // ── Submit — online posts directly, offline saves to Hive ────────────
 
   Future<void> submitSafetyCard(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
@@ -178,11 +194,9 @@ class SafetyCardController extends GetxController {
     isSubmitting.value = true;
     try {
       if (_connectivity.isOnline.value) {
-        // ── Online: submit normally, also drain any pending queue ──────
         await _submitOnline(token);
         _drainPendingQueue(token); // fire and forget, no await
       } else {
-        // ── Offline: save to Hive silently ─────────────────────────────
         await _saveToHive();
       }
     } finally {
@@ -295,7 +309,6 @@ class SafetyCardController extends GetxController {
         await submission.delete(); // success → remove from Hive
 
       } catch (_) {
-        // Silent fail — will retry next time user is online
       }
     }
   }
@@ -377,7 +390,7 @@ class SafetyCardController extends GetxController {
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────
+
 
   String hazardIcon(String name) {
     final lower = name.toLowerCase();
