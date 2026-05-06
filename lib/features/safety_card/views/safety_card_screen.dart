@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
 import 'package:nelsontan_offshore_drilling/features/notification/views/notifications_screen.dart';
+import 'package:nelsontan_offshore_drilling/features/safety_card/widgets/submit_not_available.dart';
 import 'dart:io';
 
 import '../../../core/constants/app_colors.dart';
@@ -10,6 +11,7 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/dashed_border_painter.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/progress_bar/app_progress_bar.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../controllers/safety_card_controller.dart';
@@ -30,242 +32,258 @@ class SafetyCardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<SafetyCardController>();
-
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left:   context.widthPercentage(5),
-                right:  context.widthPercentage(5),
-                top:    context.heightPercentage(4),
-                bottom: context.heightPercentage(3),
-              ),
-              child: Form(
-                key: controller.formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Header ──────────────────────────────────────────
-                    Row(
-                      children: [
-                        Image.asset(
-                          appAssets.topHeaderIcon,
-                          width:  context.responsiveSize(36),
-                          height: context.responsiveSize(36),
-                          colorBlendMode: BlendMode.srcIn,
-                        ),
-                        SizedBox(width: context.responsiveSize(12)),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AppText(
-                                data: 'Submit UAUC / STOP Card',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A1A),
-                                useResponsiveFontSize: true,
-                              ),
-                              AppText(
-                                data: 'Report safety observations quickly',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF6B6B6B),
-                                useResponsiveFontSize: true,
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => AppNavigation.push(
-                              NotificationsScreen(),
-                              context: context),
-                          child: Icon(
-                            Icons.notifications_none,
-                            color: Colors.black,
-                            size: context.responsiveSize(30),
-                          ),
-                        ),
-                      ],
-                    ),
-
-
-                    Obx(() {
-                      final connectivity = Get.find<ConnectivityService>();
-                      final sync         = Get.find<SyncService>();
-
-                      if (sync.isSyncing.value) {
-                        return _buildBanner(
-                          context,
-                          color:   const Color(0xFF0047AB),
-                          icon:    Icons.sync,
-                          message: 'Syncing ${sync.pendingCount.value} pending card(s)…',
-                        );
-                      }
-                      if (!connectivity.isOnline.value && sync.pendingCount.value > 0) {
-                        return _buildBanner(
-                          context,
-                          color:   const Color(0xFFF59E0B),
-                          icon:    Icons.cloud_off,
-                          message: 'Offline — ${sync.pendingCount.value} card(s) queued to sync',
-                        );
-                      }
-                      if (!connectivity.isOnline.value) {
-                        return _buildBanner(
-                          context,
-                          color:   const Color(0xFFF59E0B),
-                          icon:    Icons.cloud_off,
-                          message: 'You\'re offline. Submissions will be saved locally.',
-                        );
-                      }
-                      return const SizedBox.shrink();
-                    }),
-                    SizedBox(height: context.responsiveSize(12)),
-
-                    SizedBox(height: context.responsiveSize(24)),
-
-                    _buildLabel(context, 'Card Type'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    Obx(() {
-                      if (controller.isLoadingDropdowns.value) {
-                        return _buildDropdownSkeleton(context);
-                      }
-                      return SearchableMultiSelectDropdown(
-                        hint: 'Select card type',
-                        icon: '✋',
-                        items: controller.cardTypes.map((e) => e.name).toList(),
-                        selectedItems: controller.selectedCardType.value != null
-                            ? [controller.selectedCardType.value!.name]
-                            : [],
-                        multiSelect: false,
-                        onChanged: (items) {
-                          controller.selectedCardType.value = items.isNotEmpty
-                              ? controller.cardTypes
-                              .firstWhere((e) => e.name == items.first)
-                              : null;
-                        },
-                      );
-                    }),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    _buildLabel(context, 'Area of Observation'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    Obx(() {
-                      if (controller.isLoadingDropdowns.value) {
-                        return _buildDropdownSkeleton(context);
-                      }
-                      return SearchableMultiSelectDropdown(
-                        hint: 'Select area',
-                        icon: '📍',
-                        items: controller.areas.map((e) => e.name).toList(),
-                        selectedItems: controller.selectedArea.value != null
-                            ? [controller.selectedArea.value!.name]
-                            : [],
-                        multiSelect: false,
-                        onChanged: (items) {
-                          controller.selectedArea.value = items.isNotEmpty
-                              ? controller.areas
-                              .firstWhere((e) => e.name == items.first)
-                              : null;
-                        },
-                      );
-                    }),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-
-                    _buildLabel(context, 'Hazard Categories'),
-                    SizedBox(height: context.responsiveSize(12)),
-                    Obx(() => _buildHazardCategories(context, controller)),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    _buildLabel(context, 'Description'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    _buildDescriptionField(context, controller),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    _buildLabel(context, 'Risk Severity'),
-                    SizedBox(height: context.responsiveSize(12)),
-                    Obx(() => _buildRiskSeverity(context, controller)),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    _buildLabel(context, 'Photo / Video Evidence'),
-                    SizedBox(height: context.responsiveSize(12)),
-                    Obx(() => _buildPhotoUpload(context, controller)),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    _buildToggleOptions(context, controller),
-
-                    SizedBox(height: context.responsiveSize(24)),
-
-                    Row(
-                      children: [
-                        Expanded(
-                          flex: 2,
-                          child: AppButton(
-                            buttonText: 'Reset',
-                            onPressed:  controller.resetForm,
-                            fillColor:  const Color(0xffE6ECF5),
-                            textColor:  const Color(0xFF0047AB),
-                            borderColor: const Color(0xFF0047AB),
-                            borderWidth: 1.5,
-                            fontSize:   16,
-                            fontWeight: FontWeight.w600,
-                            buttonHeight: context.heightPercentage(6),
-                            borderRadius: 25,
-                          ),
-                        ),
-                        SizedBox(width: context.responsiveSize(12)),
-                        Expanded(
-                          flex: 2,
-                          child: Obx(
-                                () => AppButton(
-                              buttonText:   'Submit Card',
-                              onPressed:    () => controller.submitSafetyCard(context),
-                              fillColor:    const Color(0xFF0047AB),
-                              textColor:    Colors.white,
-                              fontSize:     16,
-                              fontWeight:   FontWeight.w600,
-                              buttonHeight: context.heightPercentage(6),
-                              isLoading:    controller.isSubmitting.value,
-                              loadingText:  'Submitting...',
-                              borderRadius: 25,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: context.responsiveSize(40)),
-                  ],
-                ),
-              ),
-            ),
-
-            Obx(
-                  () => controller.isSubmitting.value
-                  ? AppButton.buildLoadingOverlay(
-                isLoading:       controller.isSubmitting,
-                loadingMessage:  'Submitting safety card...',
-                backgroundColor: Colors.black,
-              )
-                  : const SizedBox.shrink(),
-            ),
-          ],
+        child: Obx(() => controller.isCheckingSubmission.value
+            ? Center(
+              child: AppProgressBar(
+                        value: 0.0, // ignored
+                        style: ProgressBarStyle.circular,
+                        indeterminate: true,
+                      ),
+            )
+            : submitNotAvailable(controller,context),
         ),
       ),
     );
   }
 
+  Widget submitNotAvailable(SafetyCardController controller , BuildContext context) {
+    return Obx(()=> controller.canSubmitToday.value
+        ?cardUi(context, controller)
+        :Center(child: SubmitNotAvailable()),
+    );
+  }
+
+  Widget cardUi(BuildContext context,SafetyCardController controller ){
+    return Stack(
+      children: [
+        SingleChildScrollView(
+          padding: EdgeInsets.only(
+            left:   context.widthPercentage(5),
+            right:  context.widthPercentage(5),
+            top:    context.heightPercentage(4),
+            bottom: context.heightPercentage(3),
+          ),
+          child: Form(
+            key: controller.formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Image.asset(
+                      appAssets.topHeaderIcon,
+                      width:  context.responsiveSize(36),
+                      height: context.responsiveSize(36),
+                      colorBlendMode: BlendMode.srcIn,
+                    ),
+                    SizedBox(width: context.responsiveSize(12)),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AppText(
+                            data: 'Submit UAUC / STOP Card',
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF1A1A1A),
+                            useResponsiveFontSize: true,
+                          ),
+                          AppText(
+                            data: 'Report safety observations quickly',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: const Color(0xFF6B6B6B),
+                            useResponsiveFontSize: true,
+                          ),
+                        ],
+                      ),
+                    ),
+                    GestureDetector(
+                      onTap: () => AppNavigation.push(
+                          NotificationsScreen(),
+                          context: context),
+                      child: Icon(
+                        Icons.notifications_none,
+                        color: Colors.black,
+                        size: context.responsiveSize(30),
+                      ),
+                    ),
+                  ],
+                ),
+
+
+                Obx(() {
+                  final connectivity = Get.find<ConnectivityService>();
+                  final sync         = Get.find<SyncService>();
+
+                  if (sync.isSyncing.value) {
+                    return _buildBanner(
+                      context,
+                      color:   const Color(0xFF0047AB),
+                      icon:    Icons.sync,
+                      message: 'Syncing ${sync.pendingCount.value} pending card(s)…',
+                    );
+                  }
+                  if (!connectivity.isOnline.value && sync.pendingCount.value > 0) {
+                    return _buildBanner(
+                      context,
+                      color:   const Color(0xFFF59E0B),
+                      icon:    Icons.cloud_off,
+                      message: 'Offline — ${sync.pendingCount.value} card(s) queued to sync',
+                    );
+                  }
+                  if (!connectivity.isOnline.value) {
+                    return _buildBanner(
+                      context,
+                      color:   const Color(0xFFF59E0B),
+                      icon:    Icons.cloud_off,
+                      message: 'You\'re offline. Submissions will be saved locally.',
+                    );
+                  }
+                  return const SizedBox.shrink();
+                }),
+                SizedBox(height: context.responsiveSize(12)),
+
+                SizedBox(height: context.responsiveSize(24)),
+
+                _buildLabel(context, 'Card Type'),
+                SizedBox(height: context.responsiveSize(8)),
+                Obx(() {
+                  if (controller.isLoadingDropdowns.value) {
+                    return _buildDropdownSkeleton(context);
+                  }
+                  return SearchableMultiSelectDropdown(
+                    hint: 'Select card type',
+                    icon: '✋',
+                    items: controller.cardTypes.map((e) => e.name).toList(),
+                    selectedItems: controller.selectedCardType.value != null
+                        ? [controller.selectedCardType.value!.name]
+                        : [],
+                    multiSelect: false,
+                    onChanged: (items) {
+                      controller.selectedCardType.value = items.isNotEmpty
+                          ? controller.cardTypes
+                          .firstWhere((e) => e.name == items.first)
+                          : null;
+                    },
+                  );
+                }),
+
+                SizedBox(height: context.responsiveSize(20)),
+
+                _buildLabel(context, 'Area of Observation'),
+                SizedBox(height: context.responsiveSize(8)),
+                Obx(() {
+                  if (controller.isLoadingDropdowns.value) {
+                    return _buildDropdownSkeleton(context);
+                  }
+                  return SearchableMultiSelectDropdown(
+                    hint: 'Select area',
+                    icon: '📍',
+                    items: controller.areas.map((e) => e.name).toList(),
+                    selectedItems: controller.selectedArea.value != null
+                        ? [controller.selectedArea.value!.name]
+                        : [],
+                    multiSelect: false,
+                    onChanged: (items) {
+                      controller.selectedArea.value = items.isNotEmpty
+                          ? controller.areas
+                          .firstWhere((e) => e.name == items.first)
+                          : null;
+                    },
+                  );
+                }),
+
+                SizedBox(height: context.responsiveSize(20)),
+
+
+                _buildLabel(context, 'Hazard Categories'),
+                SizedBox(height: context.responsiveSize(12)),
+                Obx(() => _buildHazardCategories(context, controller)),
+
+                SizedBox(height: context.responsiveSize(20)),
+
+                _buildLabel(context, 'Description'),
+                SizedBox(height: context.responsiveSize(8)),
+                _buildDescriptionField(context, controller),
+
+                SizedBox(height: context.responsiveSize(20)),
+
+                _buildLabel(context, 'Risk Severity'),
+                SizedBox(height: context.responsiveSize(12)),
+                Obx(() => _buildRiskSeverity(context, controller)),
+
+                SizedBox(height: context.responsiveSize(20)),
+
+                _buildLabel(context, 'Photo / Video Evidence'),
+                SizedBox(height: context.responsiveSize(12)),
+                Obx(() => _buildPhotoUpload(context, controller)),
+
+                SizedBox(height: context.responsiveSize(20)),
+
+                _buildToggleOptions(context, controller),
+
+                SizedBox(height: context.responsiveSize(24)),
+
+                Row(
+                  children: [
+                    Expanded(
+                      flex: 2,
+                      child: AppButton(
+                        buttonText: 'Reset',
+                        onPressed:  controller.resetForm,
+                        fillColor:  const Color(0xffE6ECF5),
+                        textColor:  const Color(0xFF0047AB),
+                        borderColor: const Color(0xFF0047AB),
+                        borderWidth: 1.5,
+                        fontSize:   16,
+                        fontWeight: FontWeight.w600,
+                        buttonHeight: context.heightPercentage(6),
+                        borderRadius: 25,
+                      ),
+                    ),
+                    SizedBox(width: context.responsiveSize(12)),
+                    Expanded(
+                      flex: 2,
+                      child: Obx(
+                            () => AppButton(
+                          buttonText:   'Submit Card',
+                          onPressed:    () => controller.submitSafetyCard(context),
+                          fillColor:    const Color(0xFF0047AB),
+                          textColor:    Colors.white,
+                          fontSize:     16,
+                          fontWeight:   FontWeight.w600,
+                          buttonHeight: context.heightPercentage(6),
+                          isLoading:    controller.isSubmitting.value,
+                          loadingText:  'Submitting...',
+                          borderRadius: 25,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: context.responsiveSize(40)),
+              ],
+            ),
+          ),
+        ),
+
+        Obx(
+              () => controller.isSubmitting.value
+              ? AppButton.buildLoadingOverlay(
+            isLoading:       controller.isSubmitting,
+            loadingMessage:  'Submitting safety card...',
+            backgroundColor: Colors.black,
+          )
+              : const SizedBox.shrink(),
+        ),
+      ],
+    );
+  }
 
 
   Widget _buildBanner(

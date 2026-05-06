@@ -6,10 +6,12 @@ import '../../../core/dropdown/searchable_multi_select_dropdown.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/buttons/app_button.dart';
+import '../../../core/widgets/progress_bar/app_progress_bar.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
 import '../controllers/daily_debrief_controller.dart';
+import '../widgets/submit_not_available.dart';
 
 class SubmitDailyDebriefScreen extends StatelessWidget {
   SubmitDailyDebriefScreen({super.key});
@@ -23,224 +25,230 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.only(
-                left: context.widthPercentage(5),
-                right: context.widthPercentage(5),
-                top: context.heightPercentage(4),
-                bottom: context.heightPercentage(3),
-              ),
-              child: Form(
-                key: controller.formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // ── Header ───────────────────────────────────────────
-                    Row(
-                      children: [
-                        Image.asset(
-                          appAssets.submitDailyDebrief,
-                          width: context.responsiveSize(36),
-                          height: context.responsiveSize(36),
-                        ),
-                        SizedBox(width: context.responsiveSize(12)),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              AppText(
-                                data: 'Submit Daily Debrief',
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF1A1A1A),
-                                useResponsiveFontSize: true,
-                              ),
-                              AppText(
-                                data: 'Capture insights instantly',
-                                fontSize: 12,
-                                fontWeight: FontWeight.w400,
-                                color: const Color(0xFF6B6B6B),
-                                useResponsiveFontSize: true,
-                              ),
-                            ],
-                          ),
-                        ),
-                        GestureDetector(
-                          onTap: () => AppNavigation.push(
-                            NotificationsScreen(),
-                            context: context,
-                          ),
-                          child: Icon(
-                            Icons.notifications_none,
-                            color: Colors.black,
-                            size: context.responsiveSize(30),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: context.responsiveSize(24)),
-
-                    // ── Activity Name ────────────────────────────────────
-                    _buildLabel(context, 'Activity Name'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    Obx(() {
-                      if (controller.isLoadingDropdowns.value) {
-                        return _buildDropdownSkeleton(context);
-                      }
-                      return SearchableMultiSelectDropdown(
-                        hint: 'Select activity',
-                        icon: '🛢️',
-                        items: controller.activities.map((e) => e.name).toList(),
-                        selectedItems: controller.selectedActivity.value != null
-                            ? [controller.selectedActivity.value!.name]
-                            : [],
-                        multiSelect: false,
-                        onChanged: (items) {
-                          controller.selectedActivity.value = items.isNotEmpty
-                              ? controller.activities
-                              .firstWhere((e) => e.name == items.first)
-                              : null;
-                        },
-                      );
-                    }),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    // ── Type of Debrief ──────────────────────────────────
-                    _buildLabel(context, 'Type of Debrief'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    Obx(() {
-                      if (controller.isLoadingDropdowns.value) {
-                        return _buildDropdownSkeleton(context);
-                      }
-                      return SearchableMultiSelectDropdown(
-                        hint: 'Select type of debrief',
-                        icon: '⚙️',
-                        items: controller.debriefTypes.map((e) => e.name).toList(),
-                        selectedItems: controller.selectedDebriefType.value != null
-                            ? [controller.selectedDebriefType.value!.name]
-                            : [],
-                        multiSelect: false,
-                        onChanged: (items) {
-                          controller.selectedDebriefType.value = items.isNotEmpty
-                              ? controller.debriefTypes
-                              .firstWhere((e) => e.name == items.first)
-                              : null;
-                        },
-                      );
-                    }),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    // ── What Happened ────────────────────────────────────
-                    _buildLabel(context, 'What Happened?'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    _buildTextArea(
-                      context,
-                      controller: controller.whatHappenedController,
-                      focusNode: controller.whatHappenedFocus,
-                      hint: 'Short description of the event or observation...',
-                      validator: controller.validateField,
-                    ),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    // ── What Worked Well ─────────────────────────────────
-                    _buildLabel(context, 'What Worked Well?'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    _buildTextArea(
-                      context,
-                      controller: controller.whatWorkedWellController,
-                      focusNode: controller.whatWorkedWellFocus,
-                      hint: 'Capture positive practices or successful actions...',
-                      validator: controller.validateField,
-                    ),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    // ── What Could Be Improved ───────────────────────────
-                    _buildLabel(context, 'What Could Be Improved?'),
-                    SizedBox(height: context.responsiveSize(8)),
-                    _buildTextArea(
-                      context,
-                      controller: controller.whatImprovedController,
-                      focusNode: controller.whatImprovedFocus,
-                      hint: 'Identify gaps or areas for improvement...',
-                      validator: controller.validateField,
-                    ),
-
-                    SizedBox(height: context.responsiveSize(20)),
-
-                    // ── Toggle Options ───────────────────────────────────
-                    _buildToggleOptions(context, controller),
-
-                    SizedBox(height: context.responsiveSize(24)),
-
-                    // ── Buttons ──────────────────────────────────────────
-                    Row(
-                      children: [
-                        Expanded(
-                          child: AppButton(
-                            buttonText: 'Reset',
-                            onPressed: controller.resetForm,
-                            fillColor: const Color(0xffE6ECF5),
-                            textColor: const Color(0xFF0047AB),
-                            borderColor: const Color(0xFF0047AB),
-                            borderWidth: 1.5,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            buttonHeight: context.heightPercentage(6),
-                            borderRadius: 25,
-                          ),
-                        ),
-                        SizedBox(width: context.responsiveSize(12)),
-                        Expanded(
-                          child: Obx(
-                                () => AppButton(
-                              buttonText: 'Submit Card',
-                              onPressed: () =>
-                                  controller.submitDebrief(context),
-                              fillColor: const Color(0xFF0047AB),
-                              textColor: Colors.white,
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              buttonHeight: context.heightPercentage(6),
-                              isLoading: controller.isSubmitting.value,
-                              loadingText: 'Submitting...',
-                              borderRadius: 25,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    SizedBox(height: context.responsiveSize(40)),
-                  ],
-                ),
-              ),
-            ),
-
-            // ── Loading Overlay ──────────────────────────────────────────
-            Obx(
-                  () => controller.isSubmitting.value
-                  ? AppButton.buildLoadingOverlay(
-                isLoading: controller.isSubmitting,
-                loadingMessage: 'Submitting debrief...',
-                backgroundColor: Colors.black,
-              )
-                  : const SizedBox.shrink(),
-            ),
-          ],
+      body:SafeArea(child: Obx(() => controller.isCheckingSubmission.value
+          ? Center(
+        child: AppProgressBar(
+          value: 0.0, // ignored
+          style: ProgressBarStyle.circular,
+          indeterminate: true,
         ),
-      ),
+      )
+          : submitNotAvailable(controller,context),
+      ),) ,
     );
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
+  Widget submitNotAvailable(DailyDebriefController controller, BuildContext context) {
+    return Obx(() => controller.canSubmitToday.value
+        ? cardUi(context, controller)
+        : Center(child: SubmitNotAvailable()),);
+  }
+  Widget cardUi (BuildContext context,DailyDebriefController controller){
+    return Stack(
+        children: [
+          SingleChildScrollView(
+            padding: EdgeInsets.only(
+              left: context.widthPercentage(5),
+              right: context.widthPercentage(5),
+              top: context.heightPercentage(4),
+              bottom: context.heightPercentage(3),
+            ),
+            child: Form(
+              key: controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Image.asset(
+                        appAssets.submitDailyDebrief,
+                        width: context.responsiveSize(36),
+                        height: context.responsiveSize(36),
+                      ),
+                      SizedBox(width: context.responsiveSize(12)),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            AppText(
+                              data: 'Submit Daily Debrief',
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: const Color(0xFF1A1A1A),
+                              useResponsiveFontSize: true,
+                            ),
+                            AppText(
+                              data: 'Capture insights instantly',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w400,
+                              color: const Color(0xFF6B6B6B),
+                              useResponsiveFontSize: true,
+                            ),
+                          ],
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () => AppNavigation.push(
+                          NotificationsScreen(),
+                          context: context,
+                        ),
+                        child: Icon(
+                          Icons.notifications_none,
+                          color: Colors.black,
+                          size: context.responsiveSize(30),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: context.responsiveSize(24)),
+
+                  _buildLabel(context, 'Activity Name'),
+                  SizedBox(height: context.responsiveSize(8)),
+                  Obx(() {
+                    if (controller.isLoadingDropdowns.value) {
+                      return _buildDropdownSkeleton(context);
+                    }
+                    return SearchableMultiSelectDropdown(
+                      hint: 'Select activity',
+                      icon: '🛢️',
+                      items: controller.activities.map((e) => e.name).toList(),
+                      selectedItems: controller.selectedActivity.value != null
+                          ? [controller.selectedActivity.value!.name]
+                          : [],
+                      multiSelect: false,
+                      onChanged: (items) {
+                        controller.selectedActivity.value = items.isNotEmpty
+                            ? controller.activities
+                            .firstWhere((e) => e.name == items.first)
+                            : null;
+                      },
+                    );
+                  }),
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+                  _buildLabel(context, 'Type of Debrief'),
+                  SizedBox(height: context.responsiveSize(8)),
+                  Obx(() {
+                    if (controller.isLoadingDropdowns.value) {
+                      return _buildDropdownSkeleton(context);
+                    }
+                    return SearchableMultiSelectDropdown(
+                      hint: 'Select type of debrief',
+                      icon: '⚙️',
+                      items: controller.debriefTypes.map((e) => e.name).toList(),
+                      selectedItems: controller.selectedDebriefType.value != null
+                          ? [controller.selectedDebriefType.value!.name]
+                          : [],
+                      multiSelect: false,
+                      onChanged: (items) {
+                        controller.selectedDebriefType.value = items.isNotEmpty
+                            ? controller.debriefTypes
+                            .firstWhere((e) => e.name == items.first)
+                            : null;
+                      },
+                    );
+                  }),
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+                  _buildLabel(context, 'What Happened?'),
+                  SizedBox(height: context.responsiveSize(8)),
+                  _buildTextArea(
+                    context,
+                    controller: controller.whatHappenedController,
+                    focusNode: controller.whatHappenedFocus,
+                    hint: 'Short description of the event or observation...',
+                    validator: controller.validateField,
+                  ),
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+                  _buildLabel(context, 'What Worked Well?'),
+                  SizedBox(height: context.responsiveSize(8)),
+                  _buildTextArea(
+                    context,
+                    controller: controller.whatWorkedWellController,
+                    focusNode: controller.whatWorkedWellFocus,
+                    hint: 'Capture positive practices or successful actions...',
+                    validator: controller.validateField,
+                  ),
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+                  _buildLabel(context, 'What Could Be Improved?'),
+                  SizedBox(height: context.responsiveSize(8)),
+                  _buildTextArea(
+                    context,
+                    controller: controller.whatImprovedController,
+                    focusNode: controller.whatImprovedFocus,
+                    hint: 'Identify gaps or areas for improvement...',
+                    validator: controller.validateField,
+                  ),
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+                  _buildToggleOptions(context, controller),
+
+                  SizedBox(height: context.responsiveSize(24)),
+
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AppButton(
+                          buttonText: 'Reset',
+                          onPressed: controller.resetForm,
+                          fillColor: const Color(0xffE6ECF5),
+                          textColor: const Color(0xFF0047AB),
+                          borderColor: const Color(0xFF0047AB),
+                          borderWidth: 1.5,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          buttonHeight: context.heightPercentage(6),
+                          borderRadius: 25,
+                        ),
+                      ),
+                      SizedBox(width: context.responsiveSize(12)),
+                      Expanded(
+                        child: Obx(
+                              () => AppButton(
+                            buttonText: 'Submit Card',
+                            onPressed: () =>
+                                controller.submitDebrief(context),
+                            fillColor: const Color(0xFF0047AB),
+                            textColor: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            buttonHeight: context.heightPercentage(6),
+                            isLoading: controller.isSubmitting.value,
+                            loadingText: 'Submitting...',
+                            borderRadius: 25,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: context.responsiveSize(40)),
+                ],
+              ),
+            ),
+          ),
+
+          Obx(
+                () => controller.isSubmitting.value
+                ? AppButton.buildLoadingOverlay(
+              isLoading: controller.isSubmitting,
+              loadingMessage: 'Submitting debrief...',
+              backgroundColor: Colors.black,
+            )
+                : const SizedBox.shrink(),
+          ),
+        ],
+      );
+
+  }
 
   Widget _buildLabel(BuildContext context, String text) {
     return AppText(

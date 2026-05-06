@@ -196,11 +196,14 @@ class SafetyCardController extends GetxController {
       if (_connectivity.isOnline.value) {
         await _submitOnline(token);
         _drainPendingQueue(token); // fire and forget, no await
+        canSubmitToday.value = false;
       } else {
         await _saveToHive();
+        canSubmitToday.value = false;
       }
     } finally {
       isSubmitting.value = false;
+      canSubmitToday.value = false;
     }
   }
 
