@@ -43,7 +43,7 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _init();
+    init();
   }
 
   @override
@@ -57,7 +57,7 @@ class ProfileController extends GetxController {
   }
 
 
-  Future<void> _init() async {
+  Future<void> init() async {
     final cached = _box.get(HiveBoxes.profileCacheKey);
     if (cached != null) {
       _populateFields(cached.toDomain());

@@ -59,6 +59,13 @@ class DailyDebriefController extends GetxController {
     super.onClose();
   }
 
+  Future<void> refreshCard() async {
+    await Future.wait([
+      checkSubmissionStatus(),
+      fetchDropdowns(),
+    ]);
+  }
+
   Future<void> checkSubmissionStatus() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {

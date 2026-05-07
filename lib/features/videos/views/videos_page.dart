@@ -19,15 +19,53 @@ class VideosPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: context.heightPercentage(1)),
-            _buildHeader(context),
+      body: RefreshIndicator(
+        onRefresh: () {
+          return controller.fetchVideos();
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: context.heightPercentage(1)),
+              _buildHeader(context),
 
-            Expanded(
-              child: Obx(() {
-                if (controller.isLoading.value) {
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return GridView.builder(
+                      padding: EdgeInsets.all(context.responsiveSize(16)),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: context.responsiveSize(24),
+                        mainAxisSpacing: context.responsiveSize(8),
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (_, _) => _buildSkeletonCard(context),
+                    );
+                  }
+
+                  if (controller.videos.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.video_library_outlined,
+                              size: context.responsiveSize(64),
+                              color: Colors.grey.shade300),
+                          SizedBox(height: context.responsiveSize(12)),
+                          AppText(
+                            data: 'No videos available',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF6B6B6B),
+                            useResponsiveFontSize: true,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return GridView.builder(
                     padding: EdgeInsets.all(context.responsiveSize(16)),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -36,49 +74,16 @@ class VideosPage extends StatelessWidget {
                       mainAxisSpacing: context.responsiveSize(8),
                       childAspectRatio: 0.85,
                     ),
-                    itemCount: 4,
-                    itemBuilder: (_, _) => _buildSkeletonCard(context),
+                    itemCount: controller.videos.length,
+                    itemBuilder: (context, index) {
+                      final video = controller.videos[index];
+                      return _buildVideoCard(context, video: video);
+                    },
                   );
-                }
-
-                if (controller.videos.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.video_library_outlined,
-                            size: context.responsiveSize(64),
-                            color: Colors.grey.shade300),
-                        SizedBox(height: context.responsiveSize(12)),
-                        AppText(
-                          data: 'No videos available',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF6B6B6B),
-                          useResponsiveFontSize: true,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                return GridView.builder(
-                  padding: EdgeInsets.all(context.responsiveSize(16)),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: context.responsiveSize(24),
-                    mainAxisSpacing: context.responsiveSize(8),
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: controller.videos.length,
-                  itemBuilder: (context, index) {
-                    final video = controller.videos[index];
-                    return _buildVideoCard(context, video: video);
-                  },
-                );
-              }),
-            ),
-          ],
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );

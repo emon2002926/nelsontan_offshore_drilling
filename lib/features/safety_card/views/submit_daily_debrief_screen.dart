@@ -25,16 +25,21 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body:SafeArea(child: Obx(() => controller.isCheckingSubmission.value
-          ? Center(
-        child: AppProgressBar(
-          value: 0.0, // ignored
-          style: ProgressBarStyle.circular,
-          indeterminate: true,
-        ),
-      )
-          : submitNotAvailable(controller,context),
-      ),) ,
+      body:RefreshIndicator(
+        onRefresh: () {
+          return controller.refreshCard();
+        },
+        child: SafeArea(child: Obx(() => controller.isCheckingSubmission.value
+            ? Center(
+          child: AppProgressBar(
+            value: 0.0,
+            style: ProgressBarStyle.circular,
+            indeterminate: true,
+          ),
+        )
+            : submitNotAvailable(controller,context),
+        ),),
+      ) ,
     );
   }
 

@@ -39,6 +39,8 @@ class HomeController extends GetxController {
     fetchAppHome();
   }
 
+
+
   Future<void> fetchAppHome() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
