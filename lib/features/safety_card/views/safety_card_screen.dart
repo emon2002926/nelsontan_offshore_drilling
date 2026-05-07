@@ -12,13 +12,9 @@ import '../../../core/util/dashed_border_painter.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/buttons/app_button.dart';
 import '../../../core/widgets/progress_bar/app_progress_bar.dart';
-import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../controllers/safety_card_controller.dart';
 
-import 'dart:io';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 import '../services/connectivity_service.dart';
 import '../services/sync_service.dart';

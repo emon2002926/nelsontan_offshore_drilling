@@ -6,7 +6,6 @@ import '../../../core/widgets/buttons/app_button.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../controllers/game_play_controller.dart';
 import '../models/game_models.dart';
-import '../models/game_play_model.dart';
 import '../widgets/game_score_card.dart';
 import '../widgets/game_timer_bar.dart';
 
@@ -114,7 +113,7 @@ class GameplayScreen extends StatelessWidget {
                           ),
                         );
                       },
-                      errorBuilder: (_, __, ___) => _imageFallback(context),
+                      errorBuilder: (_, _, _) => _imageFallback(context),
                     ),
                   ),
 
@@ -305,7 +304,7 @@ class GameplayScreen extends StatelessWidget {
           Expanded(
             child: ListView.separated(
               itemCount: result.results.length,
-              separatorBuilder: (_, __) =>
+              separatorBuilder: (_, _) =>
                   SizedBox(height: context.responsiveSize(8)),
               itemBuilder: (_, i) {
                 final r = result.results[i];

@@ -32,7 +32,6 @@ class ResetPasswordController extends GetxController {
   void toggleNewPasswordVisibility()     => isNewPasswordVisible.value = !isNewPasswordVisible.value;
   void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
 
-  // ── Validators ────────────────────────────────────────────────────────────
   String? validateNewPassword(String? value) {
     if (value == null || value.isEmpty) return 'Please enter a new password';
     if (!FormValidator.isValidPassword(value)) {
@@ -51,7 +50,6 @@ class ResetPasswordController extends GetxController {
     return null;
   }
 
-  // ── Update Password ───────────────────────────────────────────────────────
   Future<void> updatePassword(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
 

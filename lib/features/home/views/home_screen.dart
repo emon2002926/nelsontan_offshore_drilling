@@ -7,7 +7,6 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../home_page.dart';
 import '../../notification/views/notifications_screen.dart';
-import '../../safety_card/controllers/daily_debrief_controller.dart';
 import '../../safety_card/views/submit_daily_debrief_screen.dart';
 import '../../video_player/models/video_source.dart';
 import '../../video_player/widgets/app_video_player.dart';

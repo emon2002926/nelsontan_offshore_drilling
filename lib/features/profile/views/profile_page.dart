@@ -71,7 +71,7 @@ class ProfilePage extends StatelessWidget {
   Widget _buildNameDisplay(ProfileController controller) =>
       ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller.nameController,
-        builder: (_, value, __) => Center(
+        builder: (_, value, _) => Center(
           child: AppText(
             data: value.text.isEmpty ? '—' : value.text,
             fontSize: 20,
@@ -85,7 +85,7 @@ class ProfilePage extends StatelessWidget {
   Widget _buildPositionDisplay(ProfileController controller) =>
       ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller.positionController,
-        builder: (_, value, __) => Center(
+        builder: (_, value, _) => Center(
           child: AppText(
             data: value.text.isEmpty ? '—' : value.text,
             fontSize: 14,

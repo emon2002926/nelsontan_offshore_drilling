@@ -5,10 +5,8 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
-import '../../video_player/models/video_source.dart';
 import '../controllers/videos_controller.dart';
 import '../models/video_model.dart';
-import 'video_player_screen.dart';
 import 'package:get/get.dart';
 class VideosPage extends StatelessWidget {
   VideosPage({super.key});
@@ -40,7 +38,7 @@ class VideosPage extends StatelessWidget {
                       childAspectRatio: 0.85,
                     ),
                     itemCount: 4,
-                    itemBuilder: (_, __) => _buildSkeletonCard(context),
+                    itemBuilder: (_, _) => _buildSkeletonCard(context),
                   );
                 }
 
@@ -170,7 +168,7 @@ class VideosPage extends StatelessWidget {
                         ),
                       );
                     },
-                    errorBuilder: (_, __, ___) =>
+                    errorBuilder: (_, _, _) =>
                         _buildThumbnailFallback(context),
                   )
                       : _buildThumbnailFallback(context),

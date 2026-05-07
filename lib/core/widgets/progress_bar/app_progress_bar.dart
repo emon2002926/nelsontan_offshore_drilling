@@ -173,7 +173,7 @@ class _IndeterminateLinearState extends State<_IndeterminateLinear>
     if (widget.style == ProgressBarStyle.segmented) {
       return AnimatedBuilder(
         animation: _ctrl,
-        builder: (_, __) {
+        builder: (_, _) {
           final active = (_ctrl.value * widget.segmentCount).floor();
           return Row(
             children: List.generate(widget.segmentCount, (i) {
@@ -203,7 +203,7 @@ class _IndeterminateLinearState extends State<_IndeterminateLinear>
         color: bg,
         child: AnimatedBuilder(
           animation: _ctrl,
-          builder: (_, __) {
+          builder: (_, _) {
             // bar travels from -40% to +140% of track width
             final position = _ctrl.value * 1.4 - 0.2;
             return FractionallySizedBox(
@@ -266,7 +266,7 @@ class _IndeterminateCircularState extends State<_IndeterminateCircular>
       height: size,
       child: AnimatedBuilder(
         animation: _ctrl,
-        builder: (_, __) => CustomPaint(
+        builder: (_, _) => CustomPaint(
           painter: _IndeterminateCirclePainter(
             progress: _ctrl.value,
             color: widget.color,
@@ -369,7 +369,7 @@ class _GlowDotState extends State<_GlowDot> with SingleTickerProviderStateMixin 
               widthFactor: widget.value,
               child: AnimatedBuilder(
                 animation: _opacity,
-                builder: (_, __) => Opacity(
+                builder: (_, _) => Opacity(
                   opacity: _opacity.value,
                   child: Stack(clipBehavior: Clip.none, children: [
                     Container(decoration: BoxDecoration(color: widget.color, borderRadius: br)),
@@ -471,7 +471,7 @@ class _StripesState extends State<_Stripes> with SingleTickerProviderStateMixin 
               widthFactor: widget.value,
               child: AnimatedBuilder(
                 animation: _ctrl,
-                builder: (_, __) => CustomPaint(
+                builder: (_, _) => CustomPaint(
                   painter: _StripePainter(progress: _ctrl.value, color: widget.color, light: light),
                 ),
               ),
@@ -542,7 +542,7 @@ class _ThinLineState extends State<_ThinLine> with SingleTickerProviderStateMixi
             left: (widget.value * (MediaQuery.of(context).size.width - (widget.showLabel ? 60 : 20))) - 5,
             child: AnimatedBuilder(
               animation: _bounce,
-              builder: (_, __) => Transform.translate(
+              builder: (_, _) => Transform.translate(
                 offset: Offset(0, _bounce.value),
                 child: Container(width: 10, height: 10, decoration: BoxDecoration(shape: BoxShape.circle, color: widget.color)),
               ),
@@ -688,7 +688,7 @@ class _WaveState extends State<_Wave> with SingleTickerProviderStateMixin {
               child: ClipRect(
                 child: AnimatedBuilder(
                   animation: _ctrl,
-                  builder: (_, __) => CustomPaint(
+                  builder: (_, _) => CustomPaint(
                     painter: _WavePainter(progress: _ctrl.value, color: widget.color),
                   ),
                 ),

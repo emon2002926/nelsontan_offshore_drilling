@@ -83,44 +83,29 @@ class SignInController extends GetxController {
       await StorageService.saveUser(user);
 
 
-      // print("sadkfjgsag: ${user.approveStatus}");
-      //
-      // String status = user.approveStatus;
-      // if(status=="PENDING"){
-      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
-      // } else if(status=="APPROVED"){
-      //   AppNavigation.pushAndClear(HomePage());
-      // } else if(status=="REJECTED"){
-      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
-      // }else if(status=="INACTIVE"){
-      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
-      // }else if(status=="DELETED"){
-      //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
-      // }else if(status=="NOT_SUBMITTED"){
-      //   AppNavigation.pushAndClear(ClientRigSelectScreen());
-      // }
-      //
 
-
-
-      if (!user.isApproved) {
-        final screen = switch (true) {
-          _ when user.isActive   =>  const BasePage( ),
-          _ when user.isPending   => const AccountStatusScreen(status: AccountStatus.pending),
-          _ when user.isInactive  => const AccountStatusScreen(status: AccountStatus.inactive),
-          _ when user.isSuspended => const AccountStatusScreen(status: AccountStatus.suspended),
-          _ when user.isDeleted   => const AccountStatusScreen(status: AccountStatus.deleted),
-          _ when user.isNotSubmitted   => const ClientRigSelectScreen( ),
-          _                       => const AccountStatusScreen(status: AccountStatus.pending),
-        };
-        AppNavigation.push(screen);
-        return;
+      switch (user.approveStatus){
+        case "PENDING":
+          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
+          break;
+        case "APPROVED":
+          AppNavigation.pushAndClear(BasePage());
+          break;
+        case "REJECTED":
+          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
+          break;
+        case "INACTIVE":
+          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
+          break;
+        case "DELETED":
+          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
+          break;
+        case "NOT_SUBMITTED":
+          AppNavigation.pushAndClear(ClientRigSelectScreen());
+          break;
       }
 
-
-      // ✅ Approved — go home
       CustomSnackBar.success('Welcome back, ${user.name}!');
-      Get.offAll(() => BasePage());
 
     } on HttpException catch (e) {
       if (e.body != null && e.body!.contains('not verified')) {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
@@ -213,7 +212,7 @@ class PuzzleGameController extends GetxController {
 
     final isCorrect = hitMarkIndex != null;
     if (isCorrect) {
-      foundMarkIndices.add(hitMarkIndex!);
+      foundMarkIndices.add(hitMarkIndex);
       _playCorrectSound(); // ✅ correct sound
     } else {
       _playWrongSound();   // ❌ wrong sound

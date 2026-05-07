@@ -34,7 +34,6 @@ void main() async{
     DeviceOrientation.portraitDown,
   ]);
 
-  // Set status bar icons to white throughout the app
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,

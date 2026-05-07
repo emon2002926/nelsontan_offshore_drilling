@@ -1,4 +1,3 @@
-// otp_verification_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../core/services/api_services.dart';
@@ -7,7 +6,6 @@ import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../home_page.dart';
 import '../models/sign_in_response_model.dart';
-import '../views/account_created_success_screen.dart';
 import '../views/account_status_screen.dart';
 import '../views/client_rig_select_screen.dart';
 import '../views/reset_password_screen.dart';
@@ -31,18 +29,17 @@ class OtpVerificationController extends GetxController {
   final otp5Focus = FocusNode();
   final otp6Focus = FocusNode();
 
-  // Observable states
+
   final isLoading   = false.obs;
   final isResending = false.obs;
 
-  // Get complete OTP as string
   String get otpCode =>
       '${otp1Controller.text}${otp2Controller.text}${otp3Controller.text}'
           '${otp4Controller.text}${otp5Controller.text}${otp6Controller.text}';
 
   bool get isOtpComplete => otpCode.length == 6;
 
-  // ── Verify OTP ────────────────────────────────────────────────────────────
+
   Future<void> verifyOtp(BuildContext context, String email, bool isFromSignUp) async {
     if (!isOtpComplete) {
       CustomSnackBar.warning('Please enter complete 6-digit code');
@@ -52,8 +49,7 @@ class OtpVerificationController extends GetxController {
     isLoading.value = true;
     try {
       if (isFromSignUp) {
-        // POST /auth/user/verify-email → same structure as SignInResponseModel
-        final raw      = await _api.post(
+        final raw = await _api.post(
           '/auth/user/verify-email',
           body: {"email": email, "otp": int.parse(otpCode)},
         );
@@ -68,9 +64,7 @@ class OtpVerificationController extends GetxController {
         CustomSnackBar.success('Email verified successfully!');
         await Future.delayed(const Duration(milliseconds: 500));
 
-        // ── Decision making using approveStatus ──────────────────────────
         if (user == null || user.isNotSubmitted) {
-          // Fresh signup — needs to select client & rig
           AppNavigation.pushAndClear(const ClientRigSelectScreen());
           return;
         }
@@ -87,11 +81,10 @@ class OtpVerificationController extends GetxController {
           return;
         }
 
-        // Fallback for any other status
         AppNavigation.pushAndClear(const SignInScreen());
 
       } else {
-        // POST /auth/user/verify-otp → no token, just success
+        // This one for Forgot Password
         await _api.post(
           '/auth/user/verify-otp',
           body: {"email": email, "otp": int.parse(otpCode)},
@@ -112,7 +105,6 @@ class OtpVerificationController extends GetxController {
       isLoading.value = false;
     }
   }
-  // ── Resend OTP ────────────────────────────────────────────────────────────
   Future<void> resendOtp(BuildContext context, String email, bool isFromSignUp) async {
     isResending.value = true;
     try {
@@ -136,7 +128,6 @@ class OtpVerificationController extends GetxController {
     }
   }
 
-  // ── Helpers ───────────────────────────────────────────────────────────────
   void _clearOtp() {
     for (final c in [otp1Controller, otp2Controller, otp3Controller,
       otp4Controller, otp5Controller, otp6Controller]) {

@@ -6,7 +6,6 @@
   import '../../../core/widgets/snakbar/custom_snackbar.dart';
   import '../../../home_page.dart';
   import '../models/game_models.dart';
-  import '../models/game_play_model.dart' hide HazardSpot;
 
   enum GameState { loading, playing, submitting, finished }
 

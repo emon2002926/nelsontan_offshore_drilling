@@ -4,6 +4,7 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../models/client_rig_model.dart';
+import '../models/sign_in_response_model.dart';
 import '../views/account_status_screen.dart';
 import '../views/signin_screen.dart';
 import 'package:get/get.dart';
@@ -22,6 +23,25 @@ class ClientRigSelectController extends GetxController {
   void onInit() {
     super.onInit();
     fetchClientsAndRigs();
+    getStatusUpdate();
+  }
+
+
+  Future<void> getStatusUpdate()async{
+    final token = StorageService.accessToken;
+    try{
+      final raw = await _api.get('/user/profile',
+        headers: {"Authorization": "Bearer $token"},
+      );
+      final response = SignInResponseModel.fromJson(raw);
+      final user  = response.data!.user;
+
+    }on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
+    } catch (e) {
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 
   Future<void> fetchClientsAndRigs() async {

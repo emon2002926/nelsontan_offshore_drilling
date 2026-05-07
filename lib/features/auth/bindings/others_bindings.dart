@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../controllers/client_rig_select_controller.dart';
 import '../controllers/forget_password_controller.dart';
 import '../controllers/otp_verification_controller.dart';
 import '../controllers/signin_controller.dart';
@@ -7,26 +8,27 @@ class AuthBindings {
   static void signInDependencies(){
     Get.lazyPut<SignInController>(
           ()=> SignInController(),
-      fenix: true,
     );
   }
 
   static void signUpDependencies(){
     Get.lazyPut<SignUpController>(
           ()=> SignUpController(),
-      fenix: true,
     );
   }
   static void forgotPassDependencies(){
     Get.lazyPut<ForgetPasswordController>(
           ()=> ForgetPasswordController(),
-      fenix: true,
     );
   }
   static void otpVerificationDependencies(){
     Get.lazyPut<OtpVerificationController>(
           ()=> OtpVerificationController(),
-      fenix: true,
+    );
+  }
+  static void clientRigSelectDependencies(){
+    Get.lazyPut<ClientRigSelectController>(
+          ()=> ClientRigSelectController(),
     );
   }
 

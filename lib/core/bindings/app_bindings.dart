@@ -13,6 +13,7 @@ class AppBindings {
     AuthBindings.signUpDependencies();
     AuthBindings.forgotPassDependencies();
     AuthBindings.otpVerificationDependencies();
+    AuthBindings.clientRigSelectDependencies();
     HomeBinding.homeDependencies();
     CardBinding.cardDependencies();
     GameBinding.gameDependencies();
