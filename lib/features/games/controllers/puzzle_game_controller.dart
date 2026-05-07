@@ -5,7 +5,7 @@ import 'package:get/get.dart';
 import '../../../core/services/api_services.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
 import '../models/puzzle_model.dart';
 
 enum PuzzleGameState { loading, playing, submitting, finished }

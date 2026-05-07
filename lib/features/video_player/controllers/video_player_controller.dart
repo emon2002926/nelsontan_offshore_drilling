@@ -102,6 +102,12 @@ class AppVideoPlayerController extends GetxController {
     isMuted.value = !isMuted.value;
     videoController?.setVolume(isMuted.value ? 0.0 : 1.0);
   }
+  void pause() {
+    if (videoController?.value.isPlaying == true) {
+      videoController!.pause();
+      isPlaying.value = false;
+    }
+  }
 
   void toggleControls() {
     showControls.value = !showControls.value;
@@ -116,6 +122,7 @@ class AppVideoPlayerController extends GetxController {
 
   @override
   void onClose() {
+
     videoController?.removeListener(_videoListener);
     videoController?.dispose();
     super.onClose();

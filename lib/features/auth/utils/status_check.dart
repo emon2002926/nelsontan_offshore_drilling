@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../core/util/app_navigation.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
 import '../controllers/account_status_controller.dart';
 import '../views/account_status_screen.dart';
 import '../views/client_rig_select_screen.dart';

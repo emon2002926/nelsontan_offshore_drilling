@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../../../../core/util/storage_service.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/util/app_navigation.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
 import '../../auth/controllers/account_status_controller.dart';
 import '../../auth/utils/status_check.dart';
 import '../../auth/views/account_status_screen.dart';

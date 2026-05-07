@@ -4,7 +4,7 @@ import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
 import '../models/sign_in_response_model.dart';
 import '../views/account_status_screen.dart';
 import '../views/client_rig_select_screen.dart';

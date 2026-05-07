@@ -3,7 +3,7 @@ import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
 import '../models/client_rig_model.dart';
 import '../models/update_profile_status.dart';
 import '../views/account_status_screen.dart';

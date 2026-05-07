@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
 import 'package:nelsontan_offshore_drilling/core/widgets/snakbar/custom_snackbar.dart';
 import 'package:nelsontan_offshore_drilling/features/auth/views/signup_screen.dart';
-import 'package:nelsontan_offshore_drilling/home_page.dart';
+import 'package:nelsontan_offshore_drilling/base_page.dart';
 
 import '../../../core/services/api_services.dart';
 import '../../../core/util/storage_service.dart';

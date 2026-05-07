@@ -27,7 +27,6 @@ class VideosPage extends StatelessWidget {
 
             Expanded(
               child: Obx(() {
-                // ── Loading ──────────────────────────────────────────────
                 if (controller.isLoading.value) {
                   return GridView.builder(
                     padding: EdgeInsets.all(context.responsiveSize(16)),
@@ -42,7 +41,6 @@ class VideosPage extends StatelessWidget {
                   );
                 }
 
-                // ── Empty ────────────────────────────────────────────────
                 if (controller.videos.isEmpty) {
                   return Center(
                     child: Column(
@@ -64,7 +62,6 @@ class VideosPage extends StatelessWidget {
                   );
                 }
 
-                // ── Grid ─────────────────────────────────────────────────
                 return GridView.builder(
                   padding: EdgeInsets.all(context.responsiveSize(16)),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -87,7 +84,6 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Header ─────────────────────────────────────────────────────────────────
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -136,7 +132,6 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Video card — thumbnail only, no video loaded ───────────────────────────
 
   Widget _buildVideoCard(BuildContext context, {required VideoModel video}) {
     return GestureDetector(
@@ -239,7 +234,6 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Fallback when thumbnail is null or fails to load ──────────────────────
 
   Widget _buildThumbnailFallback(BuildContext context) {
     return Container(
@@ -254,7 +248,7 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Skeleton card shown while loading ─────────────────────────────────────
+
 
   Widget _buildSkeletonCard(BuildContext context) {
     return Column(
@@ -288,4 +282,3 @@ class VideosPage extends StatelessWidget {
     );
   }
 }
-// Video Player Screen (Full screen video player)

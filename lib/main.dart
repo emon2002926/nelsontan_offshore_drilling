@@ -10,6 +10,7 @@ import 'features/safety_card/services/hive_boxes.dart';
 import 'features/safety_card/services/sync_service.dart';
 import 'features/splash/controller/splash_controller.dart';
 import 'features/splash/views/splash_screen.dart';
+import 'features/videos/controllers/video_manager.dart';
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -18,6 +19,8 @@ void main() async{
   Get.put(ApiServices(baseUrl: 'http://10.10.7.108:8000/api/v1'));
   // Get.put(ApiServices(baseUrl: 'https://safe.dsrt321.online/api/v1'));
   Get.put(SplashController());
+  Get.put(VideoManager());
+
 
   await HiveBoxes.init();
 

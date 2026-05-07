@@ -6,6 +6,7 @@ import 'package:nelsontan_offshore_drilling/features/videos/views/videos_page.da
 
 import 'core/widgets/bottom_navigation/bottom_navigation.dart';
 import 'features/safety_card/views/safety_card_screen.dart';
+import 'features/videos/controllers/video_manager.dart';
 
   class BasePage extends StatefulWidget {
     const BasePage({super.key});
@@ -35,6 +36,11 @@ import 'features/safety_card/views/safety_card_screen.dart';
     void onTabSelected(int index) {
       final currentTime = DateTime.now().millisecondsSinceEpoch;
 
+      // ✅ Pause all videos when leaving the Videos tab
+      if (currentIndex == 3 && index != 3) {
+        VideoManager.to.pauseAll();
+      }
+
       if (index == currentIndex && currentTime - lastTapTime < 500) {
         if (index == 0) {
           homeNavKey.currentState?.popUntil((route) => route.isFirst);
@@ -44,13 +50,11 @@ import 'features/safety_card/views/safety_card_screen.dart';
           gameNavKey.currentState?.popUntil((route) => route.isFirst);
         } else if (index == 3) {
           videosNavKey.currentState?.popUntil((route) => route.isFirst);
-        }else if (index == 4) {
+        } else if (index == 4) {
           profileNavKey.currentState?.popUntil((route) => route.isFirst);
         }
       } else {
-        setState(() {
-          currentIndex = index;
-        });
+        setState(() => currentIndex = index);
       }
 
       lastTapTime = currentTime;

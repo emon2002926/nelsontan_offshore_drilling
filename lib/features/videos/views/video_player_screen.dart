@@ -12,20 +12,45 @@ import '../../video_player/widgets/app_video_player.dart';
 
 import 'package:get/get.dart';
 import '../../video_player/controllers/video_player_controller.dart';
+import '../controllers/video_manager.dart';
 
-class VideoPlayerScreen extends StatelessWidget {
+class VideoPlayerScreen extends StatefulWidget {
   final VideoSource videoSource;
   final String title;
   final String? description;
 
-  final appAssets = AppAssertImage.instance;
-
-   VideoPlayerScreen({
+  const VideoPlayerScreen({
     super.key,
     required this.videoSource,
     required this.title,
     this.description,
   });
+
+  @override
+  State<VideoPlayerScreen> createState() => _VideoPlayerScreenState();
+}
+
+class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
+  final appAssets = AppAssertImage.instance;
+  late final String _tag;
+
+  @override
+  void initState() {
+    super.initState();
+    _tag = 'main_${widget.videoSource.path}';
+    Get.put(AppVideoPlayerController(), tag: _tag);
+    VideoManager.to.register(_tag); // ✅ track this player
+  }
+
+  @override
+  void dispose() {
+    VideoManager.to.unregister(_tag); // ✅ stop tracking
+    try {
+      Get.find<AppVideoPlayerController>(tag: _tag).pause();
+    } catch (_) {}
+    Get.delete<AppVideoPlayerController>(tag: _tag, force: true);
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,8 +60,7 @@ class VideoPlayerScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            SizedBox(height: context.heightPercentage(1),),
-
+            SizedBox(height: context.heightPercentage(1)),
             _buildHeader(context),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -45,68 +69,60 @@ class VideoPlayerScreen extends StatelessWidget {
                 child: AspectRatio(
                   aspectRatio: 16 / 10,
                   child: AppVideoPlayer(
-                    videoSource: videoSource,
+                    videoSource: widget.videoSource,
                     width: double.infinity,
                     borderRadius: 0,
                     showThumbnail: true,
                     autoPlay: false,
-                    tag: 'main_${videoSource.path}',
+                    tag: _tag, // ✅ pass the same tag
                   ),
                 ),
               ),
             ),
-
             const SizedBox(height: 20),
-
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   AppText(
-                    data: title,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF111827),
+                    data: widget.title,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF111827),
                   ),
                   const SizedBox(height: 6),
                   AppText(
-                    data:description ??
+                    data: widget.description ??
                         'Learn to identify and prevent hazards on the WIP Oil Machine and follow best practices for safe operation.',
-                      fontSize: 14,
-                      color: Color(0xFF6B7280),
-                      height: 1.5,
+                    fontSize: 14,
+                    color: const Color(0xFF6B7280),
+                    height: 1.5,
                   ),
                 ],
               ),
             ),
-
             const SizedBox(height: 20),
-
-            _InlinePlayerControls(videoSource: videoSource),
+            _InlinePlayerControls(tag: _tag),
           ],
         ),
       ),
     );
   }
+
   Widget _buildHeader(BuildContext context) {
     return Container(
       padding: EdgeInsets.all(context.responsiveSize(16)),
       color: Colors.white,
       child: Row(
         children: [
-          // Icon
-          Container(
-            child: Image.asset(
-              appAssets.bxsVideos,
-              width: context.responsiveSize(40),
-              height: context.responsiveSize(40),
-              colorBlendMode: BlendMode.srcIn,
-            ),
+          Image.asset(
+            appAssets.bxsVideos,
+            width: context.responsiveSize(40),
+            height: context.responsiveSize(40),
+            colorBlendMode: BlendMode.srcIn,
           ),
           SizedBox(width: context.responsiveSize(12)),
-
-          // Title and subtitle
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -129,37 +145,27 @@ class VideoPlayerScreen extends StatelessWidget {
               ],
             ),
           ),
-
-          // Notification icon
           IconButton(
-            onPressed: () {
-              // Handle notification tap
-              AppNavigation.push( const NotificationsScreen(),context: context);
-
-            },
-            icon: const Icon(
-              Icons.notifications_outlined,
-              color: Color(0xFF1A1A1A),
-            ),
+            onPressed: () =>
+                AppNavigation.push(const NotificationsScreen(), context: context),
+            icon: const Icon(Icons.notifications_outlined, color: Color(0xFF1A1A1A)),
             iconSize: context.responsiveSize(28),
           ),
         ],
       ),
     );
   }
-
 }
-class _InlinePlayerControls extends StatelessWidget {
-  final VideoSource videoSource;
 
-  const _InlinePlayerControls({required this.videoSource});
+// ✅ Accept tag instead of videoSource — no controller lookup duplication
+class _InlinePlayerControls extends StatelessWidget {
+  final String tag;
+
+  const _InlinePlayerControls({required this.tag});
 
   @override
   Widget build(BuildContext context) {
-    // Reuse the same controller that AppVideoPlayer already registered
-    final controller = Get.find<AppVideoPlayerController>(
-      tag: 'main_${videoSource.path}',
-    );
+    final controller = Get.find<AppVideoPlayerController>(tag: tag);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -172,7 +178,6 @@ class _InlinePlayerControls extends StatelessWidget {
 
         return Row(
           children: [
-            // Play / Pause button
             GestureDetector(
               onTap: controller.togglePlayPause,
               child: Icon(
@@ -183,10 +188,7 @@ class _InlinePlayerControls extends StatelessWidget {
                 size: 32,
               ),
             ),
-
             const SizedBox(width: 8),
-
-            // Slider
             Expanded(
               child: SliderTheme(
                 data: SliderThemeData(
@@ -194,29 +196,21 @@ class _InlinePlayerControls extends StatelessWidget {
                   activeTrackColor: const Color(0xFF0057B8),
                   inactiveTrackColor: const Color(0xFFE5E7EB),
                   thumbColor: const Color(0xFF0057B8),
-                  thumbShape:
-                  const RoundSliderThumbShape(enabledThumbRadius: 6),
-                  overlayShape:
-                  const RoundSliderOverlayShape(overlayRadius: 12),
+                  thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+                  overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
                 ),
                 child: Slider(
                   value: progress,
-                  onChanged: (value) {
-                    final newPosition = duration * value;
-                    controller.seekTo(newPosition);
-                  },
+                  onChanged: (value) => controller.seekTo(duration * value),
                 ),
               ),
             ),
-
             const SizedBox(width: 4),
-
-            // Duration label
             AppText(
               data: controller.formatDuration(duration),
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF0057B8),
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: const Color(0xFF0057B8),
             ),
           ],
         );
