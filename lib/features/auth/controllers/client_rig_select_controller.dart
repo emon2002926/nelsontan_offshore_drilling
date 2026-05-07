@@ -5,10 +5,8 @@ import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
 import '../../../home_page.dart';
 import '../models/client_rig_model.dart';
-import '../models/sign_in_response_model.dart';
 import '../models/update_profile_status.dart';
 import '../views/account_status_screen.dart';
-import '../views/client_rig_select_screen.dart';
 import '../views/signin_screen.dart';
 import 'package:get/get.dart';
 
@@ -59,8 +57,6 @@ class ClientRigSelectController extends GetxController {
       }
     }on HttpException catch (e) {
       CustomSnackBar.error(e.message);
-    } catch (e) {
-
     } finally {
       isSubmitting.value = false;
     }

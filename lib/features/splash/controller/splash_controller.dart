@@ -4,6 +4,7 @@ import '../../../../core/util/storage_service.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../home_page.dart';
+import '../../auth/controllers/account_status_controller.dart';
 import '../../auth/utils/status_check.dart';
 import '../../auth/views/account_status_screen.dart';
 import '../../auth/views/client_rig_select_screen.dart';
@@ -35,7 +36,7 @@ class SplashController extends GetxController {
         //   case "PENDING":
         //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
         //     break;
-        //   case "APPROVED":
+        //   case "ACTIVE":
         //     AppNavigation.pushAndClear(BasePage());
         //     break;
         //   case "REJECTED":

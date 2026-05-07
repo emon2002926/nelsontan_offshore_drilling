@@ -17,7 +17,6 @@ class ClientRigSelectScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-
       body: SafeArea(
         child: Center(
           child: Stack(

@@ -22,7 +22,7 @@ class StatusChecker {
           status: AccountStatus.pending,
         );
 
-      case "APPROVED":
+      case "ACTIVE":
         return BasePage();
 
       case "REJECTED":

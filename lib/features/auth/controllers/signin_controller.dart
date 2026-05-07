@@ -9,6 +9,7 @@ import 'package:nelsontan_offshore_drilling/home_page.dart';
 import '../../../core/services/api_services.dart';
 import '../../../core/util/storage_service.dart';
 import '../models/sign_in_response_model.dart';
+import '../utils/status_check.dart';
 import '../views/account_status_screen.dart';
 import '../views/client_rig_select_screen.dart';
 import '../views/forget_password_screen.dart';
@@ -83,28 +84,29 @@ class SignInController extends GetxController {
       StorageService.saveToken(token);
       await StorageService.saveUser(user);
 
+      StatusChecker.navigate(user.approveStatus);
 
 
-      switch (user.approveStatus){
-        case "PENDING":
-          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
-          break;
-        case "APPROVED":
-          AppNavigation.pushAndClear(BasePage());
-          break;
-        case "REJECTED":
-          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
-          break;
-        case "INACTIVE":
-          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
-          break;
-        case "DELETED":
-          AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
-          break;
-        case "NOT_SUBMITTED":
-          AppNavigation.pushAndClear(ClientRigSelectScreen());
-          break;
-      }
+      // switch (user.approveStatus){
+      //   case "PENDING":
+      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
+      //     break;
+      //   case "APPROVED":
+      //     AppNavigation.pushAndClear(BasePage());
+      //     break;
+      //   case "REJECTED":
+      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
+      //     break;
+      //   case "INACTIVE":
+      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
+      //     break;
+      //   case "DELETED":
+      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
+      //     break;
+      //   case "NOT_SUBMITTED":
+      //     AppNavigation.pushAndClear(ClientRigSelectScreen());
+      //     break;
+      // }
 
       CustomSnackBar.success('Welcome back, ${user.name}!');
 
