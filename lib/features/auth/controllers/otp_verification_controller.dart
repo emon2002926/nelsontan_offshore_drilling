@@ -10,6 +10,7 @@ import '../views/account_status_screen.dart';
 import '../views/client_rig_select_screen.dart';
 import '../views/reset_password_screen.dart';
 import '../views/signin_screen.dart';
+import 'account_status_controller.dart';
 
 class OtpVerificationController extends GetxController {
   final ApiServices _api = Get.find<ApiServices>();

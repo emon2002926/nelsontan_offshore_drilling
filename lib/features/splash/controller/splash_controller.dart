@@ -4,6 +4,7 @@ import '../../../../core/util/storage_service.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../home_page.dart';
+import '../../auth/utils/status_check.dart';
 import '../../auth/views/account_status_screen.dart';
 import '../../auth/views/client_rig_select_screen.dart';
 import '../../onboarding/views/onboarding_screen.dart';
@@ -27,27 +28,30 @@ class SplashController extends GetxController {
           return;
         }
 
-        switch(user.approveStatus){
-          case "PENDING":
-            AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
-            break;
-          case "APPROVED":
-            AppNavigation.pushAndClear(BasePage());
-            break;
-          case "REJECTED":
-            AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
-            break;
-          case "INACTIVE":
-            AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
-              break;
-          case "DELETED":
-           AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
-              break;
-          case "NOT_SUBMITTED":
-            AppNavigation.pushAndClear(ClientRigSelectScreen());
-              break;
 
-        }
+        StatusChecker.navigate(user.approveStatus);
+
+        // switch(user.approveStatus){
+        //   case "PENDING":
+        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
+        //     break;
+        //   case "APPROVED":
+        //     AppNavigation.pushAndClear(BasePage());
+        //     break;
+        //   case "REJECTED":
+        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
+        //     break;
+        //   case "INACTIVE":
+        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
+        //       break;
+        //   case "DELETED":
+        //    AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
+        //       break;
+        //   case "NOT_SUBMITTED":
+        //     AppNavigation.pushAndClear(ClientRigSelectScreen());
+        //       break;
+        //
+        // }
 
 
       } else {

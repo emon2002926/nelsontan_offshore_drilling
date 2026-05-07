@@ -13,6 +13,7 @@ import '../views/account_status_screen.dart';
 import '../views/client_rig_select_screen.dart';
 import '../views/forget_password_screen.dart';
 import '../views/otp_verification_screen.dart';
+import 'account_status_controller.dart';
 
 class SignInController extends GetxController {
   // Text Controllers
