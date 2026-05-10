@@ -6,40 +6,17 @@ import 'package:hive/hive.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/services/api_services.dart';
-import '../../../core/services/local_cache_service.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/form_validator.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
-import '../../auth/models/sign_in_response_model.dart';
 import '../../onboarding/views/onboarding_screen.dart';
 import '../../safety_card/services/connectivity_service.dart';
 import '../../safety_card/services/hive_boxes.dart';
 import '../data/models/profile_hive_model.dart';
 import '../data/models/profile_model.dart';
-import 'dart:io';
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
-/// ─────────────────────────────────────────────────────────────────────────────
-/// ProfileController  –  with offline-first Hive caching
-///
-/// Strategy
-/// ─────────
-///  1. onInit → open the Hive box (fast, local).
-///  2. If cached data exists → populate UI immediately (no loading spinner).
-///  3. Always call the API in the background.
-///  4. When the API responds → update UI + overwrite the cache.
-///  5. If the API fails AND there is no cache → show an error.
-///  6. If the API fails BUT cache exists → silently keep showing cached data.
-/// ─────────────────────────────────────────────────────────────────────────────
-import 'dart:io';
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
-import 'dart:io';
-import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
 
 class ProfileController extends GetxController {
   final ApiServices         _api          = Get.find<ApiServices>();
@@ -66,7 +43,7 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _init();
+    init();
   }
 
   @override
@@ -80,7 +57,7 @@ class ProfileController extends GetxController {
   }
 
 
-  Future<void> _init() async {
+  Future<void> init() async {
     final cached = _box.get(HiveBoxes.profileCacheKey);
     if (cached != null) {
       _populateFields(cached.toDomain());

@@ -4,7 +4,6 @@ import 'package:nelsontan_offshore_drilling/core/constants/app_colors.dart';
 
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
-import '../models/training_game_model.dart';
 
 class SubmitDailyDebrief extends StatelessWidget {
 

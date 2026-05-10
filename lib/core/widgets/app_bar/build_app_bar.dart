@@ -75,7 +75,7 @@ class BuildAppBar extends StatelessWidget implements PreferredSizeWidget {
             child: Center(
               child: Icon(
                 backButtonIcon,
-                color: iconColor ?? Colors.black,
+                color: iconColor ?? Colors.white,
                 size: context.responsiveSize(24),
               ),
             ),
@@ -93,10 +93,7 @@ class BuildAppBar extends StatelessWidget implements PreferredSizeWidget {
     }
 
     final appBarContent = AppBar(
-      backgroundColor: backgroundColor ??
-          (enableFrostEffect
-              ? Colors.white.withOpacity(0.15)
-              : Colors.transparent),
+      backgroundColor: backgroundColor ??Colors.transparent,
       elevation: 0,
       automaticallyImplyLeading: false, // Set to false to use custom leading
       leading: showBackButton

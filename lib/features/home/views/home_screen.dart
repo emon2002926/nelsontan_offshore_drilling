@@ -5,7 +5,7 @@ import 'package:nelsontan_offshore_drilling/core/widgets/text/app_text.dart';
 
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
 import '../../notification/views/notifications_screen.dart';
 import '../../safety_card/controllers/daily_debrief_controller.dart';
 import '../../safety_card/views/submit_daily_debrief_screen.dart';
@@ -24,84 +24,89 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<HomeController>();
-
+    final dailyDebriefController = Get.find<DailyDebriefController>();
 
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: context.heightPercentage(1)),
+          child: RefreshIndicator(
+            onRefresh: () {
+              return controller.fetchAppHome();
+            },
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  SizedBox(height: context.heightPercentage(1)),
 
-                topHeader(context, appAssets.topHeaderIcon, appAssets.topHeaderNotificationIcon),
-                SizedBox(height: context.responsiveSize(10)),
+                  topHeader(context, appAssets.topHeaderIcon, appAssets.topHeaderNotificationIcon),
+                  SizedBox(height: context.responsiveSize(10)),
 
-                // Reactive video — switches to network URL once API data loads
-                Obx(() {
-                  final video = controller.appHome.value?.videos;
-                  return AppVideoPlayer(
-                    key: ValueKey(video?.videoUrl ?? 'no-video'),
-                    videoSource: video?.videoUrl != null
-                        ? VideoSource.network(video!.videoUrl)
-                        : null, // <-- just pass null, widget handles the rest
-                    width: context.widthPercentage(100),
-                    height: context.heightPercentage(23),
-                    borderRadius: 16,
-                    autoPlay: false,
-                  );
-                }),
-
-                SizedBox(height: context.responsiveSize(8)),
-
-                Obx(
-                      () => WeeklySafetyFocusCard(
-                    data: controller.weeklySafetyFocus.value,
-                    isLoading: controller.isLoadingSafetyFocus.value,
-                    onReadMore: () => controller.onReadMoreSafetyFocus(context),
-                  ),
-                ),
-
-                SizedBox(height: context.responsiveSize(8)),
-
-                Obx(
-                      () => TrainingGameCard(
-                    data: controller.trainingGame.value,
-                    isLoading: controller.isLoadingTrainingGame.value,
-                    onPlay: () => controller.onPlayGame(context),
-                    onSettings: () => controller.onGameSettings(context),
-                  ),
-                ),
-
-                SizedBox(height: context.responsiveSize(20)),
-
-                SubmitDailyDebrief(
-                  onStart: () {
-                    AppNavigation.push(
-                      SubmitDailyDebriefScreen(),
-                      context: context,
+                  // Reactive video — switches to network URL once API data loads
+                  Obx(() {
+                    final video = controller.appHome.value?.videos;
+                    return AppVideoPlayer(
+                      key: ValueKey(video?.videoUrl ?? 'no-video'),
+                      videoSource: video?.videoUrl != null
+                          ? VideoSource.network(video!.videoUrl)
+                          : null, // <-- just pass null, widget handles the rest
+                      width: context.widthPercentage(100),
+                      height: context.heightPercentage(23),
+                      borderRadius: 16,
+                      autoPlay: false,
                     );
+                  }),
 
-                  },
-                ),
+                  SizedBox(height: context.responsiveSize(8)),
 
-
-                SizedBox(height: context.responsiveSize(20)),
-
-
-                Obx(
-                      () => SubmitSafetyCardButton(
-                    onPressed: () {
-                      context.findAncestorStateOfType<BasePageState>()?.onTabSelected(1);
-                    },
-                    isLoading: controller.isSubmittingSafetyCard.value,
+                  Obx(
+                        () => WeeklySafetyFocusCard(
+                      data: controller.weeklySafetyFocus.value,
+                      isLoading: controller.isLoadingSafetyFocus.value,
+                      onReadMore: () => controller.onReadMoreSafetyFocus(context),
+                    ),
                   ),
-                ),
 
-                SizedBox(height: context.responsiveSize(20)),
-              ],
+                  SizedBox(height: context.responsiveSize(8)),
+
+                  Obx(
+                        () => TrainingGameCard(
+                      data: controller.trainingGame.value,
+                      isLoading: controller.isLoadingTrainingGame.value,
+                      onPlay: () => controller.onPlayGame(context),
+                      onSettings: () => controller.onGameSettings(context),
+                    ),
+                  ),
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+                  SubmitDailyDebrief(
+                    onStart: () {
+                      AppNavigation.push(
+                        SubmitDailyDebriefScreen(),
+                        context: context,
+                      );
+
+                    },
+                  ),
+
+
+                  SizedBox(height: context.responsiveSize(20)),
+
+
+                  Obx(
+                        () => SubmitSafetyCardButton(
+                      onPressed: () {
+                        context.findAncestorStateOfType<BasePageState>()?.onTabSelected(1);
+                      },
+                      isLoading: controller.isSubmittingSafetyCard.value,
+                    ),
+                  ),
+
+                  SizedBox(height: context.responsiveSize(20)),
+                ],
+              ),
             ),
           ),
         ),

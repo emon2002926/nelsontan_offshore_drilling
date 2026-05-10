@@ -11,7 +11,6 @@ import '../views/otp_verification_screen.dart';
 class SignUpController extends GetxController {
   final ApiServices _api = Get.find<ApiServices>();
 
-  // Text Controllers
   final fullNameController        = TextEditingController();
   final emailController           = TextEditingController();
   final companyNameController     = TextEditingController();
@@ -20,7 +19,6 @@ class SignUpController extends GetxController {
   final passwordController        = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  // Focus Nodes
   final fullNameFocus         = FocusNode();
   final emailFocus            = FocusNode();
   final companyNameFocus      = FocusNode();
@@ -29,7 +27,6 @@ class SignUpController extends GetxController {
   final passwordFocus         = FocusNode();
   final confirmPasswordFocus  = FocusNode();
 
-  // Observable states
   final isPasswordVisible        = false.obs;
   final isConfirmPasswordVisible = false.obs;
   final isLoading                = false.obs;
@@ -40,7 +37,6 @@ class SignUpController extends GetxController {
   void togglePasswordVisibility()        => isPasswordVisible.value = !isPasswordVisible.value;
   void toggleConfirmPasswordVisibility() => isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
 
-  // ── Validators (used by AppTextField) ────────────────────────────────────
   String? validateFullName(String? v) {
     if (v == null || v.isEmpty) return 'Please enter your full name';
     if (v.length < 3) return 'Name must be at least 3 characters';
@@ -78,12 +74,10 @@ class SignUpController extends GetxController {
     return null;
   }
 
-  // ── Sign Up ───────────────────────────────────────────────────────────────
+
   Future<void> signUp(BuildContext context) async {
-    // Step 1: Flutter form validators (inline field errors)
     if (!formKey.currentState!.validate()) return;
 
-    // Step 2: FormValidator — sequential snackbar + focus on first failure
     final password        = passwordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
@@ -98,7 +92,6 @@ class SignUpController extends GetxController {
     ]);
     if (!isValid) return;
 
-    // Step 3: Extra checks that validateAll can't handle
     if (!FormValidator.isValidEmail(emailController.text.trim())) {
       CustomSnackBar.error('Please enter a valid email');
       emailFocus.requestFocus();
@@ -120,7 +113,6 @@ class SignUpController extends GetxController {
       return;
     }
 
-    // ✅ All validation passed — ready for API call
     isLoading.value = true;
     try {
       // TODO: replace with real endpoint

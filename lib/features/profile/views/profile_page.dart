@@ -15,53 +15,58 @@ class ProfilePage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Stack(
-          children: [
-            SingleChildScrollView(
-              padding: EdgeInsets.symmetric(
-                horizontal: context.responsiveSize(20),
+      body: RefreshIndicator(
+        onRefresh: () {
+          return controller.init();
+        },
+        child: SafeArea(
+          child: Stack(
+            children: [
+              SingleChildScrollView(
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.responsiveSize(20),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: context.responsiveSize(35)),
+
+                    Center(child: _buildProfileAvatar(context, controller)),
+
+                    SizedBox(height: context.responsiveSize(12)),
+
+                    _buildNameDisplay(controller),
+
+                    SizedBox(height: context.responsiveSize(4)),
+
+                    _buildPositionDisplay(controller),
+
+                    SizedBox(height: context.responsiveSize(20)),
+
+                    ..._buildFormFields(context, controller),
+
+                    SizedBox(height: context.responsiveSize(35)),
+
+                    _buildSaveButton(controller),
+
+                    SizedBox(height: context.responsiveSize(12)),
+
+                    _buildLogoutButton(controller),
+
+                    SizedBox(height: context.responsiveSize(40)),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: context.responsiveSize(35)),
 
-                  Center(child: _buildProfileAvatar(context, controller)),
+              _buildFullScreenLoader(controller),
 
-                  SizedBox(height: context.responsiveSize(12)),
-
-                  _buildNameDisplay(controller),
-
-                  SizedBox(height: context.responsiveSize(4)),
-
-                  _buildPositionDisplay(controller),
-
-                  SizedBox(height: context.responsiveSize(20)),
-
-                  ..._buildFormFields(context, controller),
-
-                  SizedBox(height: context.responsiveSize(35)),
-
-                  _buildSaveButton(controller),
-
-                  SizedBox(height: context.responsiveSize(12)),
-
-                  _buildLogoutButton(controller),
-
-                  SizedBox(height: context.responsiveSize(40)),
-                ],
+              AppButton.buildLoadingOverlay(
+                isLoading: controller.isUpdating,
+                loadingMessage: 'Updating your profile...',
+                backgroundColor: Colors.black,
               ),
-            ),
-
-            _buildFullScreenLoader(controller),
-
-            AppButton.buildLoadingOverlay(
-              isLoading: controller.isUpdating,
-              loadingMessage: 'Updating your profile...',
-              backgroundColor: Colors.black,
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -71,7 +76,7 @@ class ProfilePage extends StatelessWidget {
   Widget _buildNameDisplay(ProfileController controller) =>
       ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller.nameController,
-        builder: (_, value, __) => Center(
+        builder: (_, value, _) => Center(
           child: AppText(
             data: value.text.isEmpty ? '—' : value.text,
             fontSize: 20,
@@ -85,7 +90,7 @@ class ProfilePage extends StatelessWidget {
   Widget _buildPositionDisplay(ProfileController controller) =>
       ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller.positionController,
-        builder: (_, value, __) => Center(
+        builder: (_, value, _) => Center(
           child: AppText(
             data: value.text.isEmpty ? '—' : value.text,
             fontSize: 14,

@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/util/screen_size.dart';
@@ -190,7 +189,7 @@ class PuzzleGameScreen extends StatelessWidget {
                                   ),
                                 );
                               },
-                              errorBuilder: (_, __, ___) => Container(
+                              errorBuilder: (_, _, _) => Container(
                                 color: const Color(0xFFE8F4FC),
                                 child: Center(
                                   child: Icon(Icons.image,

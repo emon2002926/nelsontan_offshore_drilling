@@ -235,7 +235,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
         return Image.asset(
           widget.videoSource!.thumbnailPath!,
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Center(
+          errorBuilder: (_, _, _) => const Center(
             child: Icon(Icons.broken_image, color: Colors.white, size: 50),
           ),
         );
@@ -255,7 +255,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
               ),
             );
           },
-          errorBuilder: (_, __, ___) => const Center(
+          errorBuilder: (_, _, _) => const Center(
             child: Icon(Icons.broken_image, color: Colors.white, size: 50),
           ),
         );
@@ -263,7 +263,7 @@ class _AppVideoPlayerState extends State<AppVideoPlayer> {
         return Image.file(
           File(widget.videoSource!.thumbnailPath!),
           fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Center(
+          errorBuilder: (_, _, _) => const Center(
             child: Icon(Icons.broken_image, color: Colors.white, size: 50),
           ),
         );

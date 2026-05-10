@@ -3,10 +3,14 @@ import '../../../core/services/api_services.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/storage_service.dart';
 import '../../../core/widgets/snakbar/custom_snackbar.dart';
+import '../../../base_page.dart';
 import '../models/client_rig_model.dart';
+import '../models/update_profile_status.dart';
 import '../views/account_status_screen.dart';
 import '../views/signin_screen.dart';
 import 'package:get/get.dart';
+
+import 'account_status_controller.dart';
 
 class ClientRigSelectController extends GetxController {
   final ApiServices _api = Get.find<ApiServices>();
@@ -21,7 +25,41 @@ class ClientRigSelectController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchClientsAndRigs();
+    // fetchClientsAndRigs();
+    getStatusUpdate();
+    print("asdgdfgh:aytyaet");
+
+  }
+
+
+  Future<void> getStatusUpdate()async{
+    final token = StorageService.accessToken;
+    try{
+      final raw = await _api.get('/user/profile',
+        headers: {"Authorization": "Bearer $token"},
+      );
+      final response = UpdateProfileStatus.fromJson(raw);
+      final user  = response.data!;
+      print("asdgdfgh:${user.approveStatus}");
+      await StorageService.saveUser(user);
+      switch (user.approveStatus){
+        // case "PENDING":
+        //   AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
+        case "ACTIVE":
+          AppNavigation.pushAndClear(BasePage());
+          break;
+
+        case "NOT_SUBMITTED":
+          fetchClientsAndRigs();
+          break;
+
+
+      }
+    }on HttpException catch (e) {
+      CustomSnackBar.error(e.message);
+    } finally {
+      isSubmitting.value = false;
+    }
   }
 
   Future<void> fetchClientsAndRigs() async {

@@ -19,6 +19,7 @@ class SignInResponseModel {
   }
 }
 
+
 class SignInData {
   final String token;
   final UserModel user;

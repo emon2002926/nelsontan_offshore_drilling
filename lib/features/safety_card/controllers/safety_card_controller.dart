@@ -75,6 +75,13 @@ class SafetyCardController extends GetxController {
     super.onClose();
   }
 
+  Future<void> refreshCard() async {
+    await Future.wait([
+      checkSubmissionStatus(),
+      fetchDropdowns(),
+    ]);
+  }
+
   Future<void> checkSubmissionStatus() async {
     final token = StorageService.accessToken;
     if (token == null || token.isEmpty) {
@@ -196,11 +203,14 @@ class SafetyCardController extends GetxController {
       if (_connectivity.isOnline.value) {
         await _submitOnline(token);
         _drainPendingQueue(token); // fire and forget, no await
+        canSubmitToday.value = false;
       } else {
         await _saveToHive();
+        canSubmitToday.value = false;
       }
     } finally {
       isSubmitting.value = false;
+      canSubmitToday.value = false;
     }
   }
 

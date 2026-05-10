@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-import 'package:nelsontan_offshore_drilling/features/auth/views/signin_screen.dart';
 import '../../../../core/util/storage_service.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../../core/util/app_navigation.dart';
-import '../../../home_page.dart';
+import '../../../base_page.dart';
+import '../../auth/controllers/account_status_controller.dart';
+import '../../auth/utils/status_check.dart';
 import '../../auth/views/account_status_screen.dart';
 import '../../auth/views/client_rig_select_screen.dart';
 import '../../onboarding/views/onboarding_screen.dart';
@@ -23,30 +23,37 @@ class SplashController extends GetxController {
       final String? accessToken = StorageService.accessToken;
 
       if (accessToken != null && accessToken.isNotEmpty) {
-        final u = StorageService.user; // ← no force unwrap, INSIDE the if-block
-
-        if (u == null) {
+        final user = StorageService.user;
+        if (user == null) {
           AppNavigation.pushAndClear(OnboardingScreen());
           return;
         }
 
-        if (u.isActive || u.isApproved) {
-          AppNavigation.pushAndClear(BasePage());
-        } else if (u.isPending) {
-          AppNavigation.pushAndClear(
-              const AccountStatusScreen(status: AccountStatus.pending));
-        } else if (u.isSuspended) {
-          AppNavigation.pushAndClear(
-              const AccountStatusScreen(status: AccountStatus.suspended));
-        } else if (u.isInactive) {
-          AppNavigation.pushAndClear(
-              const AccountStatusScreen(status: AccountStatus.inactive));
-        } else if (u.isDeleted) {
-          AppNavigation.pushAndClear(
-              const AccountStatusScreen(status: AccountStatus.deleted));
-        } else {
-          AppNavigation.pushAndClear(OnboardingScreen());
-        }
+
+        StatusChecker.navigate(user.approveStatus);
+
+        // switch(user.approveStatus){
+        //   case "PENDING":
+        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
+        //     break;
+        //   case "ACTIVE":
+        //     AppNavigation.pushAndClear(BasePage());
+        //     break;
+        //   case "REJECTED":
+        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
+        //     break;
+        //   case "INACTIVE":
+        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
+        //       break;
+        //   case "DELETED":
+        //    AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
+        //       break;
+        //   case "NOT_SUBMITTED":
+        //     AppNavigation.pushAndClear(ClientRigSelectScreen());
+        //       break;
+        //
+        // }
+
 
       } else {
         AppNavigation.pushAndClear(OnboardingScreen());

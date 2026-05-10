@@ -5,10 +5,8 @@ import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
-import '../../video_player/models/video_source.dart';
 import '../controllers/videos_controller.dart';
 import '../models/video_model.dart';
-import 'video_player_screen.dart';
 import 'package:get/get.dart';
 class VideosPage extends StatelessWidget {
   VideosPage({super.key});
@@ -21,16 +19,53 @@ class VideosPage extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Column(
-          children: [
-            SizedBox(height: context.heightPercentage(1)),
-            _buildHeader(context),
+      body: RefreshIndicator(
+        onRefresh: () {
+          return controller.fetchVideos();
+        },
+        child: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: context.heightPercentage(1)),
+              _buildHeader(context),
 
-            Expanded(
-              child: Obx(() {
-                // ── Loading ──────────────────────────────────────────────
-                if (controller.isLoading.value) {
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return GridView.builder(
+                      padding: EdgeInsets.all(context.responsiveSize(16)),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: context.responsiveSize(24),
+                        mainAxisSpacing: context.responsiveSize(8),
+                        childAspectRatio: 0.85,
+                      ),
+                      itemCount: 4,
+                      itemBuilder: (_, _) => _buildSkeletonCard(context),
+                    );
+                  }
+
+                  if (controller.videos.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.video_library_outlined,
+                              size: context.responsiveSize(64),
+                              color: Colors.grey.shade300),
+                          SizedBox(height: context.responsiveSize(12)),
+                          AppText(
+                            data: 'No videos available',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                            color: const Color(0xFF6B6B6B),
+                            useResponsiveFontSize: true,
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
                   return GridView.builder(
                     padding: EdgeInsets.all(context.responsiveSize(16)),
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -39,57 +74,21 @@ class VideosPage extends StatelessWidget {
                       mainAxisSpacing: context.responsiveSize(8),
                       childAspectRatio: 0.85,
                     ),
-                    itemCount: 4,
-                    itemBuilder: (_, __) => _buildSkeletonCard(context),
+                    itemCount: controller.videos.length,
+                    itemBuilder: (context, index) {
+                      final video = controller.videos[index];
+                      return _buildVideoCard(context, video: video);
+                    },
                   );
-                }
-
-                // ── Empty ────────────────────────────────────────────────
-                if (controller.videos.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.video_library_outlined,
-                            size: context.responsiveSize(64),
-                            color: Colors.grey.shade300),
-                        SizedBox(height: context.responsiveSize(12)),
-                        AppText(
-                          data: 'No videos available',
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          color: const Color(0xFF6B6B6B),
-                          useResponsiveFontSize: true,
-                        ),
-                      ],
-                    ),
-                  );
-                }
-
-                // ── Grid ─────────────────────────────────────────────────
-                return GridView.builder(
-                  padding: EdgeInsets.all(context.responsiveSize(16)),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: context.responsiveSize(24),
-                    mainAxisSpacing: context.responsiveSize(8),
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: controller.videos.length,
-                  itemBuilder: (context, index) {
-                    final video = controller.videos[index];
-                    return _buildVideoCard(context, video: video);
-                  },
-                );
-              }),
-            ),
-          ],
+                }),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  // ── Header ─────────────────────────────────────────────────────────────────
 
   Widget _buildHeader(BuildContext context) {
     return Container(
@@ -138,7 +137,6 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Video card — thumbnail only, no video loaded ───────────────────────────
 
   Widget _buildVideoCard(BuildContext context, {required VideoModel video}) {
     return GestureDetector(
@@ -170,7 +168,7 @@ class VideosPage extends StatelessWidget {
                         ),
                       );
                     },
-                    errorBuilder: (_, __, ___) =>
+                    errorBuilder: (_, _, _) =>
                         _buildThumbnailFallback(context),
                   )
                       : _buildThumbnailFallback(context),
@@ -241,7 +239,6 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Fallback when thumbnail is null or fails to load ──────────────────────
 
   Widget _buildThumbnailFallback(BuildContext context) {
     return Container(
@@ -256,7 +253,7 @@ class VideosPage extends StatelessWidget {
     );
   }
 
-  // ── Skeleton card shown while loading ─────────────────────────────────────
+
 
   Widget _buildSkeletonCard(BuildContext context) {
     return Column(
@@ -290,4 +287,3 @@ class VideosPage extends StatelessWidget {
     );
   }
 }
-// Video Player Screen (Full screen video player)

@@ -37,10 +37,14 @@ class DailyDebriefController extends GetxController {
   final RxBool submitAnonymously = false.obs;
   final RxBool isSubmitting      = false.obs;
 
+  final RxBool canSubmitToday = true.obs;
+  final RxBool isCheckingSubmission = true.obs;
+
 
   @override
   void onInit() {
     super.onInit();
+    checkSubmissionStatus();
     fetchDropdowns();
   }
 
@@ -53,6 +57,34 @@ class DailyDebriefController extends GetxController {
     whatWorkedWellFocus.dispose();
     whatImprovedFocus.dispose();
     super.onClose();
+  }
+
+  Future<void> refreshCard() async {
+    await Future.wait([
+      checkSubmissionStatus(),
+      fetchDropdowns(),
+    ]);
+  }
+
+  Future<void> checkSubmissionStatus() async {
+    final token = StorageService.accessToken;
+    if (token == null || token.isEmpty) {
+      AppNavigation.pushAndClear(const SignInScreen());
+      return;
+    }
+
+    try {
+      isCheckingSubmission.value = true;
+      final raw = await _api.get(
+        '/daily-debrief/check',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      canSubmitToday.value = raw['success'] == true;
+    } catch (e) {
+      canSubmitToday.value = true; // fail open — don't block on network error
+    } finally {
+      isCheckingSubmission.value = false;
+    }
   }
 
 
@@ -133,7 +165,6 @@ class DailyDebriefController extends GetxController {
         .put(HiveBoxes.debriefDropdownCacheKey, entry);
   }
 
-  // ── Submit — online posts directly, offline saves to Hive ─────────────
 
   Future<void> submitDebrief(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
@@ -158,11 +189,14 @@ class DailyDebriefController extends GetxController {
       if (_connectivity.isOnline.value) {
         await _submitOnline(token);
         _drainPendingQueue(token); // fire and forget
+        canSubmitToday.value = false;
       } else {
         await _saveToHive();
+        canSubmitToday.value = false;
       }
     } finally {
       isSubmitting.value = false;
+      canSubmitToday.value = false;
     }
   }
 
@@ -242,7 +276,6 @@ class DailyDebriefController extends GetxController {
     }
   }
 
-  // ── Helpers ────────────────────────────────────────────────────────────
 
   String? validateField(String? value) {
     if (value == null || value.trim().isEmpty) return 'This field is required';
