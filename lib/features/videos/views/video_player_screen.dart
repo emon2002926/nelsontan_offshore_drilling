@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_assert_image.dart';
@@ -83,7 +84,7 @@ class VideoPlayerScreen extends StatelessWidget {
 
             const SizedBox(height: 20),
 
-            _InlinePlayerControls(videoSource: videoSource),
+            // _InlinePlayerControls(videoSource: videoSource),
           ],
         ),
       ),
@@ -97,13 +98,18 @@ class VideoPlayerScreen extends StatelessWidget {
         children: [
           // Icon
           Container(
-            child: Image.asset(
-              appAssets.bxsVideos,
-              width: context.responsiveSize(40),
-              height: context.responsiveSize(40),
-              colorBlendMode: BlendMode.srcIn,
-            ),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Icon(
+                CupertinoIcons.back,
+                color: Colors.black,
+                size: 28,
+              ),
+            )
           ),
+
           SizedBox(width: context.responsiveSize(12)),
 
           // Title and subtitle

@@ -63,6 +63,7 @@ class VideosController extends GetxController {
           // thumbnailNetworkPath: video.thumbnail,
         ),
         title: video.title,
+        description: video.description,
       ),
       context: context,
     );
