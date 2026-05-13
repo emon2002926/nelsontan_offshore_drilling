@@ -85,29 +85,6 @@ class SignInController extends GetxController {
       await StorageService.saveUser(user);
 
       StatusChecker.navigate(user.approveStatus);
-
-
-      // switch (user.approveStatus){
-      //   case "PENDING":
-      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
-      //     break;
-      //   case "APPROVED":
-      //     AppNavigation.pushAndClear(BasePage());
-      //     break;
-      //   case "REJECTED":
-      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
-      //     break;
-      //   case "INACTIVE":
-      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
-      //     break;
-      //   case "DELETED":
-      //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
-      //     break;
-      //   case "NOT_SUBMITTED":
-      //     AppNavigation.pushAndClear(ClientRigSelectScreen());
-      //     break;
-      // }
-
       CustomSnackBar.success('Welcome back, ${user.name}!');
 
     } on HttpException catch (e) {

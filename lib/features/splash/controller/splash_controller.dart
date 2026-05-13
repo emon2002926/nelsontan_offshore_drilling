@@ -28,32 +28,7 @@ class SplashController extends GetxController {
           AppNavigation.pushAndClear(OnboardingScreen());
           return;
         }
-
-
         StatusChecker.navigate(user.approveStatus);
-
-        // switch(user.approveStatus){
-        //   case "PENDING":
-        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.pending));
-        //     break;
-        //   case "ACTIVE":
-        //     AppNavigation.pushAndClear(BasePage());
-        //     break;
-        //   case "REJECTED":
-        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.suspended));
-        //     break;
-        //   case "INACTIVE":
-        //     AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.inactive));
-        //       break;
-        //   case "DELETED":
-        //    AppNavigation.pushAndClear(AccountStatusScreen(status: AccountStatus.deleted));
-        //       break;
-        //   case "NOT_SUBMITTED":
-        //     AppNavigation.pushAndClear(ClientRigSelectScreen());
-        //       break;
-        //
-        // }
-
 
       } else {
         AppNavigation.pushAndClear(OnboardingScreen());

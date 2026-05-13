@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/constants/app_assert_image.dart';
 import '../../../core/util/app_navigation.dart';
 import '../../../core/util/screen_size.dart';
@@ -7,9 +6,6 @@ import '../../../core/widgets/text/app_text.dart';
 import '../../notification/views/notifications_screen.dart';
 import '../../video_player/models/video_source.dart';
 import '../../video_player/widgets/app_video_player.dart';
-
-// lib/features/video_player/views/video_player_screen.dart
-
 import 'package:get/get.dart';
 import '../../video_player/controllers/video_player_controller.dart';
 import '../controllers/video_manager.dart';
@@ -39,12 +35,12 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
     super.initState();
     _tag = 'main_${widget.videoSource.path}';
     Get.put(AppVideoPlayerController(), tag: _tag);
-    VideoManager.to.register(_tag); // ✅ track this player
+    VideoManager.to.register(_tag);
   }
 
   @override
   void dispose() {
-    VideoManager.to.unregister(_tag); // ✅ stop tracking
+    VideoManager.to.unregister(_tag);
     try {
       Get.find<AppVideoPlayerController>(tag: _tag).pause();
     } catch (_) {}
@@ -74,7 +70,7 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
                     borderRadius: 0,
                     showThumbnail: true,
                     autoPlay: false,
-                    tag: _tag, // ✅ pass the same tag
+                    tag: _tag,
                   ),
                 ),
               ),
@@ -116,11 +112,14 @@ class _VideoPlayerScreenState extends State<VideoPlayerScreen> {
       color: Colors.white,
       child: Row(
         children: [
-          Image.asset(
-            appAssets.bxsVideos,
-            width: context.responsiveSize(40),
-            height: context.responsiveSize(40),
-            colorBlendMode: BlendMode.srcIn,
+
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(
+              Icons.arrow_back_ios,
+              color: const Color(0xFF1A1A1A),
+              size: 28,
+            ),
           ),
           SizedBox(width: context.responsiveSize(12)),
           Expanded(
