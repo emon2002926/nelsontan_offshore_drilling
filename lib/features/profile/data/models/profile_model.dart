@@ -18,6 +18,36 @@ class ProfileResponseModel {
   }
 }
 
+// ── Nested models ─────────────────────────────────────────────────────────────
+
+class ProfileCompanyModel {
+  final int id;
+  final String name;
+
+  const ProfileCompanyModel({required this.id, required this.name});
+
+  factory ProfileCompanyModel.fromJson(Map<String, dynamic> json) =>
+      ProfileCompanyModel(
+        id:   json["id"]   as int,
+        name: json["name"] as String? ?? '',
+      );
+}
+
+class ProfileRigModel {
+  final int id;
+  final String name;
+
+  const ProfileRigModel({required this.id, required this.name});
+
+  factory ProfileRigModel.fromJson(Map<String, dynamic> json) =>
+      ProfileRigModel(
+        id:   json["id"]   as int,
+        name: json["name"] as String? ?? '',
+      );
+}
+
+// ── Main model ────────────────────────────────────────────────────────────────
+
 class ProfileModel {
   final int id;
   final String name;
@@ -33,6 +63,8 @@ class ProfileModel {
   final DateTime updatedAt;
   final int? companyId;
   final int? rigId;
+  final ProfileCompanyModel? company;  // new
+  final ProfileRigModel? rig;          // new
 
   const ProfileModel({
     required this.id,
@@ -49,24 +81,32 @@ class ProfileModel {
     required this.updatedAt,
     this.companyId,
     this.rigId,
+    this.company,
+    this.rig,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
     return ProfileModel(
-      id:            json["id"],
-      name:          json["name"]          ?? '',
-      email:         json["email"]         ?? '',
-      profile:       json["profile"],
-      entryCompany:  json["entryCompany"]  ?? '',
-      position:      json["position"]      ?? '',
-      phone:         json["phone"]         ?? '',
-      isVerified:    json["isVerified"]    ?? false,
-      approveStatus: json["approveStatus"] ?? '',
-      status:        json["status"]        ?? '',
-      createdAt:     DateTime.parse(json["createdAt"]),
-      updatedAt:     DateTime.parse(json["updatedAt"]),
-      companyId:     json["companyId"],
-      rigId:         json["rigId"],
+      id:            json["id"]            as int,
+      name:          json["name"]          as String? ?? '',
+      email:         json["email"]         as String? ?? '',
+      profile:       json["profile"]       as String?,
+      entryCompany:  json["entryCompany"]  as String? ?? '',
+      position:      json["position"]      as String? ?? '',
+      phone:         json["phone"]         as String? ?? '',
+      isVerified:    json["isVerified"]    as bool?   ?? false,
+      approveStatus: json["approveStatus"] as String? ?? '',
+      status:        json["status"]        as String? ?? '',
+      createdAt:     DateTime.parse(json["createdAt"] as String),
+      updatedAt:     DateTime.parse(json["updatedAt"] as String),
+      companyId:     json["companyId"]     as int?,
+      rigId:         json["rigId"]         as int?,
+      company:       json["company"] != null
+          ? ProfileCompanyModel.fromJson(json["company"] as Map<String, dynamic>)
+          : null,
+      rig:           json["rig"] != null
+          ? ProfileRigModel.fromJson(json["rig"] as Map<String, dynamic>)
+          : null,
     );
   }
 

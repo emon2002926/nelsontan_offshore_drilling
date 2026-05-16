@@ -8,12 +8,17 @@ import '../controllers/client_rig_select_controller.dart';
 import '../models/client_rig_model.dart';
 
 class ClientRigSelectScreen extends StatelessWidget {
-  const ClientRigSelectScreen({super.key});
+  // final bool isFromLogin;
+   ClientRigSelectScreen({super.key, });
 
   @override
   Widget build(BuildContext context) {
 
     final controller = Get.find<ClientRigSelectController>();
+
+    // if (isFromLogin) {
+    //   controller.getStatusUpdate();
+    // }
 
     return Scaffold(
       backgroundColor: Colors.white,

@@ -69,6 +69,7 @@ class HomeController extends GetxController {
         title: alert.title,
         description: alert.description,
         imageUrl: alert.file,
+        sectionTitle: alert.sectionTitle
       );
     } on HttpException catch (e) {
       CustomSnackBar.error(e.message);

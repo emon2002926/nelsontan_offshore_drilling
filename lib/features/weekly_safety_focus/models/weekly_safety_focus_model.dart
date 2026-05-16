@@ -3,6 +3,7 @@ class WeeklySafetyFocusModel {
   final String id;
   final String title;
   final String description;
+  final String sectionTitle;
   final String? detailsUrl;
   final String? imageUrl;
   final String? fullDetails;
@@ -15,13 +16,14 @@ class WeeklySafetyFocusModel {
     this.detailsUrl,
     this.imageUrl,
     this.fullDetails,
-    this.publishedAt,
+    this.publishedAt, required this.sectionTitle,
   });
 
   factory WeeklySafetyFocusModel.fromJson(Map<String, dynamic> json) {
     return WeeklySafetyFocusModel(
       id: json['id']?.toString() ?? '',
       title: json['title'] ?? '',
+      sectionTitle: json['sectionTitle'] ?? '',
       description: json['description'] ?? '',
       detailsUrl: json['details_url'],
       imageUrl: json['image_url'],
@@ -36,6 +38,7 @@ class WeeklySafetyFocusModel {
     return {
       'id': id,
       'title': title,
+      'sectionTitle': sectionTitle,
       'description': description,
       'details_url': detailsUrl,
       'image_url': imageUrl,
@@ -48,6 +51,7 @@ class WeeklySafetyFocusModel {
     return WeeklySafetyFocusModel(
       id: '1',
       title: 'Proper Lifting Techniques',
+      sectionTitle: 'sectionTitle Title',
       description: 'Protect your back. Lift with your legs.',
       detailsUrl: null,
       imageUrl: null,

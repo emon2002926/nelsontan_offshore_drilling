@@ -93,7 +93,7 @@ class SubmitDailyDebrief extends StatelessWidget {
 
           // Description
           AppText(
-            data: 'Capture safety insights & improvements from today\'s shift.',
+            data: 'Capture safety insights & improvements \n from today\'s shift.',
             fontSize: 12,
             fontWeight: FontWeight.w400,
             color: appColor.titleTextColor,

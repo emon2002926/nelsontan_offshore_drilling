@@ -15,6 +15,8 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
   await GetStorage.init();
+  await HiveBoxes.init();
+
   AppBindings.init();
   Get.put(ApiServices(baseUrl: 'http://10.10.7.108:13500/api/v1'));
   // Get.put(ApiServices(baseUrl: 'https://safe.dsrt321.online/api/v1'));
@@ -22,7 +24,6 @@ void main() async{
   Get.put(VideoManager());
 
 
-  await HiveBoxes.init();
 
   // open boxes
   final connectivity = ConnectivityService();

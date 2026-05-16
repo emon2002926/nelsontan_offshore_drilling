@@ -17,6 +17,8 @@ class ProfileHiveModel {
   DateTime updatedAt;
   int?     companyId;
   int?     rigId;
+  String?  companyName;  // new — flattened from company.name
+  String?  rigName;      // new — flattened from rig.name
 
   ProfileHiveModel({
     required this.id,
@@ -33,6 +35,8 @@ class ProfileHiveModel {
     required this.updatedAt,
     this.companyId,
     this.rigId,
+    this.companyName,
+    this.rigName,
   });
 
   factory ProfileHiveModel.fromDomain(ProfileModel m) => ProfileHiveModel(
@@ -50,6 +54,8 @@ class ProfileHiveModel {
     updatedAt:     m.updatedAt,
     companyId:     m.companyId,
     rigId:         m.rigId,
+    companyName:   m.company?.name,
+    rigName:       m.rig?.name,
   );
 
   ProfileModel toDomain() => ProfileModel(
@@ -67,9 +73,14 @@ class ProfileHiveModel {
     updatedAt:     updatedAt,
     companyId:     companyId,
     rigId:         rigId,
+    company:       companyName != null && companyId != null
+        ? ProfileCompanyModel(id: companyId!, name: companyName!)
+        : null,
+    rig:           rigName != null && rigId != null
+        ? ProfileRigModel(id: rigId!, name: rigName!)
+        : null,
   );
 }
-
 // ── Adapter ───────────────────────────────────────────────────────────────────
 // typeId 20 — matches what you had before, change if already taken.
 // write() and read() field order MUST stay in sync — never reorder.
@@ -77,7 +88,7 @@ class ProfileHiveModel {
 
 class ProfileHiveModelAdapter extends TypeAdapter<ProfileHiveModel> {
   @override
-  final int typeId = 20;
+  final int typeId = 18;
 
   @override
   ProfileHiveModel read(BinaryReader reader) {
@@ -96,6 +107,9 @@ class ProfileHiveModelAdapter extends TypeAdapter<ProfileHiveModel> {
       updatedAt:     DateTime.fromMillisecondsSinceEpoch(reader.read() as int),
       companyId:     reader.read() as int?,
       rigId:         reader.read() as int?,
+      // new fields — appended at the end
+      companyName:   reader.read() as String?,
+      rigName:       reader.read() as String?,
     );
   }
 
@@ -115,5 +129,8 @@ class ProfileHiveModelAdapter extends TypeAdapter<ProfileHiveModel> {
     writer.write(obj.updatedAt.millisecondsSinceEpoch);
     writer.write(obj.companyId);
     writer.write(obj.rigId);
+    // new fields — appended at the end
+    writer.write(obj.companyName);
+    writer.write(obj.rigName);
   }
 }

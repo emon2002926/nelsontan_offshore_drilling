@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
 import 'package:nelsontan_offshore_drilling/core/widgets/buttons/app_button.dart';
+import 'package:nelsontan_offshore_drilling/features/auth/views/client_rig_select_screen.dart';
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
 import '../../../core/widgets/text/text_field/AppTextFiled.dart';
@@ -41,6 +43,10 @@ class ProfilePage extends StatelessWidget {
 
                     _buildPositionDisplay(controller),
 
+                    SizedBox(height: context.responsiveSize(12)),
+
+                    // Center(child: _buildChangeRigButton(context, controller)),
+
                     SizedBox(height: context.responsiveSize(20)),
 
                     ..._buildFormFields(context, controller),
@@ -72,7 +78,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-
   Widget _buildNameDisplay(ProfileController controller) =>
       ValueListenableBuilder<TextEditingValue>(
         valueListenable: controller.nameController,
@@ -101,7 +106,56 @@ class ProfilePage extends StatelessWidget {
         ),
       );
 
-
+  // Widget _buildChangeRigButton(
+  //     BuildContext context, ProfileController controller) {
+  //   return GestureDetector(
+  //     onTap: () {
+  //       AppNavigation.push(ClientRigSelectScreen());
+  //     },
+  //     child: Container(
+  //       padding: EdgeInsets.symmetric(
+  //         horizontal: context.responsiveSize(16),
+  //         vertical: context.responsiveSize(7),
+  //       ),
+  //       decoration: BoxDecoration(
+  //         gradient: const LinearGradient(
+  //           colors: [Color(0xFF0047AB), Color(0xFF0063E5)],
+  //           begin: Alignment.topLeft,
+  //           end: Alignment.bottomRight,
+  //         ),
+  //         borderRadius: BorderRadius.circular(context.responsiveSize(20)),
+  //         boxShadow: [
+  //           BoxShadow(
+  //             color: const Color(0xFF0047AB).withOpacity(0.25),
+  //             blurRadius: 8,
+  //             offset: const Offset(0, 3),
+  //           ),
+  //         ],
+  //       ),
+  //       child: Row(
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           const Icon(Icons.swap_horiz_rounded, size: 14, color: Colors.white),
+  //           SizedBox(width: context.responsiveSize(6)),
+  //           Text(
+  //             controller.rigName.isNotEmpty
+  //                 ? controller.rigName
+  //                 : 'No Rig Assigned',
+  //             style: TextStyle(
+  //               fontSize: context.responsiveFontSize(12),
+  //               fontWeight: FontWeight.w600,
+  //               color: Colors.white,
+  //               letterSpacing: 0.2,
+  //             ),
+  //           ),
+  //           SizedBox(width: context.responsiveSize(6)),
+  //           const Icon(Icons.keyboard_arrow_down_rounded,
+  //               size: 14, color: Colors.white),
+  //         ],
+  //       ),
+  //     ),
+  //   );
+  // }
 
   List<Widget> _buildFormFields(
       BuildContext context, ProfileController controller) {
@@ -134,11 +188,22 @@ class ProfilePage extends StatelessWidget {
         label: 'Company Name',
         controller: controller.companyController,
         hintText: 'Enter your company name',
+        enabled: false,
         elevation: 0,
         borderColor: const Color(0xFFBEBDBD),
-        fillColor: Colors.white,
-        inputTextColor: const Color(0xFF1A1A1A),
+        fillColor: const Color(0xFFF5F5F5),
+        inputTextColor: const Color(0xFF9E9E9E),
       ),
+      gap,
+      // AppTextField(
+      //   label: 'Position ',
+      //   controller: controller.positionController,
+      //   hintText: 'Enter your company name',
+      //   elevation: 0,
+      //   borderColor: const Color(0xFFBEBDBD),
+      //   fillColor: Colors.white,
+      //   inputTextColor: const Color(0xFF1A1A1A),
+      // ),
       gap,
       AppTextField(
         label: 'Position',
@@ -163,8 +228,6 @@ class ProfilePage extends StatelessWidget {
     ];
   }
 
-  // ── Buttons ────────────────────────────────────────────────────────────────
-
   Widget _buildSaveButton(ProfileController controller) =>
       Obx(() => AppButton(
         buttonText: 'Save',
@@ -182,24 +245,20 @@ class ProfilePage extends StatelessWidget {
     textColor: Colors.white,
   );
 
-  // ── Loaders ────────────────────────────────────────────────────────────────
-
-  Widget _buildFullScreenLoader(ProfileController controller) =>
-      Obx(() {
-        if (!controller.isLoadingProfile.value) return const SizedBox.shrink();
-        return Container(
-          color: Colors.white,
-          child: const Center(
-            child: CircularProgressIndicator(color: Color(0xFF0047AB)),
-          ),
-        );
-      });
-
-  // ── Avatar ─────────────────────────────────────────────────────────────────
+  Widget _buildFullScreenLoader(ProfileController controller) => Obx(() {
+    if (!controller.isLoadingProfile.value) return const SizedBox.shrink();
+    return Container(
+      color: Colors.white,
+      child: const Center(
+        child: CircularProgressIndicator(color: Color(0xFF0047AB)),
+      ),
+    );
+  });
 
   Widget _buildProfileAvatar(
       BuildContext context, ProfileController controller) {
     return Stack(
+      clipBehavior: Clip.none,
       children: [
         Obx(() {
           if (controller.pickedImage.value != null) {
@@ -223,6 +282,7 @@ class ProfilePage extends StatelessWidget {
             const AssetImage('assets/icons/profile_icon.png'),
           );
         }),
+
         Positioned(
           bottom: 0,
           right: 0,
@@ -246,4 +306,5 @@ class ProfilePage extends StatelessWidget {
       ],
     );
   }
+
 }

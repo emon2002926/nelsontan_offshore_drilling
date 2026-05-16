@@ -9,6 +9,7 @@ class WeeklySafetyFocusCard extends StatelessWidget {
   final WeeklySafetyFocusModel? data;
   final bool isLoading;
   final VoidCallback? onReadMore;
+  // final String title;
 
    WeeklySafetyFocusCard({
     super.key,
@@ -76,7 +77,7 @@ class WeeklySafetyFocusCard extends StatelessWidget {
             SizedBox(width: context.responsiveSize(12)),
             Expanded(
               child: AppText(
-                data: 'Weekly Safety Focus',
+                data: data!.sectionTitle,
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: appColors.headLineTextColor,

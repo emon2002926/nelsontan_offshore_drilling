@@ -66,7 +66,7 @@ class OtpVerificationController extends GetxController {
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (user == null || user.isNotSubmitted) {
-          AppNavigation.pushAndClear(const ClientRigSelectScreen());
+          AppNavigation.pushAndClear( ClientRigSelectScreen());
           return;
         }
 

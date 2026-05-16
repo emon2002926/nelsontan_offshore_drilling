@@ -22,9 +22,9 @@ class ProfileController extends GetxController {
   final ApiServices         _api          = Get.find<ApiServices>();
   final ConnectivityService _connectivity = Get.find<ConnectivityService>();
 
-  // ── Text controllers ────────────────────────────────────────────────────────
   final nameController     = TextEditingController();
   final emailController    = TextEditingController();
+  final entryCompanyController    = TextEditingController();
   final companyController  = TextEditingController();
   final positionController = TextEditingController();
   final phoneController    = TextEditingController();
@@ -40,6 +40,13 @@ class ProfileController extends GetxController {
   Map<String, String> get _authHeader => {"Authorization": "Bearer $_token"};
 
 
+
+  String get companyName =>
+      _box.get(HiveBoxes.profileCacheKey)?.companyName ?? '';
+
+  String get rigName =>
+      _box.get(HiveBoxes.profileCacheKey)?.rigName ?? '';
+
   @override
   void onInit() {
     super.onInit();
@@ -50,6 +57,7 @@ class ProfileController extends GetxController {
   void onClose() {
     nameController.dispose();
     emailController.dispose();
+    entryCompanyController.dispose();
     companyController.dispose();
     positionController.dispose();
     phoneController.dispose();
@@ -80,6 +88,7 @@ class ProfileController extends GetxController {
   void _populateFields(ProfileModel model) {
     nameController.text     = model.name;
     emailController.text    = model.email;
+    entryCompanyController.text    = model.entryCompany;
     companyController.text  = model.entryCompany;
     positionController.text = model.position;
     phoneController.text    = model.phone;
