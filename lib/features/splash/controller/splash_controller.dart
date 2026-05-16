@@ -29,6 +29,7 @@ class SplashController extends GetxController {
           return;
         }
         StatusChecker.navigate(user.approveStatus);
+        // AppNavigation.push(ClientRigSelectScreen());
 
       } else {
         AppNavigation.pushAndClear(OnboardingScreen());

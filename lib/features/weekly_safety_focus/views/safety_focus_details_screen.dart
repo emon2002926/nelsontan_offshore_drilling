@@ -1,6 +1,7 @@
 // features/home/presentation/safety_focus_details_screen.dart
 import 'package:flutter/material.dart';
 import 'package:nelsontan_offshore_drilling/core/constants/app_assert_image.dart';
+import 'package:nelsontan_offshore_drilling/core/util/app_navigation.dart';
 
 import '../../../core/util/screen_size.dart';
 import '../../../core/widgets/text/app_text.dart';
@@ -31,10 +32,15 @@ class SafetyFocusDetailsScreen extends StatelessWidget {
                 // Header
                 Row(
                   children: [
-                    Icon(
-                      Icons.calendar_today_outlined,
-                      color: const Color(0xFF0047AB),
-                      size: context.responsiveSize(28),
+                    GestureDetector(
+                      onTap: (){
+                        Navigator.pop(context);
+                      },
+                      child: Icon(
+                        Icons.arrow_back_ios,
+                        color: const Color(0xFF1A1A1A),
+                        size: context.responsiveSize(28),
+                      ),
                     ),
                     SizedBox(width: context.responsiveSize(12)),
                     Expanded(

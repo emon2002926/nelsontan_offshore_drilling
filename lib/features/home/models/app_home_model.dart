@@ -1,16 +1,16 @@
 class AppHomeModel {
-  final AppHomeAlertModel? alerts;
+  final AppHomeMessageModel? messages;  // renamed from alerts
   final AppHomeVideoModel? videos;
 
   AppHomeModel({
-    this.alerts,
+    this.messages,
     this.videos,
   });
 
   factory AppHomeModel.fromJson(Map<String, dynamic> json) {
     return AppHomeModel(
-      alerts: json['alerts'] != null
-          ? AppHomeAlertModel.fromJson(json['alerts'] as Map<String, dynamic>)
+      messages: json['messages'] != null
+          ? AppHomeMessageModel.fromJson(json['messages'] as Map<String, dynamic>)
           : null,
       videos: json['videos'] != null
           ? AppHomeVideoModel.fromJson(json['videos'] as Map<String, dynamic>)
@@ -19,16 +19,17 @@ class AppHomeModel {
   }
 
   Map<String, dynamic> toJson() => {
-    'alerts': alerts?.toJson(),
+    'messages': messages?.toJson(),
     'videos': videos?.toJson(),
   };
 }
 
-class AppHomeAlertModel {
+class AppHomeMessageModel {
   final int id;
   final String title;
   final String description;
   final String? file;
+  final String sectionTitle;   // new field
   final String status;
   final bool isDefault;
   final int? companyId;
@@ -37,11 +38,12 @@ class AppHomeAlertModel {
   final String createdAt;
   final String updatedAt;
 
-  AppHomeAlertModel({
+  AppHomeMessageModel({
     required this.id,
     required this.title,
     required this.description,
     this.file,
+    required this.sectionTitle,
     required this.status,
     required this.isDefault,
     this.companyId,
@@ -51,12 +53,13 @@ class AppHomeAlertModel {
     required this.updatedAt,
   });
 
-  factory AppHomeAlertModel.fromJson(Map<String, dynamic> json) {
-    return AppHomeAlertModel(
+  factory AppHomeMessageModel.fromJson(Map<String, dynamic> json) {
+    return AppHomeMessageModel(
       id: json['id'] as int,
       title: json['title'] as String,
       description: json['description'] as String,
       file: json['file'] as String?,
+      sectionTitle: json['sectionTitle'] as String? ?? '',
       status: json['status'] as String,
       isDefault: json['isDefault'] as bool,
       companyId: json['companyId'] as int?,
@@ -72,6 +75,7 @@ class AppHomeAlertModel {
     'title': title,
     'description': description,
     'file': file,
+    'sectionTitle': sectionTitle,
     'status': status,
     'isDefault': isDefault,
     'companyId': companyId,
@@ -81,7 +85,6 @@ class AppHomeAlertModel {
     'updatedAt': updatedAt,
   };
 }
-
 class AppHomeVideoModel {
   final int id;
   final String title;

@@ -49,6 +49,7 @@ class HomeController extends GetxController {
       return;
     }
 
+    print("asfdg: $token");
     isLoadingHome.value = true;
     try {
       final raw = await _api.get(
@@ -60,7 +61,7 @@ class HomeController extends GetxController {
 
       print("video title: ${appHome.value?.videos?.thumbnail}");
 
-      final alert = appHome.value?.alerts;
+      final alert = appHome.value?.messages;
       weeklySafetyFocus.value = alert == null
           ? null
           : WeeklySafetyFocusModel(

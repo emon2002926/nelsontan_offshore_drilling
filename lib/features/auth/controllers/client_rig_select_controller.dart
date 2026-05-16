@@ -27,7 +27,6 @@ class ClientRigSelectController extends GetxController {
     super.onInit();
     // fetchClientsAndRigs();
     getStatusUpdate();
-    print("asdgdfgh:aytyaet");
 
   }
 

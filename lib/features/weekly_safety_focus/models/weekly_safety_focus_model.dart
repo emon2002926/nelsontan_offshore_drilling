@@ -1,12 +1,11 @@
-// features/home/data/models/weekly_safety_focus_model.dart
-// features/home/data/models/weekly_safety_focus_model.dart
+
 class WeeklySafetyFocusModel {
   final String id;
   final String title;
   final String description;
   final String? detailsUrl;
   final String? imageUrl;
-  final String? fullDetails; // Full text content
+  final String? fullDetails;
   final DateTime? publishedAt;
 
   WeeklySafetyFocusModel({
