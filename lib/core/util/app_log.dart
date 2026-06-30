@@ -48,6 +48,7 @@ class AppLog {
     // Show snackbar automatically
     if (showSnackBar) {
       CustomSnackBar.error(snackMessage);
+
     }
 
     assert(() {
