@@ -9,10 +9,21 @@ class CachedDebriefDropdownModelAdapter
 
   @override
   CachedDebriefDropdownModel read(BinaryReader reader) {
+    final activities   = (reader.read() as List).cast<Map>();
+    final debriefTypes = (reader.read() as List).cast<Map>();
+    final cachedAt =
+        DateTime.fromMillisecondsSinceEpoch(reader.read() as int);
+
+    // Older cache entries were written without questions
+    final questions = reader.availableBytes > 0
+        ? (reader.read() as List).cast<Map>()
+        : <Map>[];
+
     return CachedDebriefDropdownModel(
-      activities:  (reader.read() as List).cast<Map>(),
-      debriefTypes: (reader.read() as List).cast<Map>(),
-      cachedAt:    DateTime.fromMillisecondsSinceEpoch(reader.read() as int),
+      activities:   activities,
+      debriefTypes: debriefTypes,
+      cachedAt:     cachedAt,
+      questions:    questions,
     );
   }
 
@@ -21,5 +32,6 @@ class CachedDebriefDropdownModelAdapter
     writer.write(obj.activities);
     writer.write(obj.debriefTypes);
     writer.write(obj.cachedAt.millisecondsSinceEpoch);
+    writer.write(obj.questions);
   }
 }

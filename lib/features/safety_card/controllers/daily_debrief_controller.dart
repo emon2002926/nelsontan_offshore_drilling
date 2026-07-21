@@ -18,18 +18,15 @@ class DailyDebriefController extends GetxController {
 
   final formKey = GlobalKey<FormState>();
 
-  final whatHappenedController   = TextEditingController();
-  final whatWorkedWellController = TextEditingController();
-  final whatImprovedController   = TextEditingController();
-
-  final whatHappenedFocus   = FocusNode();
-  final whatWorkedWellFocus = FocusNode();
-  final whatImprovedFocus   = FocusNode();
-
   // Dropdown data
   final RxList<ActivityModel>    activities   = <ActivityModel>[].obs;
   final RxList<DebriefTypeModel> debriefTypes = <DebriefTypeModel>[].obs;
   final RxBool isLoadingDropdowns = false.obs;
+
+  // Dynamic questions from API
+  final RxList<DebriefQuestionModel> questions = <DebriefQuestionModel>[].obs;
+  final Map<int, TextEditingController> questionControllers = {};
+  final Map<int, FocusNode> questionFocusNodes = {};
 
   final Rx<ActivityModel?>    selectedActivity    = Rx<ActivityModel?>(null);
   final Rx<DebriefTypeModel?> selectedDebriefType = Rx<DebriefTypeModel?>(null);
@@ -50,13 +47,38 @@ class DailyDebriefController extends GetxController {
 
   @override
   void onClose() {
-    whatHappenedController.dispose();
-    whatWorkedWellController.dispose();
-    whatImprovedController.dispose();
-    whatHappenedFocus.dispose();
-    whatWorkedWellFocus.dispose();
-    whatImprovedFocus.dispose();
+    _disposeQuestionFields();
     super.onClose();
+  }
+
+  TextEditingController controllerFor(DebriefQuestionModel q) =>
+      questionControllers.putIfAbsent(q.id, () => TextEditingController());
+
+  FocusNode focusNodeFor(DebriefQuestionModel q) =>
+      questionFocusNodes.putIfAbsent(q.id, () => FocusNode());
+
+  void _setQuestions(List<DebriefQuestionModel> newQuestions) {
+    // Drop controllers for questions that no longer exist; keep text of
+    // ones that survive a refresh.
+    final newIds = newQuestions.map((q) => q.id).toSet();
+    final removedIds =
+        questionControllers.keys.where((id) => !newIds.contains(id)).toList();
+    for (final id in removedIds) {
+      questionControllers.remove(id)?.dispose();
+      questionFocusNodes.remove(id)?.dispose();
+    }
+    questions.assignAll(newQuestions);
+  }
+
+  void _disposeQuestionFields() {
+    for (final c in questionControllers.values) {
+      c.dispose();
+    }
+    for (final f in questionFocusNodes.values) {
+      f.dispose();
+    }
+    questionControllers.clear();
+    questionFocusNodes.clear();
   }
 
   Future<void> refreshCard() async {
@@ -116,6 +138,11 @@ class DailyDebriefController extends GetxController {
               .map((e) => DebriefTypeModel.fromJson(e))
               .toList(),
         );
+        _setQuestions(
+          ((data['debriefQuestion'] as List?) ?? [])
+              .map((e) => DebriefQuestionModel.fromJson(e))
+              .toList(),
+        );
 
         if (activities.isNotEmpty)   selectedActivity.value   = activities.first;
         if (debriefTypes.isNotEmpty) selectedDebriefType.value = debriefTypes.first;
@@ -150,6 +177,10 @@ class DailyDebriefController extends GetxController {
       cached.debriefTypes.map((e) =>
           DebriefTypeModel.fromJson(Map<String, dynamic>.from(e))).toList(),
     );
+    _setQuestions(
+      cached.questions.map((e) =>
+          DebriefQuestionModel.fromJson(Map<String, dynamic>.from(e))).toList(),
+    );
 
     if (activities.isNotEmpty)   selectedActivity.value   = activities.first;
     if (debriefTypes.isNotEmpty) selectedDebriefType.value = debriefTypes.first;
@@ -159,12 +190,24 @@ class DailyDebriefController extends GetxController {
     final entry = CachedDebriefDropdownModel(
       activities:  activities.map((e) => {'id': e.id, 'name': e.name}).toList(),
       debriefTypes: debriefTypes.map((e) => {'id': e.id, 'name': e.name}).toList(),
+      questions:   questions.map((q) => {
+        'id':          q.id,
+        'question':    q.question,
+        'placeholder': q.placeholder,
+      }).toList(),
       cachedAt:    DateTime.now(),
     );
     await HiveBoxes.debriefDropdownBox
         .put(HiveBoxes.debriefDropdownCacheKey, entry);
   }
 
+
+  List<Map<String, String>> _buildQuestionAnswers() {
+    return questions.map((q) => {
+      'question': q.question,
+      'answer':   controllerFor(q).text.trim(),
+    }).toList();
+  }
 
   Future<void> submitDebrief(BuildContext context) async {
     if (!formKey.currentState!.validate()) return;
@@ -175,6 +218,10 @@ class DailyDebriefController extends GetxController {
     }
     if (selectedDebriefType.value == null) {
       CustomSnackBar.warning('Please select a type of debrief');
+      return;
+    }
+    if (questions.isEmpty) {
+      CustomSnackBar.warning('No debrief questions available. Pull to refresh.');
       return;
     }
 
@@ -208,10 +255,8 @@ class DailyDebriefController extends GetxController {
         body: {
           'activityId':        selectedActivity.value!.id,
           'typeOfDevriefId':   selectedDebriefType.value!.id,
-          'whatHappend':       whatHappenedController.text.trim(),
-          'whatWorkedWell':    whatWorkedWellController.text.trim(),
-          'whatImproved':      whatImprovedController.text.trim(),
           'submitAnonymously': submitAnonymously.value,
+          'questionAnswer':    _buildQuestionAnswers(),
         },
       );
 
@@ -232,9 +277,7 @@ class DailyDebriefController extends GetxController {
         localId:          const Uuid().v4(),
         activityId:       selectedActivity.value!.id,
         typeOfDevriefId:  selectedDebriefType.value!.id,
-        whatHappend:      whatHappenedController.text.trim(),
-        whatWorkedWell:   whatWorkedWellController.text.trim(),
-        whatImproved:     whatImprovedController.text.trim(),
+        questionAnswer:   _buildQuestionAnswers(),
         submitAnonymously: submitAnonymously.value,
         createdAt:        DateTime.now(),
       );
@@ -263,10 +306,10 @@ class DailyDebriefController extends GetxController {
           body: {
             'activityId':        debrief.activityId,
             'typeOfDevriefId':   debrief.typeOfDevriefId,
-            'whatHappend':       debrief.whatHappend,
-            'whatWorkedWell':    debrief.whatWorkedWell,
-            'whatImproved':      debrief.whatImproved,
             'submitAnonymously': debrief.submitAnonymously,
+            'questionAnswer':    debrief.questionAnswer
+                .map((qa) => Map<String, dynamic>.from(qa))
+                .toList(),
           },
         );
         await debrief.delete(); // success → remove from Hive
@@ -284,9 +327,9 @@ class DailyDebriefController extends GetxController {
   }
 
   void resetForm() {
-    whatHappenedController.clear();
-    whatWorkedWellController.clear();
-    whatImprovedController.clear();
+    for (final c in questionControllers.values) {
+      c.clear();
+    }
     selectedActivity.value    = activities.isNotEmpty ? activities.first : null;
     selectedDebriefType.value = debriefTypes.isNotEmpty ? debriefTypes.first : null;
     submitAnonymously.value   = false;

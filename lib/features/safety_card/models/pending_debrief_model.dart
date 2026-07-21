@@ -3,22 +3,18 @@ import 'package:hive/hive.dart';
 class PendingDebriefModel extends HiveObject {
   @HiveField(0) final String localId;
   @HiveField(1) final int    activityId;
-  @HiveField(2) final int    typeOfDevriefId;
-  @HiveField(3) final String whatHappend;      // typo matches API
-  @HiveField(4) final String whatWorkedWell;
-  @HiveField(5) final String whatImproved;
-  @HiveField(6) final bool   submitAnonymously;
-  @HiveField(7) final DateTime createdAt;
-  @HiveField(8)       String syncStatus;
-  @HiveField(9)       int    retryCount;
+  @HiveField(2) final int    typeOfDevriefId;  // typo matches API
+  @HiveField(3) final List<Map> questionAnswer; // [{'question': ..., 'answer': ...}]
+  @HiveField(4) final bool   submitAnonymously;
+  @HiveField(5) final DateTime createdAt;
+  @HiveField(6)       String syncStatus;
+  @HiveField(7)       int    retryCount;
 
   PendingDebriefModel({
     required this.localId,
     required this.activityId,
     required this.typeOfDevriefId,
-    required this.whatHappend,
-    required this.whatWorkedWell,
-    required this.whatImproved,
+    required this.questionAnswer,
     required this.submitAnonymously,
     required this.createdAt,
     this.syncStatus = 'pending',

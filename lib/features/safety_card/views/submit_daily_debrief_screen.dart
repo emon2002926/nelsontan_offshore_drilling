@@ -158,41 +158,7 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
 
                   SizedBox(height: context.responsiveSize(20)),
 
-                  _buildLabel(context, 'What Happened?'),
-                  SizedBox(height: context.responsiveSize(8)),
-                  _buildTextArea(
-                    context,
-                    controller: controller.whatHappenedController,
-                    focusNode: controller.whatHappenedFocus,
-                    hint: 'Short description of the event or observation...',
-                    validator: controller.validateField,
-                  ),
-
-                  SizedBox(height: context.responsiveSize(20)),
-
-                  _buildLabel(context, 'What Worked Well?'),
-                  SizedBox(height: context.responsiveSize(8)),
-                  _buildTextArea(
-                    context,
-                    controller: controller.whatWorkedWellController,
-                    focusNode: controller.whatWorkedWellFocus,
-                    hint: 'Capture positive practices or successful actions...',
-                    validator: controller.validateField,
-                  ),
-
-                  SizedBox(height: context.responsiveSize(20)),
-
-                  _buildLabel(context, 'What Could Be Improved?'),
-                  SizedBox(height: context.responsiveSize(8)),
-                  _buildTextArea(
-                    context,
-                    controller: controller.whatImprovedController,
-                    focusNode: controller.whatImprovedFocus,
-                    hint: 'Identify gaps or areas for improvement...',
-                    validator: controller.validateField,
-                  ),
-
-                  SizedBox(height: context.responsiveSize(20)),
+                  Obx(() => _buildQuestionFields(context, controller)),
 
                   _buildToggleOptions(context, controller),
 
@@ -262,6 +228,43 @@ class SubmitDailyDebriefScreen extends StatelessWidget {
       fontWeight: FontWeight.w600,
       color: appColor.normalTextColor,
       useResponsiveFontSize: true,
+    );
+  }
+
+  Widget _buildQuestionFields(
+      BuildContext context, DailyDebriefController controller) {
+    if (controller.isLoadingDropdowns.value) {
+      return Column(
+        children: List.generate(
+          3,
+          (_) => Padding(
+            padding: EdgeInsets.only(bottom: context.responsiveSize(20)),
+            child: Container(
+              height: context.responsiveSize(120),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade200,
+                borderRadius: BorderRadius.circular(context.responsiveSize(8)),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: controller.questions.expand((q) sync* {
+        yield _buildLabel(context, q.question);
+        yield SizedBox(height: context.responsiveSize(8));
+        yield _buildTextArea(
+          context,
+          controller: controller.controllerFor(q),
+          focusNode: controller.focusNodeFor(q),
+          hint: q.placeholder,
+          validator: controller.validateField,
+        );
+        yield SizedBox(height: context.responsiveSize(20));
+      }).toList(),
     );
   }
 

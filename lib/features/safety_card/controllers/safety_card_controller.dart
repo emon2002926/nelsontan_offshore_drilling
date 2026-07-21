@@ -228,6 +228,8 @@ class SafetyCardController extends GetxController {
         'actionTaken':       actionTaken.value.toString(),
         'immediateAction':   immediateActionRequired.value.toString(),
         'submitAnonymously': submitAnonymously.value.toString(),
+        // 'submitDay':         DateTime.now().toIso8601String(),
+        'submitDay':        "2026-07-21",
       };
 
       final imageFile = uploadedPhotoPath.value != null

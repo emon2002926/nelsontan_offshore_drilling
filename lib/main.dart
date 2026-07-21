@@ -18,7 +18,7 @@ void main() async{
   await HiveBoxes.init();
 
   AppBindings.init();
-  Get.put(ApiServices(baseUrl: 'http://10.10.26.235:13500/api/v1'));
+  // Get.put(ApiServices(baseUrl: 'http://10.10.26.235:13500/api/v1'));
   Get.put(ApiServices(baseUrl: 'https://safe.dsrt321.online/api/v1'));
   Get.put(SplashController());
   Get.put(VideoManager());
